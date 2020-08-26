@@ -1,0 +1,6 @@
+﻿  CD3DApp.cpp
+  CGameEdu01.cpp
+  Main.cpp
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter3_Verties\Print_Triangle_with_no_Tri_Class\DX_Prac\Main.cpp(83,14): warning C4101: 'ps' :참조되지 않은 지역 변수입니다.
+  코드를 생성하고 있습니다...
+  DX_Prac.vcxproj -> C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter3_Verties\Print_Triangle_with_no_Tri_Class\Debug\DX_Prac.exe
