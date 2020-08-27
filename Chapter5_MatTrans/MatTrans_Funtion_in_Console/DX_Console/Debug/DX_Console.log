@@ -1,0 +1,3 @@
+﻿  Main.cpp
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter5_MatTrans\MatTrans_Funtion_in_Console\DX_Console\Main.cpp(40,25): warning C4305: '초기화 중': 'double'에서 'float'(으)로 잘립니다.
+  DX_Console.vcxproj -> C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter5_MatTrans\MatTrans_Funtion_in_Console\Debug\DX_Console.exe
