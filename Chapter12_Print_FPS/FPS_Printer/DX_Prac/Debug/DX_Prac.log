@@ -1,0 +1,6 @@
+﻿  CGameEdu01.cpp
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter12_Print_FPS\FPS_Printer\DX_Prac\CGameEdu01.cpp(76,18): warning C4244: '초기화 중': 'ULONGLONG'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter12_Print_FPS\FPS_Printer\DX_Prac\CGameEdu01.cpp(77,25): warning C4244: '초기화 중': 'ULONGLONG'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  Main.cpp
+  코드를 생성하고 있습니다...
+  DX_Prac.vcxproj -> C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter12_Print_FPS\FPS_Printer\Debug\DX_Prac.exe
