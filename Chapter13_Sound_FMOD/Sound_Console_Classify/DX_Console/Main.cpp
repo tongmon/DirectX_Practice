@@ -3,6 +3,7 @@
 #include <d3d9.h>
 #include <d3dx9math.h>
 #include <fmod.h>
+#include "FmodSound.h"
 using namespace std;
 
 #pragma comment (lib,"d3d9.lib")
@@ -14,67 +15,43 @@ using namespace std;
 #pragma comment (lib,"fmod_vc.lib")
 #pragma comment (lib,"fmodL_vc.lib")
 
-/*
-코드가 약간 구형이라 헷갈릴 수 있으니 https://m.blog.naver.com/PostView.nhn?blogId=zoomen1004&logNo=110175532047&proxyReferer=https:%2F%2Fwww.google.com%2F
-위 홈페이지 참고
-*/
-
-FMOD_SYSTEM* g_System; // FMOD 사운드 시스템을 이용하기 위한 포인터 객체
-FMOD_SOUND* g_Sound[2]; // 포인터 배열임을 주의!
-FMOD_CHANNEL* g_Channel; // 배경음 출력
-
-void FMOD_Init() // FMOD 시스템 초기화 함수
-{
-	// FMOD 초기화 및 사운드 파일 로딩
-	FMOD_System_Create(&g_System);
-	FMOD_System_Init(g_System, 32, FMOD_INIT_NORMAL, NULL); // FMOD_INIT_NORMAL은 일반 효과음에 쓰이는 모드
-	// 실제 소리파일을 각 g_Sound와 1:1 대응시킴, 반복은 FMOD_LOOP_NORMAL, 기본 효과음은 FMOD_DEFAULT 이용 
-	FMOD_System_CreateSound(g_System, "Sound_Dir\\wave.mp3", FMOD_LOOP_NORMAL, 0, &g_Sound[0]);
-	FMOD_System_CreateSound(g_System, "Sound_Dir\\safe.wav", FMOD_DEFAULT, 0, &g_Sound[1]);
-
-	// 배경음 출력
-	FMOD_System_PlaySound(g_System, g_Sound[0], 0, 0, &g_Channel);
-	FMOD_Channel_SetVolume(g_Channel, 0.3f);
-}
-
-void FMOD_Release() // FMOD 메모리 해제 함수
-{
-	// Note: FMOD 해제
-	int i;
-
-	for (i = 0; i < 2; i++)
-		FMOD_Sound_Release(g_Sound[i]); // FMOD sound 객체 해제
-
-	FMOD_System_Close(g_System); // FMOD system 객체 clsoe
-	FMOD_System_Release(g_System); // FMOD system 객체 해제
-}
-
 int main()
 {
+	string strBGFileName[] = { "Sound_Dir\\story.mp3", "Sound_Dir\\wave.mp3" };
+	string strEffectFileName[] = { "Sound_Dir\\play_fire.wav", "Sound_Dir\\safe.wav" };
 	int nKey;
-	FMOD_CHANNEL* pChannel;
-	float volume = 0.5f;
 
-	FMOD_Init();
+	CFmodSound FmodSound; // 소리 객체 생성
+	FmodSound.CreateBGSound(2, strBGFileName); // 배경음 소리를 넣어준다.
+	FmodSound.CreateEffectSound(2, strEffectFileName); // 효과음 소리를 넣어준다.
 
-	printf("s를 눌러 효과음 출력\n");
+	printf("사운드 시스템 준비 완료\n");
+	printf("키 1: 배경1 출력	키 2: 효과음 출력	키 3: 배경음 중지	키 q: 종료\n");
 
-	while (1)
+	while (true)
 	{
 		if (_kbhit())
 		{
 			nKey = _getch();
-
-			if (nKey == 's') // s 누르면 효과음 출력
+			if (nKey == '1')
 			{
-				FMOD_System_PlaySound(g_System, g_Sound[1], 0, 0, &pChannel);
-				FMOD_Channel_SetVolume(pChannel, volume);
+				FmodSound.PlaySoundBG(0);
+			}
+			if (nKey == '2')
+			{
+				FmodSound.PlaySoundEffect(1);
+			}
+			if (nKey == '3')
+			{
+				FmodSound.StopSoundBG(0);
+			}
+			if (nKey == 'q')
+			{
+				break;
 			}
 		}
-
-		FMOD_System_Update(g_System);
+		FmodSound.Update();
 	}
-
-	FMOD_Release();
+	FmodSound.ReleaseSound();
 	return 0;
 }
