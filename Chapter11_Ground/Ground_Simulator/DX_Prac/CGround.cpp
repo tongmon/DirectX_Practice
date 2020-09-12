@@ -37,6 +37,7 @@ void CGround::Create(LPDIRECT3DDEVICE9 pd3dDevice, int nRow, int nCol, float fSi
 	int nIndex = 0; // 실제 격자는 2차원 배열 처럼 표현되지만 정점을 담는 배열은 일차원으로 나타낸다.
 	// x좌표가 밑과 같은 이유는 원점에서 맵 전체 크기의 절반이 음수 쪽으로 가야해서 그렇고 z좌표는 음수가 아니라 양수 쪽으로 가야해서 밑과 같이 표현된다.
 	// 즉 시작 좌표를 정하는 것이다. 오른쪽 아래로 가면서 정점들이 찍힌다고 보면 편하다. 
+	// 중심에서 절반 엇나가야 하니 0.5f를 곱해준 것.
 	D3DXVECTOR3 vPos0(-1.0f * m_nCol * fSize * 0.5f, 0.0f, m_nRow * fSize * 0.5f);
 	for (int z = 0; z <= m_nRow; z++)
 	{
@@ -53,14 +54,14 @@ void CGround::Create(LPDIRECT3DDEVICE9 pd3dDevice, int nRow, int nCol, float fSi
 	//Note: 버텍스 버퍼 생성 
 	if (m_pd3dDevice->CreateVertexBuffer(m_dwNumVertices * sizeof(GROUNDVERTEX), 0, D3DFVF_GROUNDVERTEX, D3DPOOL_DEFAULT, &m_pVB, 0) != D3D_OK)
 	{
-		MessageBox(NULL, "정정 버퍼 생성 Error", "Error", MB_OK);
+		MessageBox(NULL, "정점 버퍼 생성 Error", "Error", MB_OK);
 		return;
 	}
 
 	void* pVertices;
 	if (m_pVB->Lock(0, 0, &pVertices, NULL) != D3D_OK) // 2번째 매개변수는 전체를 lock하는 값 0	
 	{
-		MessageBox(NULL, "정정 버퍼 lock Error", "Error", MB_OK);
+		MessageBox(NULL, "정점 버퍼 lock Error", "Error", MB_OK);
 		return;
 	}
 
