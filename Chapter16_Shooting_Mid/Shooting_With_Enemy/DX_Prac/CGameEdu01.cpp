@@ -59,7 +59,7 @@ void CGameEdu01::OnInit()
 	// 적이 되는 박스 메쉬 생성
 	D3DXCreateBox(m_pd3dDevices, 1.0f, 1.0f, 1.0f, &m_pEnemyBoxMesh, NULL);
 	// 적의 총알이 될 구(원형) 메쉬 생성
-	D3DXCreateSphere(m_pd3dDevices, 0.2f, 20, 10, &m_pEnemyBulletMesh, NULL);
+	D3DXCreateSphere(m_pd3dDevices, 0.1f, 20, 10, &m_pEnemyBulletMesh, NULL);
 	// 지면 생성
 	m_Ground.Create(m_pd3dDevices, 20, 6, 2.0f);
 
@@ -119,6 +119,7 @@ void CGameEdu01::OnInit()
 	m_EnemyBulletProperty.fScale = 0.9f;
 	D3DXMatrixScaling(&m_EnemyBulletProperty.matScale, m_EnemyBulletProperty.fScale, m_EnemyBulletProperty.fScale, m_EnemyBulletProperty.fScale); // 총알 크기 행렬 생성
 	// 생성되지 않은 적 총알은 모두 체력이 0이다.
+	// 메모리 풀 기법으로 미리 메모리를 생성 해놓고 사용하는 것만 골라서 출력하게 된다. 적의 총알은 매우 매우 많아지므로 할당, 해제의 오버헤드를 줄여야 한다. 
 	for (int i = 0; i < 100; i++)
 	{
 		m_EnemyBullet[i].nLife = 0;
@@ -161,7 +162,7 @@ void CGameEdu01::OnRender()
 	{
 		if (m_EnemyBullet[i].nLife > 0)
 		{
-			matWorld = m_EnemyBulletProperty.matScale * m_EnemyBullet[i].matTranslation;
+			matWorld = m_EnemyBulletProperty.matScale * m_EnemyBullet[i].matTranslation; // 총알은 회전이 필요없어 ST만 해준다.
 			m_pd3dDevices->SetTransform(D3DTS_WORLD, &matWorld);
 			m_pEnemyBulletMesh->DrawSubset(0);
 		}
@@ -281,12 +282,12 @@ void CGameEdu01::OnUpdate()
 				m_Enemy[i].dwOldFireTime = dwCurTime;
 				for (j = 0; j < 100; j++)
 				{
-					if (!m_EnemyBullet[j].nLife)
+					if (!m_EnemyBullet[j].nLife) // 총알이 죽은 상태면
 					{
-						m_EnemyBullet[j].nLife = 1;
-						m_EnemyBullet[j].vPos = m_Enemy[i].vPos;
+						m_EnemyBullet[j].nLife = 1; // 살린다.
+						m_EnemyBullet[j].vPos = m_Enemy[i].vPos; // 적으로부터 총알이 나가야 하니 적 위치를 따온다.
 						m_EnemyBullet[j].vPos.z -= 0.5f; // 약간 앞에서 미사일 발사가 되도록 하기 위해									
-						break; // <-- 이게 중요하다. 미사일 하나만 살리는 부분의 끝 
+						break; // <-- 이게 중요하다. 총알 하나만 살리는 부분의 끝 
 					}
 				}
 			}
@@ -296,7 +297,7 @@ void CGameEdu01::OnUpdate()
 	// 적 캐릭터 총알 이동
 	for (i = 0; i < 100; i++)
 	{
-		if (m_EnemyBullet[i].nLife > 0)
+		if (m_EnemyBullet[i].nLife > 0) // 총알이 살아있다면 움직인다.
 		{
 			m_EnemyBullet[i].vPos.z -= m_dwElapsedTime * m_EnemyBulletProperty.fBulletVelcoty;
 			if (m_EnemyBullet[i].vPos.z <= -20.0f) // 경계 영역 충돌
