@@ -168,7 +168,7 @@ void CGameEdu01::OnInit()
 
 		// 적 등장 설정
 		int nRandomNum;
-		for (i = 0; i < 100; i++)
+		for (i = 0; i < EnemyCount; i++)
 		{
 			m_Enemy[i].nLife = 0;
 			m_Enemy[i].dwAppearTime = 2000 + (i * 800);
@@ -258,7 +258,7 @@ void CGameEdu01::OnRender()
 		wsprintf(string, "Stage %d", m_nStage);
 		m_pFont->DrawText(NULL, string, -1, &rt, DT_NOCLIP,
 			D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f));
-		m_nEnemyCount = 100;
+		m_nEnemyCount = EnemyCount;
 		break;
 
 	case RUN: // 실제 실행 상태
@@ -384,6 +384,7 @@ void CGameEdu01::OnUpdate()
 		{
 			m_nGameState = RUN; // 게임 상태를 RUN으로 변경
 			m_FMODSound.PlaySoundBG(1); // 본 게임 배경음
+			dwReadyTime = 0;
 		}
 		break;
 
@@ -431,7 +432,7 @@ void CGameEdu01::OnUpdate()
 		}
 
 		// 적 캐릭터 출현
-		for (i = m_nEnemyIndex; i < 100; i++)
+		for (i = m_nEnemyIndex; i < EnemyCount; i++)
 		{
 			if (m_Enemy[i].dwAppearTime <= m_dwGameElapsedTime)
 			{
@@ -678,6 +679,7 @@ void CGameEdu01::OnUpdate()
 			m_nGameState = READY; // 다시 준비 상태로 되돌림
 			m_nStage++;
 			m_nTotalGrade += m_nGrade;
+			dwReadyTime = 0;
 			OnInit();
 		}
 		break;

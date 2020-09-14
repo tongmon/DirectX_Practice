@@ -5,6 +5,8 @@
 #include "CGround.h"
 #include "FmodSound.h"
 
+#define EnemyCount 50 // 적 최대 개수
+
 typedef enum _Game_State // 따로 따로 구현되어있는 게임의 부분들을 연결해줄 상태 변수들
 {
 	INIT, LOADING, READY, RUN, STOP, SUCCESS, FAILED, END
@@ -94,7 +96,7 @@ class CGameEdu01 : public CD3DApp
 
 	// 적 캐릭터 
 	ENEMY_PROPERTY m_EnemyProperty; // 적의 종류는 여기선 간단하게 한개로 설정
-	ENEMY m_Enemy[100]; //적 캐릭터 100개 
+	ENEMY m_Enemy[EnemyCount]; //적 캐릭터 EnemyCount 만큼
 	BULLET_PROPERTY m_EnemyBulletProperty; // 총알 종류는 일단 한개로 설정
 	BULLET m_EnemyBullet[100]; // 적 총알 개수에 대한 적당량
 	int m_nEnemyIndex; // 각 적을 구분하는 기준은 인덱스이다. 결국 적들은 배열로 이루어져있기에 구별하기 위한 인덱스 변수가 필요하다.
