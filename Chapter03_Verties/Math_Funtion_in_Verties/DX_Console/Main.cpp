@@ -67,7 +67,7 @@ int main()
 	float Dot = D3DXVec3Dot(&v7, &v8); // 내적
 	float v7_len = D3DXVec3Length(&v7);
 	float v8_len = D3DXVec3Length(&v8);
-	cout << "두 벡터 v7과 v8의 외적: " << Dot << endl;
+	cout << "두 벡터 v7과 v8의 내적: " << Dot << endl;
 	cout << "두 벡터 v7과 v8 사이의 사잇각(Cosin) 라디안: " << Dot / (v7_len * v8_len) << "\n\n";
 
 	// 외적은 두 벡터가 이루어 만들어 지는 평면에 수직을 이루는 법선 벡터를 도출할 때 쓰인다.
