@@ -18,7 +18,7 @@ void CGameEdu01::SetMaterial(float r, float g, float b) // 물체의 디퓨즈(색상)값
 	Diffuse.b = b;
 	Diffuse.a = 1.0f; // 투명도
 	ZeroMemory(&m_Material, sizeof(D3DMATERIAL9));
-	m_Material.Ambient = m_Material.Diffuse = Diffuse;
+	m_Material.Ambient = m_Material.Diffuse = Diffuse; // 어짜피 방향광이기에 Ambient 안써서 모두 1.0f로 설정
 	m_pd3dDevices->SetMaterial(&m_Material); // 물질 설정
 }
 
@@ -138,7 +138,7 @@ void CGameEdu01::OnInit()
 	SetMaterial(1.0f, 1.0f, 1.0f);
 
 	// 라이트 기본 초기화
-	m_Light.Type = D3DLIGHT_DIRECTIONAL;
+	m_Light.Type = D3DLIGHT_DIRECTIONAL; // 게임에서 많이 쓰는 방향성 라이트
 	m_Light.Diffuse.r = m_Light.Diffuse.g = m_Light.Diffuse.b = m_Light.Diffuse.a = 1.0f;
 
 	// 라이트 속성 설정

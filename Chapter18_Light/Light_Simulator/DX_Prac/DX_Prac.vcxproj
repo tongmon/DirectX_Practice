@@ -152,6 +152,10 @@
     <ClInclude Include="CAxis.h" />
     <ClInclude Include="CD3DApp.h" />
     <ClInclude Include="CGameEdu01.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DX_Prac.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

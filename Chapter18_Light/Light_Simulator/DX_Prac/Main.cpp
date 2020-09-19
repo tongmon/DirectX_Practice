@@ -1,7 +1,9 @@
 #include <windows.h>
+#include <stdio.h>
 #include <d3d9.h>
 #include <d3dx9math.h>
 #include "CGameEdu01.h"
+#include "resource.h"
 
 #pragma comment (lib,"d3d9.lib")
 #pragma comment (lib,"dxguid.lib")
@@ -15,14 +17,15 @@
 CGameEdu01 Mechanism;
 
 // 전역 변수:
-HINSTANCE hInst;								// 현재 인스턴스입니다.
-TCHAR szTitle[MAX_LOADSTRING];					// 제목 표시줄 텍스트입니다.
-TCHAR szWindowClass[MAX_LOADSTRING];			// 기본 창 클래스 이름입니다.
+HINSTANCE hInst; // 현재 인스턴스입니다.
 HWND g_hWnd, g_hMenuWnd; // 메인 윈도우, 다이얼로그 윈도우 핸들
 int g_nDlgWidth, g_nDlgHeight; // 다이얼로그 가로, 세로 크기
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg,
-	WPARAM wParam, LPARAM lParam);
+	WPARAM wParam, LPARAM lParam); // 메인 윈도우
+
+INT_PTR CALLBACK MenuDlgProc(HWND hDlg, UINT nMsg, 
+	WPARAM wParam, LPARAM lParam); // 컨트롤 패널 다이얼로그
 
 LPCTSTR lpszClass = TEXT("DX Sample"); // 타이틀 이름
 
@@ -44,60 +47,74 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	RegisterClass(&WndClass); //앞서 정의한 윈도우 클래스의 주소
 
 	hInst = hInstance;
+	RECT rect = { 0, 0, 900, 900 };
+	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, true);
 
 	g_hWnd = hwnd = CreateWindow(lpszClass, //윈도우가 생성되면 핸들(hwnd)이 반환
 		lpszClass, //윈도우 클래스, 타이틀 이름
 		WS_OVERLAPPEDWINDOW, //윈도우 스타일
 		CW_USEDEFAULT, //윈도우 위치, x좌표
 		CW_USEDEFAULT, //윈도우 위치, y좌표
-		900, //윈도우 폭   
-		900, //윈도우 높이   
+		rect.right - rect.left, //윈도우 폭   
+		rect.bottom - rect.top, //윈도우 높이   
 		NULL, //부모 윈도우 핸들 
 		NULL, //메뉴 핸들
 		hInstance,     //응용 프로그램 ID
 		NULL      //생성된 윈도우 정보
 	);
+
 	ShowWindow(hwnd, nCmdShow); //윈도우의 화면 출력
 	UpdateWindow(hwnd); //O/S 에 WM_PAINT 메시지 전송
+
+	RECT rtWindow, rtDlg;
+	GetWindowRect(g_hWnd, &rtWindow); // 스크린상에서 윈도우 좌표
+
+	g_hMenuWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_DIALOG1), hwnd, MenuDlgProc);
+	GetWindowRect(g_hMenuWnd, &rtDlg); // 다이얼로그 크기
+	g_nDlgWidth = rtDlg.right - rtDlg.left + 1; // 다이얼로그 가로 길이
+	g_nDlgHeight = rtDlg.bottom - rtDlg.top + 1; // 다이얼로그 세로 길이
+
+	// 다이얼로그 창을 옆으로 메인 윈도우에 딱 붙여주기 위해 사용 
+	MoveWindow(g_hMenuWnd, rtWindow.right, rtWindow.top, g_nDlgWidth, g_nDlgHeight, TRUE);  
 
 	Mechanism.D3DInit(g_hWnd);
 
 	// 컨트롤 값 초기화 
-	/*
 	char string[10];
-	wsprintf(string, "%.1f", g_GameEdu01.m_Material.Diffuse.r);
+	snprintf(string, sizeof(string), "%.1f", Mechanism.m_Material.Diffuse.r);
 	SetDlgItemText(g_hMenuWnd, IDC_EDIT1, string);
-	wsprintf(string, "%.1f", g_GameEdu01.m_Material.Diffuse.g);
+	snprintf(string, sizeof(string), "%.1f", Mechanism.m_Material.Diffuse.g);
 	SetDlgItemText(g_hMenuWnd, IDC_EDIT2, string);
-	wsprintf(string, "%.1f", g_GameEdu01.m_Material.Diffuse.b);
+	snprintf(string, sizeof(string), "%.1f", Mechanism.m_Material.Diffuse.b);
 	SetDlgItemText(g_hMenuWnd, IDC_EDIT3, string);
 
-	wsprintf(string, "%.1f", g_GameEdu01.m_Light.Diffuse.r);
+	snprintf(string, sizeof(string), "%.1f", Mechanism.m_Light.Diffuse.r);
 	SetDlgItemText(g_hMenuWnd, IDC_EDIT4, string);
-	wsprintf(string, "%.1f", g_GameEdu01.m_Light.Diffuse.g);
+	snprintf(string, sizeof(string), "%.1f", Mechanism.m_Light.Diffuse.g);
 	SetDlgItemText(g_hMenuWnd, IDC_EDIT5, string);
-	wsprintf(string, "%.1f", g_GameEdu01.m_Light.Diffuse.b);
+	snprintf(string, sizeof(string), "%.1f", Mechanism.m_Light.Diffuse.b);
 	SetDlgItemText(g_hMenuWnd, IDC_EDIT6, string);
-	wsprintf(string, "%.1f", g_GameEdu01.m_Light.Specular.r);
+	snprintf(string, sizeof(string), "%.1f", Mechanism.m_Light.Specular.r);
 	SetDlgItemText(g_hMenuWnd, IDC_EDIT7, string);
-	wsprintf(string, "%.1f", g_GameEdu01.m_Light.Specular.g);
+	snprintf(string, sizeof(string), "%.1f", Mechanism.m_Light.Specular.g);
 	SetDlgItemText(g_hMenuWnd, IDC_EDIT8, string);
-	wsprintf(string, "%.1f", g_GameEdu01.m_Light.Specular.b);
+	snprintf(string, sizeof(string), "%.1f", Mechanism.m_Light.Specular.b);
 	SetDlgItemText(g_hMenuWnd, IDC_EDIT9, string);
-	wsprintf(string, "%.1f", g_GameEdu01.m_Light.Ambient.r);
+	snprintf(string, sizeof(string), "%.1f", Mechanism.m_Light.Ambient.r);
 	SetDlgItemText(g_hMenuWnd, IDC_EDIT10, string);
-	wsprintf(string, "%.1f", g_GameEdu01.m_Light.Ambient.g);
+	snprintf(string, sizeof(string), "%.1f", Mechanism.m_Light.Ambient.g);
 	SetDlgItemText(g_hMenuWnd, IDC_EDIT11, string);
-	wsprintf(string, "%.1f", g_GameEdu01.m_Light.Ambient.b);
+	snprintf(string, sizeof(string), "%.1f", Mechanism.m_Light.Ambient.b);
 	SetDlgItemText(g_hMenuWnd, IDC_EDIT12, string);
 
-	wsprintf(string, "%.1f", g_GameEdu01.m_Light.Direction.x);
+	snprintf(string, sizeof(string), "%.1f", Mechanism.m_Light.Direction.x);
 	SetDlgItemText(g_hMenuWnd, IDC_EDIT13, string);
-	wsprintf(string, "%.1f", g_GameEdu01.m_Light.Direction.y);
+	snprintf(string, sizeof(string), "%.1f", Mechanism.m_Light.Direction.y);
 	SetDlgItemText(g_hMenuWnd, IDC_EDIT14, string);
-	wsprintf(string, "%.1f", g_GameEdu01.m_Light.Direction.z);
+	snprintf(string, sizeof(string), "%.1f", Mechanism.m_Light.Direction.z);
 	SetDlgItemText(g_hMenuWnd, IDC_EDIT15, string);
-	*/
+
+	ShowWindow(g_hMenuWnd, nCmdShow); //윈도우의 화면 출력
 
 	// 게임 메시지 루프입니다:
 	while (true)
@@ -126,16 +143,17 @@ HDC hdc;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
-
-	//PAINTSTRUCT ps;
+	RECT rtWindow;
+	// PAINTSTRUCT ps;
 
 	switch (iMsg)
 	{
 	case WM_CREATE:
 		break;
 
-	case WM_PAINT:
-		Mechanism.Render();
+	case WM_MOVE: // 윈도우 이동시에 다이얼로그 윈도우도 같이 붙여서 움직여주기 위한 용도
+		GetWindowRect(hwnd, &rtWindow); // 스크린상에서 윈도우 좌표
+		MoveWindow(g_hMenuWnd, rtWindow.right, rtWindow.top, g_nDlgWidth, g_nDlgHeight, TRUE);
 		break;
 
 	case WM_DESTROY:
@@ -144,4 +162,62 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	return DefWindowProc(hwnd, iMsg, wParam, lParam); //CASE에서 정의되지 않은 메시지는 커널이 처리하도록 메시지 전달
+}
+
+// 다이얼로그 컨트롤 패널, 다이얼로그 종료가 필요없기에 EndDialog() 함수 없음.
+INT_PTR CALLBACK MenuDlgProc(HWND hDlg, UINT nMsg, WPARAM wParam, LPARAM lParam)
+{
+	char str[10];
+	float fRed, fGreen, fBlue;
+
+	switch (nMsg)
+	{
+	case WM_INITDIALOG:
+		break;
+	case WM_COMMAND:
+		if (wParam == IDC_BUTTON1)  // 머티리얼 셋업
+		{
+			GetDlgItemText(hDlg, IDC_EDIT1, str, 9);
+			fRed = atof(str);
+			GetDlgItemText(hDlg, IDC_EDIT2, str, 9);
+			fGreen = atof(str);
+			GetDlgItemText(hDlg, IDC_EDIT3, str, 9);
+			fBlue = atof(str);
+			Mechanism.SetMaterial(fRed, fGreen, fBlue);
+		}
+		else if (wParam == IDC_BUTTON2) // 라이트 셋업
+		{
+			GetDlgItemText(hDlg, IDC_EDIT4, str, 9);
+			Mechanism.m_Light.Diffuse.r = atof(str);
+			GetDlgItemText(hDlg, IDC_EDIT5, str, 9);
+			Mechanism.m_Light.Diffuse.g = atof(str);
+			GetDlgItemText(hDlg, IDC_EDIT6, str, 9);
+			Mechanism.m_Light.Diffuse.b = atof(str);
+
+			GetDlgItemText(hDlg, IDC_EDIT7, str, 9);
+			Mechanism.m_Light.Specular.r = atof(str);
+			GetDlgItemText(hDlg, IDC_EDIT8, str, 9);
+			Mechanism.m_Light.Specular.g = atof(str);
+			GetDlgItemText(hDlg, IDC_EDIT9, str, 9);
+			Mechanism.m_Light.Specular.b = atof(str);
+
+			GetDlgItemText(hDlg, IDC_EDIT10, str, 9);
+			Mechanism.m_Light.Ambient.r = atof(str);
+			GetDlgItemText(hDlg, IDC_EDIT11, str, 9);
+			Mechanism.m_Light.Ambient.g = atof(str);
+			GetDlgItemText(hDlg, IDC_EDIT12, str, 9);
+			Mechanism.m_Light.Ambient.b = atof(str);
+
+			GetDlgItemText(hDlg, IDC_EDIT13, str, 9);
+			Mechanism.m_Light.Direction.x = atof(str);
+			GetDlgItemText(hDlg, IDC_EDIT14, str, 9);
+			Mechanism.m_Light.Direction.y = atof(str);
+			GetDlgItemText(hDlg, IDC_EDIT15, str, 9);
+			Mechanism.m_Light.Direction.z = atof(str);
+
+			Mechanism.SetDirectionalLight();
+		}
+		break;
+	}
+	return FALSE;
 }

@@ -1,0 +1,128 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 한국어(대한민국) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
+#pragma code_page(949)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG1 DIALOGEX 0, 0, 293, 205
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Edit Control"
+FONT 10, "휴먼모음T", 400, 0, 0x81
+BEGIN
+    CTEXT           "Material",IDC_STATIC1,23,24,26,8,SS_CENTERIMAGE
+    LTEXT           "Directional Light",IDC_STATIC2,23,85,54,8
+    LTEXT           "Diffuse :",IDC_STATIC4,30,107,28,8
+    LTEXT           "Specular :",IDC_STATIC5,26,127,33,8
+    LTEXT           "Diffuse :",IDC_STATIC3,31,47,28,8
+    LTEXT           "Ambient :",IDC_STATIC6,27,146,32,8
+    LTEXT           "Direction :",IDC_STATIC7,25,166,34,8
+    PUSHBUTTON      "APPLY",IDC_BUTTON1,221,64,50,14
+    PUSHBUTTON      "APPLY",IDC_BUTTON2,223,175,50,14
+    EDITTEXT        IDC_EDIT1,75,45,40,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT2,128,45,40,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT3,178,45,40,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT4,74,105,40,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT5,126,105,40,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT6,177,105,40,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT7,74,126,40,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT8,126,127,40,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT9,177,126,40,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT10,74,147,40,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT11,125,147,40,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT12,177,147,40,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT13,73,166,40,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT14,125,166,40,14,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT15,177,166,40,14,ES_CENTER | ES_AUTOHSCROLL
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_DIALOG1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 286
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 198
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_DIALOG1 AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // 한국어(대한민국) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

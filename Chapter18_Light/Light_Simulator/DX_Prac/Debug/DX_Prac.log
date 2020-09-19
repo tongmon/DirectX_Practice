@@ -1,2 +1,17 @@
-﻿  CGameEdu01.cpp
+﻿  Main.cpp
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\DX_Prac\Main.cpp(181,15): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\DX_Prac\Main.cpp(183,17): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\DX_Prac\Main.cpp(185,16): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\DX_Prac\Main.cpp(191,38): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\DX_Prac\Main.cpp(193,38): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\DX_Prac\Main.cpp(195,38): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\DX_Prac\Main.cpp(198,39): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\DX_Prac\Main.cpp(200,39): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\DX_Prac\Main.cpp(202,39): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\DX_Prac\Main.cpp(205,38): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\DX_Prac\Main.cpp(207,38): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\DX_Prac\Main.cpp(209,38): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\DX_Prac\Main.cpp(212,40): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\DX_Prac\Main.cpp(214,40): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\DX_Prac\Main.cpp(216,40): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   DX_Prac.vcxproj -> C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter18_Light\Light_Simulator\Debug\DX_Prac.exe
