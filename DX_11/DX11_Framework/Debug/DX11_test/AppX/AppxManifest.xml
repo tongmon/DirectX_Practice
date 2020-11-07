@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp build" xmlns:build="http://schemas.microsoft.com/developer/appx/2015/build">
+  <!--
+    이 패키지 매니페스트 파일은 빌드 프로세스에 의해 생성됩니다.
+
+    이 파일을 다시 생성하면 변경 내용이 손실됩니다. 이 파일의 오류를 수정하려면 소스 .appxmanifest 파일을 편집하십시오.
+
+    패키지 매니페스트 파일에 대한 자세한 내용은 http://go.microsoft.com/fwlink/?LinkID=241727을 참조하십시오.
+  -->
+  <Identity Name="6df20a06-1144-4192-8fd2-85d9ba1c9f93" Publisher="CN=tongm" Version="1.0.0.0" ProcessorArchitecture="x86" />
+  <mp:PhoneIdentity PhoneProductId="6df20a06-1144-4192-8fd2-85d9ba1c9f93" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Properties>
+    <DisplayName>DX11_test</DisplayName>
+    <PublisherDisplayName>tongm</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0" MaxVersionTested="10.0.18362.0" />
+    <PackageDependency Name="Microsoft.VCLibs.140.00.Debug" MinVersion="14.0.27810.0" Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" />
+  </Dependencies>
+  <Resources>
+    <Resource Language="KO-KR" />
+  </Resources>
+  <Applications>
+    <Application Id="App" Executable="DX11_test.exe" EntryPoint="DX11_test.App">
+      <uap:VisualElements DisplayName="DX11_test" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="DX11_test" BackgroundColor="transparent">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+        <uap:SplashScreen Image="Assets\SplashScreen.png" />
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="internetClient" />
+  </Capabilities>
+  <build:Metadata>
+    <build:Item Name="cl.exe" Version="19.27.29112.0 built by: vcwrkspc" />
+    <build:Item Name="VisualStudio" Version="16.0" />
+    <build:Item Name="VisualStudioEdition" Value="Microsoft Visual Studio Community 2019" />
+    <build:Item Name="OperatingSystem" Version="10.0.19041.561 (WinBuild.160101.0800)" />
+    <build:Item Name="Microsoft.Build.AppxPackage.dll" Version="16.0.30521.138" />
+    <build:Item Name="ProjectGUID" Value="{84194df1-f38c-4bec-99e0-83eec2bfa320}" />
+    <build:Item Name="OptimizingToolset" Value="None" />
+    <build:Item Name="TargetRuntime" Value="Native" />
+    <build:Item Name="Microsoft.Windows.UI.Xaml.Build.Tasks.dll" Version="10.0.18362.1" />
+    <build:Item Name="MakePri.exe" Version="10.0.18362.1 (WinBuild.160101.0800)" />
+  </build:Metadata>
+</Package>
