@@ -1,9 +1,0 @@
-﻿  compilation object save succeeded; see C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_Framework\Debug\DX11_test\SamplePixelShader.cso
-  compilation object save succeeded; see C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_Framework\Debug\DX11_test\SampleVertexShader.cso
-  pch.cpp
-  App.cpp
-  DeviceResources.cpp
-  DX11_testMain.cpp
-  SampleFpsTextRenderer.cpp
-  Sample3DSceneRenderer.cpp
-  DX11_test.vcxproj -> C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_Framework\Debug\DX11_test\DX11_test.exe
