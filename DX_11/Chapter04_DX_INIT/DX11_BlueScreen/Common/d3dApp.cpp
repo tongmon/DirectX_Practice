@@ -202,43 +202,43 @@ LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch( msg )
 	{
-	// WM_ACTIVATE is sent when the window is activated or deactivated.  
-	// We pause the game when the window is deactivated and unpause it 
-	// when it becomes active.  
+	// WM_ACTIVATE 는 앱이 활성화되거나 비활성화 될 경우 호출된다.
+	// 윈도우창이 비활성화 되면 활동이 멈추는 것으로 설정하게 해놓았다.
+	// 멈춤 상태에서는 시간 체크가 비활성화 되기에 쓸데없이 시간 체크로 CPU 자원을 낭비하지 않게 한다.
 	case WM_ACTIVATE:
-		if( LOWORD(wParam) == WA_INACTIVE )
+		if( LOWORD(wParam) == WA_INACTIVE ) // 비활성화
 		{
 			mAppPaused = true;
-			mTimer.Stop();
+			mTimer.Stop(); // 게임 멈춤
 		}
-		else
+		else // 활성화
 		{
 			mAppPaused = false;
-			mTimer.Start();
+			mTimer.Start(); // 게임 시작
 		}
 		return 0;
 
-	// WM_SIZE is sent when the user resizes the window.  
+	// WM_SIZE 는 윈도우 창 크기 변경시 호출된다.
 	case WM_SIZE:
-		// Save the new client area dimensions.
+		// 새롭게 변한 창 크기 저장
 		mClientWidth  = LOWORD(lParam);
 		mClientHeight = HIWORD(lParam);
 		if( md3dDevice )
 		{
-			if( wParam == SIZE_MINIMIZED )
+			if( wParam == SIZE_MINIMIZED ) // 창 최소화
 			{
 				mAppPaused = true;
 				mMinimized = true;
 				mMaximized = false;
 			}
-			else if( wParam == SIZE_MAXIMIZED )
+			else if( wParam == SIZE_MAXIMIZED ) // 창 최대화
 			{
 				mAppPaused = false;
 				mMinimized = false;
 				mMaximized = true;
 				OnResize();
 			}
-			else if( wParam == SIZE_RESTORED )
+			else if( wParam == SIZE_RESTORED ) // 창 복구
 			{
 				
 				// Restoring from minimized state?
@@ -258,14 +258,10 @@ LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				}
 				else if( mResizing )
 				{
-					// If user is dragging the resize bars, we do not resize 
-					// the buffers here because as the user continuously 
-					// drags the resize bars, a stream of WM_SIZE messages are
-					// sent to the window, and it would be pointless (and slow)
-					// to resize for each WM_SIZE message received from dragging
-					// the resize bars.  So instead, we reset after the user is 
-					// done resizing the window and releases the resize bars, which 
-					// sends a WM_EXITSIZEMOVE message.
+					// 유저가 창의 크기를 조절하려고 창 테두리를 움직여도 화면 크기 조정을 하지 않는다.
+					// 연속적으로 계속 전달되는 WM_SIZE 메시지를 계속 그때 그때 처리하는 것은 비효율적이기 때문
+					// 따라서 유저가 창의 크기 조절을 멈추면 전달되는 WM_EXITSIZEMOVE 메시지를 이용해
+					// 창의 크기를 완전히 다 조절했다고 판단되면 그때 화면 크기에 따른 변경된 화면을 출력한다.
 				}
 				else // API call such as SetWindowPos or mSwapChain->SetFullscreenState.
 				{
@@ -275,34 +271,34 @@ LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		return 0;
 
-	// WM_EXITSIZEMOVE is sent when the user grabs the resize bars.
+	// WM_EXITSIZEMOVE 윈도우 창 테두리를 잡으면 호출된다.
 	case WM_ENTERSIZEMOVE:
-		mAppPaused = true;
-		mResizing  = true;
-		mTimer.Stop();
+		mAppPaused = true; // 창 크기 조절시 게임 멈춤
+		mResizing  = true; // 창 크기 재설정 상태
+		mTimer.Stop(); // 타이머 측정도 정지
 		return 0;
 
-	// WM_EXITSIZEMOVE is sent when the user releases the resize bars.
-	// Here we reset everything based on the new window dimensions.
+	// WM_EXITSIZEMOVE 창 테두리에서 마우스를 떼면 호출된다.
+	// 새 창 크기에 맞게 모든 것을 재설정한다.
 	case WM_EXITSIZEMOVE:
 		mAppPaused = false;
 		mResizing  = false;
 		mTimer.Start();
-		OnResize();
+		OnResize(); // 재설정
 		return 0;
  
-	// WM_DESTROY is sent when the window is being destroyed.
+	// WM_DESTROY 창이 꺼지면 호출된다.
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
 
-	// The WM_MENUCHAR message is sent when a menu is active and the user presses 
-	// a key that does not correspond to any mnemonic or accelerator key. 
+	// The WM_MENUCHAR 메시지는 메뉴가 활성화되어서 사용자가 키를 눌렀으나 그 키가
+	// 그 어떤 니모닉이나 단축키에도 해당하지 않을 경우 호출된다.
 	case WM_MENUCHAR:
-        // Don't beep when we alt-enter.
+        // alt-enter 누를시에 삐소리 안나게 설정
         return MAKELRESULT(0, MNC_CLOSE);
 
-	// Catch this message so to prevent the window from becoming too small.
+	// 창이 너무 작아지지 않도록 제한을 둔다.
 	case WM_GETMINMAXINFO:
 		((MINMAXINFO*)lParam)->ptMinTrackSize.x = 200;
 		((MINMAXINFO*)lParam)->ptMinTrackSize.y = 200; 

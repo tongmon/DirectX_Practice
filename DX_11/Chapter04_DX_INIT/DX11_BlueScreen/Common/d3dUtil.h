@@ -30,6 +30,8 @@
 // Simple d3d error checker for book demos.
 //---------------------------------------------------------------------------------------
 
+// HR 함수 정의 부분, 디버그 모드일 경우에만 정상적으로 작동한다.
+// HR 함수는 HR에 씌워진 실행 부분에 대한 오류를 잡아주는 역할을 한다. 몇 줄이 에러인지, 에러코드는 무엇인지 알 수 있다.
 #if defined(DEBUG) | defined(_DEBUG)
 	#ifndef HR
 	#define HR(x)                                              \
@@ -37,7 +39,7 @@
 		HRESULT hr = (x);                                      \
 		if(FAILED(hr))                                         \
 		{                                                      \
-			DXTrace((WCHAR*)__FILE__, (DWORD)__LINE__, hr, L#x, true); \
+			DXTrace((WCHAR*)__FILEW__, (DWORD)__LINE__, hr, L#x, true); \
 		}                                                      \
 	}
 	#endif
