@@ -1,7 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
-  <ProjectOutputs>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\Chapter14_Collision\Spere_Movement_Test\Debug\DX_Prac.exe</ProjectOutputs>
-  <ContentFiles></ContentFiles>
-  <SatelliteDlls></SatelliteDlls>
-  <NonRecipeFileRefs></NonRecipeFileRefs>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_9.0c\Chapter14_Collision\Spere_Movement_Test\Debug\DX_Prac.exe</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles />
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
 </Project>
