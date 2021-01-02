@@ -1,3 +1,4 @@
 C:\Users\tongm\source\repos\DX11_FRAME\Debug\color.cso
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME\Debug\color.cso
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME_tester\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK_2\DX11_FRAME\Debug\color.cso
