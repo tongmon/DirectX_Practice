@@ -22,10 +22,10 @@
 #pragma comment (lib,"dxguid.lib")
 #pragma comment (lib,"winmm.lib")
 
-struct Vertex
+struct Vertex // 정점
 {
-	XMFLOAT3 Pos;
-	XMFLOAT4 Color;
+	XMFLOAT3 Pos; // 위치
+	XMFLOAT4 Color; // 색상
 };
 
 class ShapesApp : public D3DApp
@@ -124,9 +124,9 @@ ShapesApp::ShapesApp(HINSTANCE hInstance)
 	XMStoreFloat4x4(&mView, I);
 	XMStoreFloat4x4(&mProj, I);
 
-	XMMATRIX boxScale = XMMatrixScaling(2.0f, 1.0f, 2.0f);
-	XMMATRIX boxOffset = XMMatrixTranslation(0.0f, 0.5f, 0.0f);
-	XMStoreFloat4x4(&mBoxWorld, XMMatrixMultiply(boxScale, boxOffset));
+	XMMATRIX boxScale = XMMatrixScaling(2.0f, 1.0f, 2.0f); // 박스 크기 조절
+	XMMATRIX boxOffset = XMMatrixTranslation(0.0f, 0.5f, 0.0f); // 박스 위치 조정
+	XMStoreFloat4x4(&mBoxWorld, XMMatrixMultiply(boxScale, boxOffset)); // S, T 연산 행렬
 
 	XMMATRIX centerSphereScale = XMMatrixScaling(2.0f, 2.0f, 2.0f);
 	XMMATRIX centerSphereOffset = XMMatrixTranslation(0.0f, 2.0f, 0.0f);
@@ -222,30 +222,30 @@ void ShapesApp::DrawScene()
 	mTech->GetDesc(&techDesc);
 	for (UINT p = 0; p < techDesc.Passes; ++p)
 	{
-		XMMATRIX buf;
+		XMMATRIX buf; // reinterpret_cast<float*>의 l-value 문제 해결을 위해 임시 저장 변수 사용
 		
-		// Draw the grid.
+		// 격자 그리기
 		XMMATRIX world = XMLoadFloat4x4(&mGridWorld);		
 		buf = world * viewProj;
 		mfxWorldViewProj->SetMatrix(reinterpret_cast<float*>(&buf));
 		mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(mGridIndexCount, mGridIndexOffset, mGridVertexOffset);
 
-		// Draw the box.
+		// 상자 그리기
 		world = XMLoadFloat4x4(&mBoxWorld);
 		buf = world * viewProj;
 		mfxWorldViewProj->SetMatrix(reinterpret_cast<float*>(&buf));
 		mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(mBoxIndexCount, mBoxIndexOffset, mBoxVertexOffset);
 
-		// Draw center sphere.
+		// 구 그리기
 		world = XMLoadFloat4x4(&mCenterSphere);
 		buf = world * viewProj;
 		mfxWorldViewProj->SetMatrix(reinterpret_cast<float*>(&buf));
 		mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(mSphereIndexCount, mSphereIndexOffset, mSphereVertexOffset);
 
-		// Draw the cylinders.
+		// 원기둥 그리기
 		for (int i = 0; i < 10; ++i)
 		{
 			world = XMLoadFloat4x4(&mCylWorld[i]);
@@ -255,7 +255,7 @@ void ShapesApp::DrawScene()
 			md3dImmediateContext->DrawIndexed(mCylinderIndexCount, mCylinderIndexOffset, mCylinderVertexOffset);
 		}
 
-		// Draw the spheres.
+		// 구 그리기
 		for (int i = 0; i < 10; ++i)
 		{
 			world = XMLoadFloat4x4(&mSphereWorld[i]);
