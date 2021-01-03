@@ -1,5 +1,4 @@
-﻿  compilation succeeded; see C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\color.cso
-  Main.cpp
+﻿  Main.cpp
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamath.h(2662,52): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamath.h(2662,64): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamath.h(2662,76): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
@@ -62,10 +61,4 @@ C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathvector.i
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathmisc.inl(518,43): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathmisc.inl(519,40): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathmisc.inl(519,51): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-Effects11d.lib(d3dxGlobal.obj) : warning LNK4099: 'Effects11d.pdb' PDB를 'Effects11d.lib(d3dxGlobal.obj)' 또는 'C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\Effects11d.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-Effects11d.lib(EffectAPI.obj) : warning LNK4099: '' PDB를 'Effects11d.lib(EffectAPI.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-Effects11d.lib(EffectLoad.obj) : warning LNK4099: 'Effects11d.pdb' PDB를 'Effects11d.lib(EffectLoad.obj)' 또는 'C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\Effects11d.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-Effects11d.lib(EffectNonRuntime.obj) : warning LNK4099: 'Effects11d.pdb' PDB를 'Effects11d.lib(EffectNonRuntime.obj)' 또는 'C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\Effects11d.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-Effects11d.lib(EffectReflection.obj) : warning LNK4099: '' PDB를 'Effects11d.lib(EffectReflection.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-Effects11d.lib(EffectRuntime.obj) : warning LNK4099: 'Effects11d.pdb' PDB를 'Effects11d.lib(EffectRuntime.obj)' 또는 'C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\Effects11d.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
   DX11_FRAME.vcxproj -> C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\DX11_FRAME.exe
