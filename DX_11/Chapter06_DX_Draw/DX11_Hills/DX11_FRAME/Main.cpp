@@ -44,7 +44,7 @@ public:
 	void OnMouseMove(WPARAM btnState, int x, int y);
 
 private:
-	float GetHeight(float x, float z)const;
+	float GetHeight(float x, float z)const; // 높이 설정 함수... 계산 방식은 이해를 못하겠다.
 	void BuildGeometryBuffers();
 	void BuildFX();
 	void BuildVertexLayout();
@@ -176,7 +176,7 @@ void HillsApp::DrawScene()
 	mTech->GetDesc(&techDesc);
 	for (UINT p = 0; p < techDesc.Passes; ++p)
 	{
-		// Draw the grid.
+		// 격자 그리기
 		mfxWorldViewProj->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
 		mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(mGridIndexCount, 0, 0);
@@ -241,14 +241,14 @@ void HillsApp::BuildGeometryBuffers()
 
 	GeometryGenerator geoGen;
 
-	geoGen.CreateGrid(160.0f, 160.0f, 50, 50, grid);
+	geoGen.CreateGrid(160.0f, 160.0f, 50, 50, grid); // 격자 생성 함수 --> 너비, 높이, 칸 수 2개, 격자의 인덱스가 저장될 타겟
 
 	mGridIndexCount = grid.Indices.size();
 
 	//
-	// Extract the vertex elements we are interested and apply the height function to
-	// each vertex.  In addition, color the vertices based on their height so we have
-	// sandy looking beaches, grassy low hills, and snow mountain peaks.
+	// 필요한 정점 특성들을 추출하고, 각 정점에 높이 함수를 적용한다.
+	// 또한 그 높이에 기초해서 정점의 색상도 적절히 설정한다.
+	// 이를 통해 모래 색의 해변과 녹색의 언덕, 그리고 흰눈 덮인 봉우리 같은 모습이 만들어진다.
 	//
 
 	std::vector<Vertex> vertices(grid.Vertices.size());
@@ -256,38 +256,39 @@ void HillsApp::BuildGeometryBuffers()
 	{
 		XMFLOAT3 p = grid.Vertices[i].Position;
 
-		p.y = GetHeight(p.x, p.z);
+		p.y = GetHeight(p.x, p.z); // 위치에 따라 높이 조정
 
 		vertices[i].Pos = p;
 
-		// Color the vertex based on its height.
+		// 높이에 따라 달라지는 정점 색상
 		if (p.y < -10.0f)
 		{
-			// Sandy beach color.
+			// 높이가 제일 낮으면 모래 색상
 			vertices[i].Color = XMFLOAT4(1.0f, 0.96f, 0.62f, 1.0f);
 		}
 		else if (p.y < 5.0f)
 		{
-			// Light yellow-green.
+			// 밝은 녹황색
 			vertices[i].Color = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
 		}
 		else if (p.y < 12.0f)
 		{
-			// Dark yellow-green.
+			// 짙은 녹황색
 			vertices[i].Color = XMFLOAT4(0.1f, 0.48f, 0.19f, 1.0f);
 		}
 		else if (p.y < 20.0f)
 		{
-			// Dark brown.
+			// 짙은 갈색
 			vertices[i].Color = XMFLOAT4(0.45f, 0.39f, 0.34f, 1.0f);
 		}
 		else
 		{
-			// White snow.
+			// 제일 높으면 눈 쌓인 색상
 			vertices[i].Color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 		}
 	}
 
+	// 정점 배열에 대한 속성 지정
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
 	vbd.ByteWidth = sizeof(Vertex) * grid.Vertices.size();
@@ -296,10 +297,10 @@ void HillsApp::BuildGeometryBuffers()
 	vbd.MiscFlags = 0;
 	D3D11_SUBRESOURCE_DATA vinitData;
 	vinitData.pSysMem = &vertices[0];
-	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mVB));
+	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mVB)); // 설정된 정점을 mVB에 저장
 
 	//
-	// Pack the indices of all the meshes into one index buffer.
+	// 모든 메시의 색인들을 하나의 색인 버퍼에 합쳐 넣는다.
 	//
 
 	D3D11_BUFFER_DESC ibd;
@@ -332,7 +333,7 @@ void HillsApp::BuildFX()
 	mfxWorldViewProj = mFX->GetVariableByName("gWorldViewProj")->AsMatrix();
 }
 
-void HillsApp::BuildVertexLayout()
+void HillsApp::BuildVertexLayout() // 입력 배치 함수
 {
 	// Create the vertex input layout.
 	D3D11_INPUT_ELEMENT_DESC vertexDesc[] =

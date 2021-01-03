@@ -60,15 +60,15 @@ private:
 
 	ID3D11RasterizerState* mWireframeRS;
 
-	// Define transformations from local spaces to world space.
-	XMFLOAT4X4 mSphereWorld[10];
-	XMFLOAT4X4 mCylWorld[10];
+	// 국소 공간에서 세계 공간으로의 변환 행렬을 정의한다.
+	XMFLOAT4X4 mSphereWorld[10]; // 구 10개 그릴거
+	XMFLOAT4X4 mCylWorld[10]; // 원기둥 10개 그릴거
 	XMFLOAT4X4 mBoxWorld;
 	XMFLOAT4X4 mGridWorld;
 	XMFLOAT4X4 mCenterSphere;
 
-	XMFLOAT4X4 mView;
-	XMFLOAT4X4 mProj;
+	XMFLOAT4X4 mView; // 시점
+	XMFLOAT4X4 mProj; // 투영
 
 	int mBoxVertexOffset;
 	int mGridVertexOffset;
@@ -119,6 +119,7 @@ ShapesApp::ShapesApp(HINSTANCE hInstance)
 	mLastMousePos.x = 0;
 	mLastMousePos.y = 0;
 
+	// 단위 행렬로 초기화
 	XMMATRIX I = XMMatrixIdentity();
 	XMStoreFloat4x4(&mGridWorld, I);
 	XMStoreFloat4x4(&mView, I);
@@ -132,6 +133,8 @@ ShapesApp::ShapesApp(HINSTANCE hInstance)
 	XMMATRIX centerSphereOffset = XMMatrixTranslation(0.0f, 2.0f, 0.0f);
 	XMStoreFloat4x4(&mCenterSphere, XMMatrixMultiply(centerSphereScale, centerSphereOffset));
 
+	// 원기둥들은 다섯줄로 배치됨, 하나의 줄은 두 개의 원기둥+구 쌍으로 이루어 진다.
+	// x 위치만 마주보는 반전으로 배치라 10번 할 필요없이 5번 루프 돌리면 된다.
 	for (int i = 0; i < 5; ++i)
 	{
 		XMStoreFloat4x4(&mCylWorld[i * 2 + 0], XMMatrixTranslation(-5.0f, 1.5f, -10.0f + i * 5.0f));
@@ -156,9 +159,9 @@ bool ShapesApp::Init()
 	if (!D3DApp::Init())
 		return false;
 
-	BuildGeometryBuffers();
-	BuildFX();
-	BuildVertexLayout();
+	BuildGeometryBuffers(); // 정점, 인덱스 정의
+	BuildFX(); // 쉐이더
+	BuildVertexLayout(); // 입력 배치
 
 	D3D11_RASTERIZER_DESC wireframeDesc; // 레스터화기 상태 집합을 서술
 	ZeroMemory(&wireframeDesc, sizeof(D3D11_RASTERIZER_DESC));
@@ -212,11 +215,11 @@ void ShapesApp::DrawScene()
 	md3dImmediateContext->IASetVertexBuffers(0, 1, &mVB, &stride, &offset);
 	md3dImmediateContext->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_UINT, 0);
 
-	// Set constants
+	// 상수들 설정
 
-	XMMATRIX view = XMLoadFloat4x4(&mView);
-	XMMATRIX proj = XMLoadFloat4x4(&mProj);
-	XMMATRIX viewProj = view * proj;
+	XMMATRIX view = XMLoadFloat4x4(&mView); // 시야
+	XMMATRIX proj = XMLoadFloat4x4(&mProj); // 투영
+	XMMATRIX viewProj = view * proj; // 시야, 투영 통합
 
 	D3DX11_TECHNIQUE_DESC techDesc;
 	mTech->GetDesc(&techDesc);
@@ -227,8 +230,9 @@ void ShapesApp::DrawScene()
 		// 격자 그리기
 		XMMATRIX world = XMLoadFloat4x4(&mGridWorld);		
 		buf = world * viewProj;
-		mfxWorldViewProj->SetMatrix(reinterpret_cast<float*>(&buf));
+		mfxWorldViewProj->SetMatrix(reinterpret_cast<float*>(&buf)); // 월드 변환, 뷰 변환을 합친 최종 행렬로 위치 설정
 		mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
+		// 격자의 인덱스 수, 격자 인덱스 시작 위치, 격자 정점의 시작 부분 ---> 이렇게 3개를 알아야 통합 인덱스 리스트를 참조하여 원활히 그려짐
 		md3dImmediateContext->DrawIndexed(mGridIndexCount, mGridIndexOffset, mGridVertexOffset);
 
 		// 상자 그리기
@@ -246,9 +250,9 @@ void ShapesApp::DrawScene()
 		md3dImmediateContext->DrawIndexed(mSphereIndexCount, mSphereIndexOffset, mSphereVertexOffset);
 
 		// 원기둥 그리기
-		for (int i = 0; i < 10; ++i)
+		for (int i = 0; i < 10; ++i) // 10개 그려야한다.
 		{
-			world = XMLoadFloat4x4(&mCylWorld[i]);
+			world = XMLoadFloat4x4(&mCylWorld[i]); // 저장해둔 S,R 행렬 mCylWorld[i] 획득
 			buf = world * viewProj;
 			mfxWorldViewProj->SetMatrix(reinterpret_cast<float*>(&buf));
 			mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
@@ -321,6 +325,7 @@ void ShapesApp::BuildGeometryBuffers()
 	GeometryGenerator::MeshData sphere;
 	GeometryGenerator::MeshData cylinder;
 
+	// 각종 도형들 정점, 인덱스 배열 생성해서 MeshData에 담음
 	GeometryGenerator geoGen;
 	geoGen.CreateBox(1.0f, 1.0f, 1.0f, box);
 	geoGen.CreateGrid(20.0f, 30.0f, 60, 40, grid);
@@ -328,70 +333,77 @@ void ShapesApp::BuildGeometryBuffers()
 	//geoGen.CreateGeosphere(0.5f, 2, sphere);
 	geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20, cylinder);
 
-	// Cache the vertex offsets to each object in the concatenated vertex buffer.
-	mBoxVertexOffset = 0;
-	mGridVertexOffset = box.Vertices.size();
-	mSphereVertexOffset = mGridVertexOffset + grid.Vertices.size();
-	mCylinderVertexOffset = mSphereVertexOffset + sphere.Vertices.size();
+	// 연결된 정점 버퍼 안에서 각 물체의 정점 오프셋을 저장해 둔다.
+	mBoxVertexOffset = 0; // 처음 생성한 박스는 처음 부터
+	mGridVertexOffset = box.Vertices.size(); // 박스 이후니까 박스 정점 후에 등장
+	mSphereVertexOffset = mGridVertexOffset + grid.Vertices.size(); // 박스와 격자 후에 등장
+	mCylinderVertexOffset = mSphereVertexOffset + sphere.Vertices.size(); // 박스와 격자와 구 후에 등장
 
-	// Cache the index count of each object.
+	// 각 물체의 인덱스 개수를 저장해 둔다.
 	mBoxIndexCount = box.Indices.size();
 	mGridIndexCount = grid.Indices.size();
 	mSphereIndexCount = sphere.Indices.size();
 	mCylinderIndexCount = cylinder.Indices.size();
 
-	// Cache the starting index for each object in the concatenated index buffer.
+	// 연결된 인덱스 버퍼에서의 각 물체의 시작 부분을 저장해 둔다. 정점과 같은 원리
 	mBoxIndexOffset = 0;
 	mGridIndexOffset = mBoxIndexCount;
 	mSphereIndexOffset = mGridIndexOffset + mGridIndexCount;
 	mCylinderIndexOffset = mSphereIndexOffset + mSphereIndexCount;
 
-	UINT totalVertexCount =
+	UINT totalVertexCount = // 전체 정점 개수
 		box.Vertices.size() +
 		grid.Vertices.size() +
 		sphere.Vertices.size() +
 		cylinder.Vertices.size();
 
-	UINT totalIndexCount =
+	UINT totalIndexCount = // 전체 인덱스 개수
 		mBoxIndexCount +
 		mGridIndexCount +
 		mSphereIndexCount +
 		mCylinderIndexCount;
 
 	//
-	// Extract the vertex elements we are interested in and pack the
-	// vertices of all the meshes into one vertex buffer.
+	// 필요한 정점들을 추출하고, 모든 메시의 정점들을
+	// 하나의 버퍼에 넣는다.
 	//
+
+	/*
+	| 박스 인덱스 | 지면 인덱스 | 구 인덱스 | 원기둥 인덱스 |
+	정점도 마찬가지
+	*/
 
 	std::vector<Vertex> vertices(totalVertexCount);
 
-	XMFLOAT4 black(0.0f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT4 black(0.0f, 0.0f, 0.0f, 1.0f); // 색상은 검은색으로
 
-	UINT k = 0;
+	UINT k = 0; // 통합 정점을 위한 색인
+	// 박스를 통합 정점에 삽입
 	for (size_t i = 0; i < box.Vertices.size(); ++i, ++k)
 	{
 		vertices[k].Pos = box.Vertices[i].Position;
 		vertices[k].Color = black;
 	}
-
+	// 격자를 통합 정점에 삽입
 	for (size_t i = 0; i < grid.Vertices.size(); ++i, ++k)
 	{
 		vertices[k].Pos = grid.Vertices[i].Position;
 		vertices[k].Color = black;
 	}
-
+	// 구를 통합 정점에 삽입
 	for (size_t i = 0; i < sphere.Vertices.size(); ++i, ++k)
 	{
 		vertices[k].Pos = sphere.Vertices[i].Position;
 		vertices[k].Color = black;
 	}
-
+	// 원기둥을 통합 정점에 삽입
 	for (size_t i = 0; i < cylinder.Vertices.size(); ++i, ++k)
 	{
 		vertices[k].Pos = cylinder.Vertices[i].Position;
 		vertices[k].Color = black;
 	}
 
+	// 정점 속성들 지정
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
 	vbd.ByteWidth = sizeof(Vertex) * totalVertexCount;
@@ -403,7 +415,7 @@ void ShapesApp::BuildGeometryBuffers()
 	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mVB));
 
 	//
-	// Pack the indices of all the meshes into one index buffer.
+	// 모든 메시의 색인들을 하나의 색인 버퍼에 넣음
 	//
 
 	std::vector<UINT> indices;
@@ -412,6 +424,7 @@ void ShapesApp::BuildGeometryBuffers()
 	indices.insert(indices.end(), sphere.Indices.begin(), sphere.Indices.end());
 	indices.insert(indices.end(), cylinder.Indices.begin(), cylinder.Indices.end());
 
+	// 인덱스 속성들 지정
 	D3D11_BUFFER_DESC ibd;
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
 	ibd.ByteWidth = sizeof(UINT) * totalIndexCount;
@@ -444,7 +457,7 @@ void ShapesApp::BuildFX()
 
 void ShapesApp::BuildVertexLayout()
 {
-	// 정점 형태 설정
+	// 입력 배치 정의
 	D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
 	{
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
