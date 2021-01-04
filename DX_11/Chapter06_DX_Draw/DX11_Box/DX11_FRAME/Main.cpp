@@ -344,6 +344,7 @@ void BoxApp::BuildVertexLayout()
 	// , 입력 슬롯 개수(위치와 색상을 따로 쪼개서 보내려 한다면 사용)
 	// , 바이트 단위의 오프셋(색상 특성은 위치가 3개의 float형이라 12부터 시작하여 12로 지정)
 	// , 나머지 2개의 속성은 일단 고정
+	// 자세한 내용은 책 212p 참조
 	D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
 	{
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
