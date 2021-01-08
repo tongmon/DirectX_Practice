@@ -1,0 +1,11 @@
+C:\Users\tongm\source\repos\DX11_FRAME\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME_tester\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK_2\DX11_FRAME\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_Box\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_Box\Debug\Lighting.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_Prac\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_Prac\Debug\Lighting.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_Cartoon\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_Cartoon\Debug\Lighting.cso

@@ -205,7 +205,8 @@ bool LitSkullApp::Init()
 	if (!D3DApp::Init())
 		return false;
 
-	// Must init Effects first since InputLayouts depend on shader signatures.
+	// InputLayouts 이 쉐이더에 영향을 받으니
+	// 무조건 먼저 Effects를 초기화 해주어야 한다.
 	Effects::InitAll(md3dDevice); // BuildFX 함수가 이렇게 변했다. 효과 설정
 	InputLayouts::InitAll(md3dDevice); // BuildVertexLayout함수가 이렇게 변했다. 입력배치(IA) 설정
 
