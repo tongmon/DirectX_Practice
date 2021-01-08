@@ -549,8 +549,8 @@ void GeometryGenerator::CreateGrid(float width, float depth, UINT m, UINT n, Mes
 	float dx = width / (n-1);  // 격자 너비 한칸
 	float dz = depth / (m-1); // 격자 높이 한칸
 
-	float du = 1.0f / (n-1);
-	float dv = 1.0f / (m-1);
+	float du = 1.0f / (n-1); // 텍스쳐 너비 한칸
+	float dv = 1.0f / (m-1); // 텍스쳐 높이 한칸
 
 	meshData.Vertices.resize(vertexCount);
 	for(UINT i = 0; i < m; ++i)
@@ -565,6 +565,8 @@ void GeometryGenerator::CreateGrid(float width, float depth, UINT m, UINT n, Mes
 			meshData.Vertices[i*n+j].TangentU = XMFLOAT3(1.0f, 0.0f, 0.0f);
 
 			// 격자에 입힐 텍스쳐 위치 설정
+			// 일단 여기서는 0 ~ 1 범위 내의 격자로 맞추어 주지만
+			// 후에 가서 텍스쳐 변환 형렬로 확장하여 타일링 시킨다.
 			meshData.Vertices[i*n+j].TexC.x = j*du;
 			meshData.Vertices[i*n+j].TexC.y = i*dv;
 		}

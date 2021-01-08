@@ -10,13 +10,13 @@ class GameTimer
 public:
 	GameTimer();
 
-	float TotalTime()const;  // in seconds
-	float DeltaTime()const; // in seconds
+	float TotalTime()const;  // 초 단위
+	float DeltaTime()const; // 초 단위
 
-	void Reset(); // Call before message loop.
-	void Start(); // Call when unpaused.
-	void Stop();  // Call when paused.
-	void Tick();  // Call every frame.
+	void Reset(); // 메시지 루프 돌기 전에 초기화
+	void Start(); // 타이머 시작, 재시작에 호출
+	void Stop();  // 타이머 정지에 호출
+	void Tick();  // 프레임마다 호출
 
 private:
 	double mSecondsPerCount;

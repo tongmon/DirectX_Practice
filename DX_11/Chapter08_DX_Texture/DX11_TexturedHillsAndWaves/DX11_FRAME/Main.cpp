@@ -63,8 +63,8 @@ private:
 	Material mLandMat;
 	Material mWavesMat;
 
-	XMFLOAT4X4 mGrassTexTransform;
-	XMFLOAT4X4 mWaterTexTransform;
+	XMFLOAT4X4 mGrassTexTransform; // 풀 텍스쳐 확장 행렬
+	XMFLOAT4X4 mWaterTexTransform; // 물 텍스쳐 확장 행렬, 이동 행렬
 	XMFLOAT4X4 mLandWorld;
 	XMFLOAT4X4 mWavesWorld;
 
@@ -185,6 +185,7 @@ void TexturedHillsAndWavesApp::OnResize()
 	XMStoreFloat4x4(&mProj, P);
 }
 
+// dt는 totalTime이 아닌 시간 변위를 의미하는 deltaTime이다.
 void TexturedHillsAndWavesApp::UpdateScene(float dt)
 {
 	// Convert Spherical to Cartesian coordinates.
@@ -244,15 +245,15 @@ void TexturedHillsAndWavesApp::UpdateScene(float dt)
 	// Animate water texture coordinates.
 	//
 
-	// Tile water texture.
+	// 물 텍스쳐 5x5 타일링
 	XMMATRIX wavesScale = XMMatrixScaling(5.0f, 5.0f, 0.0f);
 
-	// Translate texture over time.
+	// 물 텍스쳐 이동 행렬, 시간 * 속력 = 거리
 	mWaterTexOffset.y += 0.05f * dt;
 	mWaterTexOffset.x += 0.1f * dt;
 	XMMATRIX wavesOffset = XMMatrixTranslation(mWaterTexOffset.x, mWaterTexOffset.y, 0.0f);
 
-	// Combine scale and translation.
+	// S * R 행렬변환 혼합
 	XMStoreFloat4x4(&mWaterTexTransform, wavesScale * wavesOffset);
 }
 
@@ -295,7 +296,7 @@ void TexturedHillsAndWavesApp::DrawScene()
 		Effects::BasicFX->SetWorld(world);
 		Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
 		Effects::BasicFX->SetWorldViewProj(worldViewProj);
-		Effects::BasicFX->SetTexTransform(XMLoadFloat4x4(&mGrassTexTransform));
+		Effects::BasicFX->SetTexTransform(XMLoadFloat4x4(&mGrassTexTransform)); // 텍스쳐 변환 행렬
 		Effects::BasicFX->SetMaterial(mLandMat);
 		Effects::BasicFX->SetDiffuseMap(mGrassMapSRV);
 
@@ -316,7 +317,7 @@ void TexturedHillsAndWavesApp::DrawScene()
 		Effects::BasicFX->SetWorld(world);
 		Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
 		Effects::BasicFX->SetWorldViewProj(worldViewProj);
-		Effects::BasicFX->SetTexTransform(XMLoadFloat4x4(&mWaterTexTransform));
+		Effects::BasicFX->SetTexTransform(XMLoadFloat4x4(&mWaterTexTransform)); // 텍스쳐 변환 행렬
 		Effects::BasicFX->SetMaterial(mWavesMat);
 		Effects::BasicFX->SetDiffuseMap(mWavesMapSRV);
 

@@ -10,8 +10,8 @@ GameTimer::GameTimer()
   mPausedTime(0), mPrevTime(0), mCurrTime(0), mStopped(false)
 {
 	__int64 countsPerSec;
-	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
-	mSecondsPerCount = 1.0 / (double)countsPerSec;
+	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec); // 초당 진동수, CPU 클럭
+	mSecondsPerCount = 1.0 / (double)countsPerSec; // 진동 한번에 걸리는 시간, 주기
 }
 
 // Returns the total time elapsed since Reset() was called, NOT counting any
@@ -58,8 +58,8 @@ void GameTimer::Reset()
 	__int64 currTime;
 	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
 
-	mBaseTime = currTime;
-	mPrevTime = currTime;
+	mBaseTime = currTime; // 게임 시작 초창기 시간
+	mPrevTime = currTime; // 초기화
 	mStopTime = 0;
 	mStopped  = false;
 }
@@ -78,7 +78,7 @@ void GameTimer::Start()
 
 	if( mStopped )
 	{
-		mPausedTime += (startTime - mStopTime);	
+		mPausedTime += (startTime - mStopTime);	// 멈췄던 시간들이 누적된다.
 
 		mPrevTime = startTime;
 		mStopTime = 0;
@@ -98,6 +98,7 @@ void GameTimer::Stop()
 	}
 }
 
+// 매 프레임마다 Run함수에서 호출
 void GameTimer::Tick()
 {
 	if( mStopped )
@@ -106,19 +107,21 @@ void GameTimer::Tick()
 		return;
 	}
 
+	// 이번 프레임의 시간을 얻는다.
 	__int64 currTime;
-	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
-	mCurrTime = currTime;
+	QueryPerformanceCounter((LARGE_INTEGER*)&currTime); // 진동수를 얻는 함수
+	mCurrTime = currTime; // 얘는 진동수이고 시간이 아니다. 따라서 시간으로 만드려면 mSecondsPerCount 얘를 곱해주어야 한다.
 
-	// Time difference between this frame and the previous.
+	// 이 시간과 이전 프레임의 시간 차이를 구한다.
 	mDeltaTime = (mCurrTime - mPrevTime)*mSecondsPerCount;
 
-	// Prepare for next frame.
+	// 다음 프레임을 준비
 	mPrevTime = mCurrTime;
 
 	// Force nonnegative.  The DXSDK's CDXUTTimer mentions that if the 
 	// processor goes into a power save mode or we get shuffled to another
 	// processor, then mDeltaTime can be negative.
+	// mDeltaTime이 음수가 될 수 있기에 이를 방지
 	if(mDeltaTime < 0.0)
 	{
 		mDeltaTime = 0.0;
