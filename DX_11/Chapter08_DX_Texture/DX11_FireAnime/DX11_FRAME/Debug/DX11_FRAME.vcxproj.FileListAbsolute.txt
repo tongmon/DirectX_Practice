@@ -1,0 +1,11 @@
+C:\Users\tongm\source\repos\DX11_FRAME\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME_tester\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK_2\DX11_FRAME\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter08_DX_Texture\DX11_Crate\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter08_DX_Texture\DX11_Crate\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter08_DX_Texture\DX11_Prac\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter08_DX_Texture\DX11_Prac\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter08_DX_Texture\DX11_FireAnime\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter08_DX_Texture\DX11_FireAnime\Debug\LightHelper.cso
