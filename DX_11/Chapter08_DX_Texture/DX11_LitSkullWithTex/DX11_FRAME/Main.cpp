@@ -1,17 +1,11 @@
-//***************************************************************************************
-// LitSkullDemo.cpp by Frank Luna (C) 2011 All Rights Reserved.
-//
-// Demonstrates lighting using 3 directional lights.
-//
-// Controls:
-//		Hold the left mouse button down and move the mouse to rotate.
-//      Hold the right mouse button down to zoom in and out.
-//      Press '1', '2', '3' for 1, 2, or 3 lights enabled.
-//
-//***************************************************************************************
-
-// 이 예제부터 정점 입력 배치 설정과 해제는 Vertex.h와 Vertex.cpp 에서 다룬다.
-// 또 FX 관련 설정과 해제는 Effects.h Effects.cpp 에서 다룬다. 
+// 해골 라이팅 예제에 텍스쳐를 입히는 연습
+// 쉬울줄 알았으나 해골이 자꾸 검은색으로 출력이되어
+// 좀 난감하였다.
+// 문제가 뭐였냐면 해골은 텍스쳐가 없는데 내가 텍스쳐가 있는
+// 옵션의 쉐이딩을 같이 적용하고 있었다.
+// 그래서 쉐이딩 패스를 텍스쳐를 입힌 도형들하고 해골을
+// 따로 나누어 돌려 문제를 해결하였다.
+// 이 연습을 통해 tech 패스를 나누어 문제를 해결하는 기법을 알고간다.
 
 #include "d3dApp.h"
 #include "d3dx11Effect.h"
@@ -221,14 +215,15 @@ bool LitSkullApp::Init()
 	Effects::InitAll(md3dDevice); // BuildFX 함수가 이렇게 변했다. 효과 설정
 	InputLayouts::InitAll(md3dDevice); // BuildVertexLayout함수가 이렇게 변했다. 입력배치(IA) 설정
 
+	// 각종 텍스쳐 파일 할당 초기화
 	HR(D3DX11CreateShaderResourceViewFromFile(md3dDevice,
-		L"Textures/darkbrickdxt1.dds", 0, 0, &mDiffuseFloorSRV, 0));
+		L"Textures/floor.dds", 0, 0, &mDiffuseFloorSRV, 0));
 	HR(D3DX11CreateShaderResourceViewFromFile(md3dDevice,
-		L"Textures/WoodCrate02.dds", 0, 0, &mDiffuseBoxSRV, 0));
+		L"Textures/checkboard.dds", 0, 0, &mDiffuseBoxSRV, 0));
 	HR(D3DX11CreateShaderResourceViewFromFile(md3dDevice,
-		L"Textures/water2.dds", 0, 0, &mDiffuseCylinderSRV, 0));
+		L"Textures/bricks.dds", 0, 0, &mDiffuseCylinderSRV, 0));
 	HR(D3DX11CreateShaderResourceViewFromFile(md3dDevice,
-		L"Textures/flare.dds", 0, 0, &mDiffuseSpereSRV, 0));
+		L"Textures/stone.dds", 0, 0, &mDiffuseSpereSRV, 0));
 
 	BuildShapeGeometryBuffers();
 	BuildSkullGeometryBuffers();
@@ -297,22 +292,112 @@ void LitSkullApp::DrawScene()
 	Effects::BasicFX->SetEyePosW(mEyePosW);
 
 	// 어떤 테크닉을 선택하여 지정할 것인지 결정
-	ID3DX11EffectTechnique* activeTech = Effects::BasicFX->Light0TexTech;
+	ID3DX11EffectTechnique* activeTech = Effects::BasicFX->Light1TexTech;
+	// 해골은 따로 텍스쳐 지정을 안하기 때문에 텍스쳐가 없는 버전의 패스를 실행한다.
+	ID3DX11EffectTechnique* SkullTech = Effects::BasicFX->Light1Tech;
 	switch (mLightCount)
 	{
 	case 1:
 		activeTech = Effects::BasicFX->Light1TexTech;
+		SkullTech = Effects::BasicFX->Light1Tech;
 		break;
 	case 2:
 		activeTech = Effects::BasicFX->Light2TexTech;
+		SkullTech = Effects::BasicFX->Light2Tech;
 		break;
 	case 3:
 		activeTech = Effects::BasicFX->Light3TexTech;
+		SkullTech = Effects::BasicFX->Light3Tech;
 		break;
 	}
 
 	D3DX11_TECHNIQUE_DESC techDesc;
 	activeTech->GetDesc(&techDesc);
+	for (UINT p = 0; p < techDesc.Passes; ++p)
+	{		
+		// 도형 정점 입력 배치 설정
+		md3dImmediateContext->IASetVertexBuffers(0, 1, &mShapesVB, &stride, &offset);
+		md3dImmediateContext->IASetIndexBuffer(mShapesIB, DXGI_FORMAT_R32_UINT, 0);
+
+		// 박스 그리기
+		XMMATRIX world = XMLoadFloat4x4(&mBoxWorld);
+		XMMATRIX worldInvTranspose = MathHelper::InverseTranspose(world);
+		XMMATRIX worldViewProj = world * view * proj;
+		XMMATRIX TexTrans = XMLoadFloat4x4(&mTexTransform);
+
+		Effects::BasicFX->SetWorld(world);
+		Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
+		Effects::BasicFX->SetWorldViewProj(worldViewProj);
+		Effects::BasicFX->SetMaterial(mBoxMat);
+		Effects::BasicFX->SetTexTransform(TexTrans);
+
+		// 박스 텍스쳐 설정
+		Effects::BasicFX->SetDiffuseMap(mDiffuseBoxSRV);
+
+		activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
+		md3dImmediateContext->DrawIndexed(mBoxIndexCount, mBoxIndexOffset, mBoxVertexOffset);
+
+		// 원기둥 그리기
+
+		// 원기둥 텍스쳐 설정
+		Effects::BasicFX->SetDiffuseMap(mDiffuseCylinderSRV);
+
+		for (int i = 0; i < 10; ++i)
+		{
+			world = XMLoadFloat4x4(&mCylWorld[i]);
+			worldInvTranspose = MathHelper::InverseTranspose(world);
+			worldViewProj = world * view * proj;
+
+			Effects::BasicFX->SetWorld(world);
+			Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
+			Effects::BasicFX->SetWorldViewProj(worldViewProj);
+			Effects::BasicFX->SetMaterial(mCylinderMat);
+
+			activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
+			md3dImmediateContext->DrawIndexed(mCylinderIndexCount, mCylinderIndexOffset, mCylinderVertexOffset);
+		}
+
+		// 구 그리기
+
+		// 구 텍스쳐 설정
+		Effects::BasicFX->SetDiffuseMap(mDiffuseSpereSRV);
+
+		for (int i = 0; i < 10; ++i)
+		{
+			world = XMLoadFloat4x4(&mSphereWorld[i]);
+			worldInvTranspose = MathHelper::InverseTranspose(world);
+			worldViewProj = world * view * proj;
+
+			Effects::BasicFX->SetWorld(world);
+			Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
+			Effects::BasicFX->SetWorldViewProj(worldViewProj);
+			Effects::BasicFX->SetMaterial(mSphereMat);
+
+			activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
+			md3dImmediateContext->DrawIndexed(mSphereIndexCount, mSphereIndexOffset, mSphereVertexOffset);
+		}
+
+		// 격자 그리기
+		world = XMLoadFloat4x4(&mGridWorld);
+		worldInvTranspose = MathHelper::InverseTranspose(world);
+		worldViewProj = world * view * proj;
+		TexTrans = XMMatrixScaling(8.0f, 12.0f, 0.0f); // 텍스쳐 확장, 바닥 타일 여러개 깔기
+
+		Effects::BasicFX->SetWorld(world);
+		Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
+		Effects::BasicFX->SetWorldViewProj(worldViewProj);
+		Effects::BasicFX->SetMaterial(mGridMat);
+		Effects::BasicFX->SetTexTransform(TexTrans); // 텍스쳐 변환 행렬 적용
+
+		// 바닥면 텍스쳐 설정
+		Effects::BasicFX->SetDiffuseMap(mDiffuseFloorSRV);
+
+		activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
+		md3dImmediateContext->DrawIndexed(mGridIndexCount, mGridIndexOffset, mGridVertexOffset);
+	}
+
+	// 텍스쳐 미적용 테크 패스
+	SkullTech->GetDesc(&techDesc);
 	for (UINT p = 0; p < techDesc.Passes; ++p)
 	{
 		// 해골 정점 입력 배치 설정
@@ -329,85 +414,8 @@ void LitSkullApp::DrawScene()
 		Effects::BasicFX->SetWorldViewProj(worldViewProj);
 		Effects::BasicFX->SetMaterial(mSkullMat);
 
-		activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
+		SkullTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(mSkullIndexCount, 0, 0);
-		
-		md3dImmediateContext->IASetVertexBuffers(0, 1, &mShapesVB, &stride, &offset);
-		md3dImmediateContext->IASetIndexBuffer(mShapesIB, DXGI_FORMAT_R32_UINT, 0);
-
-		// 박스 그리기
-		world = XMLoadFloat4x4(&mBoxWorld);
-		worldInvTranspose = MathHelper::InverseTranspose(world);
-		worldViewProj = world * view * proj;
-		XMMATRIX TexTrans = XMLoadFloat4x4(&mTexTransform);
-
-		Effects::BasicFX->SetWorld(world);
-		Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
-		Effects::BasicFX->SetWorldViewProj(worldViewProj);
-		Effects::BasicFX->SetMaterial(mBoxMat);
-		Effects::BasicFX->SetTexTransform(TexTrans);
-
-		// 상자 텍스쳐 설정
-		Effects::BasicFX->SetDiffuseMap(mDiffuseBoxSRV);
-
-		activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
-		md3dImmediateContext->DrawIndexed(mBoxIndexCount, mBoxIndexOffset, mBoxVertexOffset);
-
-		// 원기둥 그리기
-		for (int i = 0; i < 10; ++i)
-		{
-			world = XMLoadFloat4x4(&mCylWorld[i]);
-			worldInvTranspose = MathHelper::InverseTranspose(world);
-			worldViewProj = world * view * proj;
-
-			Effects::BasicFX->SetWorld(world);
-			Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
-			Effects::BasicFX->SetWorldViewProj(worldViewProj);
-			Effects::BasicFX->SetMaterial(mCylinderMat);
-
-			// 원기둥 텍스쳐 설정
-			Effects::BasicFX->SetDiffuseMap(mDiffuseCylinderSRV);
-
-			activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
-			md3dImmediateContext->DrawIndexed(mCylinderIndexCount, mCylinderIndexOffset, mCylinderVertexOffset);
-		}
-
-		// 구 그리기
-		for (int i = 0; i < 10; ++i)
-		{
-			world = XMLoadFloat4x4(&mSphereWorld[i]);
-			worldInvTranspose = MathHelper::InverseTranspose(world);
-			worldViewProj = world * view * proj;
-
-			Effects::BasicFX->SetWorld(world);
-			Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
-			Effects::BasicFX->SetWorldViewProj(worldViewProj);
-			Effects::BasicFX->SetMaterial(mSphereMat);
-
-			// 구 텍스쳐 설정
-			Effects::BasicFX->SetDiffuseMap(mDiffuseSpereSRV);
-
-			activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
-			md3dImmediateContext->DrawIndexed(mSphereIndexCount, mSphereIndexOffset, mSphereVertexOffset);
-		}
-
-		// 격자 그리기
-		world = XMLoadFloat4x4(&mGridWorld);
-		worldInvTranspose = MathHelper::InverseTranspose(world);
-		worldViewProj = world * view * proj;
-		TexTrans = XMMatrixScaling(10.0f, 10.0f, 0.0f); // 텍스쳐 확장, 바닥 타일 여러개 깔기
-
-		Effects::BasicFX->SetWorld(world);
-		Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
-		Effects::BasicFX->SetWorldViewProj(worldViewProj);
-		Effects::BasicFX->SetMaterial(mGridMat);
-		Effects::BasicFX->SetTexTransform(TexTrans); // 텍스쳐 변환 행렬 적용
-
-		// 구 텍스쳐 설정
-		Effects::BasicFX->SetDiffuseMap(mDiffuseFloorSRV);
-
-		activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
-		md3dImmediateContext->DrawIndexed(mGridIndexCount, mGridIndexOffset, mGridVertexOffset);
 	}
 
 	HR(mSwapChain->Present(0, 0));
@@ -591,7 +599,6 @@ void LitSkullApp::BuildSkullGeometryBuffers()
 	{
 		fin >> vertices[i].Pos.x >> vertices[i].Pos.y >> vertices[i].Pos.z;
 		fin >> vertices[i].Normal.x >> vertices[i].Normal.y >> vertices[i].Normal.z;
-		vertices[i].Tex = { 1,1 };
 	}
 
 	fin >> ignore;

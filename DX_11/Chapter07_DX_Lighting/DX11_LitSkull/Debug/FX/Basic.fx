@@ -77,11 +77,10 @@ float4 PS(VertexOut pin, uniform int gLightCount) : SV_Target
 
 	// Normalize.
 	toEye /= distToEye;
-	
+
 	//
 	// Lighting.
 	//
-
 
 	// Start with a sum of zero. 
 	float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -109,7 +108,7 @@ float4 PS(VertexOut pin, uniform int gLightCount) : SV_Target
     return litColor;
 }
 
-technique11 Light1
+technique11 Light1 // 빛 하나만 쓰는 것
 {
     pass P0
     {
@@ -119,7 +118,7 @@ technique11 Light1
     }
 }
 
-technique11 Light2
+technique11 Light2 // 빛 2개 쓰는 것
 {
     pass P0
     {
@@ -129,7 +128,7 @@ technique11 Light2
     }
 }
 
-technique11 Light3
+technique11 Light3 // 빛 3개 쓰는 것
 {
     pass P0
     {

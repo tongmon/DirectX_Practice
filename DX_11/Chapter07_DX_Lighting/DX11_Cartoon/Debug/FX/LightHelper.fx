@@ -52,20 +52,26 @@ struct Material
 
 float Cartoon_Diffuse(float Diff)
 {
+	float Ans = 0.0f;
 	if (Diff <= 0)
-		return 0.4;
-	if (0 < Diff && Diff <= 0.5)
-		return 0.6;
-	return 1.0;
+		Ans = 0.4;
+	else if (0 < Diff && Diff <= 0.5)
+		Ans = 0.6;
+	else
+		Ans = 1.0;
+	return Ans;
 }
 
 float Cartoon_Specular(float Spec)
 {
+	float Ans = 0.0f;
 	if (Spec <= 0.1)
-		return 0.4;
-	if (0.1 < Spec && Spec <= 0.8)
-		return 0.5;
-	return 0.8;
+		Ans = 0.4;
+	else if (0.1 < Spec && Spec <= 0.8)
+		Ans = 0.5;
+	else
+		Ans = 0.8;
+	return Ans;
 }
 
 //---------------------------------------------------------------------------------------
@@ -101,6 +107,9 @@ void ComputeDirectionalLight(Material mat, DirectionalLight L,
 	{
 		float3 v         = reflect(-lightVec, normal); // 반사 벡터
 		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w); // 반영광 세기 계산
+
+		diffuseFactor = Cartoon_Diffuse(diffuseFactor);
+		specFactor = Cartoon_Specular(specFactor);
 					
 		diffuse = diffuseFactor * mat.Diffuse * L.Diffuse; // 빛 세기를 고려하여 색상 계산
 		spec    = specFactor * mat.Specular * L.Specular; // 반영광 세기 고려해서 반영광 색상 계산
@@ -205,6 +214,9 @@ void ComputeSpotLight(Material mat, SpotLight L, float3 pos, float3 normal, floa
 	{
 		float3 v         = reflect(-lightVec, normal);
 		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
+
+		diffuseFactor = Cartoon_Diffuse(diffuseFactor);
+		specFactor = Cartoon_Specular(specFactor);
 					
 		diffuse = diffuseFactor * mat.Diffuse * L.Diffuse;
 		spec    = specFactor * mat.Specular * L.Specular;

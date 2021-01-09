@@ -82,56 +82,56 @@ float4 PS(VertexOut pin, uniform int gLightCount, uniform bool gUseTexure) : SV_
 	// Interpolating normal can unnormalize it, so normalize it.
 	pin.NormalW = normalize(pin.NormalW);
 
-// The toEye vector is used in lighting.
-float3 toEye = gEyePosW - pin.PosW;
+	// The toEye vector is used in lighting.
+	float3 toEye = gEyePosW - pin.PosW;
 
-// Cache the distance to the eye from this surface point.
-float distToEye = length(toEye);
+	// Cache the distance to the eye from this surface point.
+	float distToEye = length(toEye);
 
-// Normalize.
-toEye /= distToEye;
+	// Normalize.
+	toEye /= distToEye;
 
-// 기본 텍스처 색상은 곱셈의 항등원
-float4 texColor = float4(1, 1, 1, 1);
-if (gUseTexure)
-{
-	// 텍스쳐에서 표본을 추출한다.
-	texColor = gDiffuseMap.Sample(samAnisotropic, pin.Tex);
-}
-
-//
-// Lighting.
-//
-
-float4 litColor = texColor;
-if (gLightCount > 0)
-{
-	// Start with a sum of zero. 
-	float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	float4 spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-	// Sum the light contribution from each light source.  
-	[unroll]
-	for (int i = 0; i < gLightCount; ++i)
+	// 기본 텍스처 색상은 곱셈의 항등원
+	float4 texColor = float4(1, 1, 1, 1);
+	if (gUseTexure)
 	{
-		float4 A, D, S;
-		ComputeDirectionalLight(gMaterial, gDirLights[i], pin.NormalW, toEye,
-			A, D, S);
-
-		ambient += A;
-		diffuse += D;
-		spec += S;
+		// 텍스쳐에서 표본을 추출한다.
+		texColor = gDiffuseMap.Sample(samAnisotropic, pin.Tex);
 	}
 
-	// 변조 후 가산, 이러한 방법이 일반적
-	litColor = texColor * (ambient + diffuse) + spec;
-}
+	//
+	// Lighting.
+	//
 
-// 일반적으로 분산광 재질의 알파 성분을 최종 알파 값으로 사용한다.
-litColor.a = gMaterial.Diffuse.a * texColor.a;
+	float4 litColor = texColor;
+	if (gLightCount > 0)
+	{
+		// Start with a sum of zero. 
+		float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
+		float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
+		float4 spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-return litColor;
+		// Sum the light contribution from each light source.  
+		[unroll]
+		for (int i = 0; i < gLightCount; ++i)
+		{
+			float4 A, D, S;
+			ComputeDirectionalLight(gMaterial, gDirLights[i], pin.NormalW, toEye,
+				A, D, S);
+
+			ambient += A;
+			diffuse += D;
+			spec += S;
+		}
+
+		// 변조 후 가산, 이러한 방법이 일반적
+		litColor = texColor * (ambient + diffuse) + spec;
+	}
+
+	// 일반적으로 분산광 재질의 알파 성분을 최종 알파 값으로 사용한다.
+	litColor.a = gMaterial.Diffuse.a * texColor.a;
+
+	return litColor;
 }
 
 technique11 Light1
