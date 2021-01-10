@@ -187,12 +187,6 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\FX\color.cod" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="..\FX\color.fx" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\..\Common\Camera.h" />
     <ClInclude Include="..\..\..\Common\d3dApp.h" />
     <ClInclude Include="..\..\..\Common\d3dUtil.h" />
@@ -206,6 +200,12 @@
     <ClInclude Include="..\..\..\Common\TextureMgr.h" />
     <ClInclude Include="..\..\..\Common\Waves.h" />
     <ClInclude Include="..\..\..\Common\xnacollision.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="FX\color.cod" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="FX\color.fx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
