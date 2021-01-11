@@ -13,6 +13,20 @@
 //
 //***************************************************************************************
 
+// 혼합 기법을 배워보는 예제로
+// 일단 혼합 기법이 뭘 하는 것인지 알아야 한다.
+// 혼합이라는 것이 없다면 일단 물에 잠긴 어떤 물건이 보이게 표현하기 힘들다.
+// 왜냐면 Z-버퍼에 의해서 물 뒤에 있으니까 가려져버린다.
+// 이를 없애려면 물의 색상과 물건의 색상을 조합하여 적절한 색상의 픽셀을
+// 화면에 보여줌으로써 물에 잠긴듯한 효과를 줄 수 있는데 이게 바로 혼합이다.
+// 정확히는 후면 버퍼에 이미 기록되어있는 레스터화 되어 있는 픽셀에 레스화화할 픽셀을 혼합하는 것이다.
+// 이는 픽셀마다 진행되는 절차기에 추가적인 부담이 가해진다.
+// 유리컵을 예로 들어보자.
+// 이 유리컵의 투명도는 75%라 하면 이는 이 유리컵의 불투명도가 25%라는 것을 의미한다.
+// 유리컵 뒤에 있는 물체는 원본 색상이 100%라고 하면 75%의 비율로 그려지면서 
+// 유리컵의 25%(불투명도) 색상도 추가가 되어야 한다.
+// 이를 고려하는 것이 혼합 기법이다.
+
 #include "d3dApp.h"
 #include "d3dx11Effect.h"
 #include "GeometryGenerator.h"
@@ -33,9 +47,9 @@
 
 enum RenderOptions
 {
-	Lighting = 0,
-	Textures = 1,
-	TexturesAndFog = 2
+	Lighting = 0, // 불빛만 렌더
+	Textures = 1, // 텍스쳐도 렌더
+	TexturesAndFog = 2 // 텍스쳐와 안개까지 모두 렌더
 };
 
 class BlendApp : public D3DApp
@@ -94,7 +108,7 @@ private:
 
 	XMFLOAT2 mWaterTexOffset;
 
-	RenderOptions mRenderOptions;
+	RenderOptions mRenderOptions; // 렌더링 옵션 enum
 
 	XMFLOAT3 mEyePosW;
 
@@ -359,7 +373,8 @@ void BlendApp::DrawScene()
 	// Draw the box with alpha clipping.
 	// 
 
-	boxTech->GetDesc(&techDesc);
+	boxTech->GetDesc(&techDesc); 
+	// 혼합을 사용하지 않는 박스부터 그려준다.
 	for (UINT p = 0; p < techDesc.Passes; ++p)
 	{
 		md3dImmediateContext->IASetVertexBuffers(0, 1, &mBoxVB, &stride, &offset);
@@ -431,7 +446,12 @@ void BlendApp::DrawScene()
 		Effects::BasicFX->SetMaterial(mWavesMat);
 		Effects::BasicFX->SetDiffuseMap(mWavesMapSRV);
 
+		// OMSetBlendState는 혼합 상태 객체를 출력 병합기에 묶는 역할을 해준다.
+		// 장치에 적용할 혼합 상태 객체를 가리키는 포인터
+		// 부동소수점 값 네 개의 배열을 가리키는 포인터로, 그 값들은 하나의 RGBA 색상 벡터를 정의한다. 추후에 혼합 계수로 쓰인다.
+		// 특정 표본 비활성화 할 경우 특정 비트를 끄는 방식으로 사용, 32개의 표본을 지원, 보통 기본값 0xffffffff 사용
 		md3dImmediateContext->OMSetBlendState(RenderStates::TransparentBS, blendFactor, 0xffffffff);
+
 		landAndWavesTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(3 * mWaves.TriangleCount(), 0, 0);
 

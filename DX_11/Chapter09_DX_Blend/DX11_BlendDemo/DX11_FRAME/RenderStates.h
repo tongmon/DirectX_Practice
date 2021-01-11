@@ -15,9 +15,11 @@ public:
 	static void InitAll(ID3D11Device* device);
 	static void DestroyAll();
 
+	// 레스터화기 단계 종류 2개
 	static ID3D11RasterizerState* WireframeRS;
 	static ID3D11RasterizerState* NoCullRS;
 
+	// 혼합 상태 종류 2개
 	static ID3D11BlendState* AlphaToCoverageBS;
 	static ID3D11BlendState* TransparentBS;
 };
