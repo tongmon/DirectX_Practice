@@ -344,24 +344,28 @@ void BlendApp::DrawScene()
 	// Set per frame constants.
 	Effects::BasicFX->SetDirLights(mDirLights);
 	Effects::BasicFX->SetEyePosW(mEyePosW);
-	Effects::BasicFX->SetFogColor(Colors::Silver);
-	Effects::BasicFX->SetFogStart(15.0f);
-	Effects::BasicFX->SetFogRange(175.0f);
 
+	// 각종 안개 설정
+	Effects::BasicFX->SetFogColor(Colors::Silver);
+	Effects::BasicFX->SetFogStart(15.0f); // 시점에서 15 거리 부터 안개 생성
+	Effects::BasicFX->SetFogRange(175.0f); // 안개 생성 지점부터 175 거리까지 서서히 안개 생성
+
+	// 이 예제에서 박스는 투명 알파값 처리할 것이 있어서 테크 패스를
+	// 지면, 물과 분리하여 다룬다.
 	ID3DX11EffectTechnique* boxTech = NULL;
 	ID3DX11EffectTechnique* landAndWavesTech = NULL;
 
 	switch (mRenderOptions)
 	{
-	case RenderOptions::Lighting:
+	case RenderOptions::Lighting: // 텍스쳐도 없이 빛만
 		boxTech = Effects::BasicFX->Light3Tech;
 		landAndWavesTech = Effects::BasicFX->Light3Tech;
 		break;
-	case RenderOptions::Textures:
+	case RenderOptions::Textures: // 빛 + 텍스쳐
 		boxTech = Effects::BasicFX->Light3TexAlphaClipTech;
 		landAndWavesTech = Effects::BasicFX->Light3TexTech;
 		break;
-	case RenderOptions::TexturesAndFog:
+	case RenderOptions::TexturesAndFog: // 빛 + 텍스쳐 + 안개
 		boxTech = Effects::BasicFX->Light3TexAlphaClipFogTech;
 		landAndWavesTech = Effects::BasicFX->Light3TexFogTech;
 		break;
@@ -392,23 +396,25 @@ void BlendApp::DrawScene()
 		Effects::BasicFX->SetMaterial(mBoxMat);
 		Effects::BasicFX->SetDiffuseMap(mBoxMapSRV);
 
-		md3dImmediateContext->RSSetState(RenderStates::NoCullRS);
+		md3dImmediateContext->RSSetState(RenderStates::NoCullRS); // 레스터화기 종류 지정
 		boxTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(36, 0, 0);
 
-		// Restore default render state.
+		// 레스터화기 단계 초기화
 		md3dImmediateContext->RSSetState(0);
 	}
 
 	//
-	// Draw the hills and water with texture and fog (no alpha clipping needed).
+	// 산과 물을 출력, 알파값 필셀 폐기가 불필요
 	//
 
 	landAndWavesTech->GetDesc(&techDesc);
 	for (UINT p = 0; p < techDesc.Passes; ++p)
 	{
 		//
-		// Draw the hills.
+		// 산을 먼저 그린다.
+		// 물은 혼합을 사용하게 되는 물체이기에 후면 버퍼에 미리
+		// 상자와 산을 그려놓고 혼합을 진행해야 원하는 결과를 얻을 수 있다.
 		//
 		md3dImmediateContext->IASetVertexBuffers(0, 1, &mLandVB, &stride, &offset);
 		md3dImmediateContext->IASetIndexBuffer(mLandIB, DXGI_FORMAT_R32_UINT, 0);
@@ -429,7 +435,7 @@ void BlendApp::DrawScene()
 		md3dImmediateContext->DrawIndexed(mLandIndexCount, 0, 0);
 
 		//
-		// Draw the waves.
+		// 물 그리기
 		//
 		md3dImmediateContext->IASetVertexBuffers(0, 1, &mWavesVB, &stride, &offset);
 		md3dImmediateContext->IASetIndexBuffer(mWavesIB, DXGI_FORMAT_R32_UINT, 0);
@@ -455,7 +461,7 @@ void BlendApp::DrawScene()
 		landAndWavesTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(3 * mWaves.TriangleCount(), 0, 0);
 
-		// Restore default blend state
+		// 혼합 상태 초기화
 		md3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff);
 	}
 

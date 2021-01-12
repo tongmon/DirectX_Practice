@@ -80,7 +80,7 @@ void RenderStates::InitAll(ID3D11Device* device)
 	transparentDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA; // 원본 픽셀의 투명도, 이 투명도 만큼 뒤에 가려지는 대상 픽셀의 색이 표현됨
 	transparentDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
 	transparentDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	transparentDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	transparentDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO; // D3D11_BLEND_ZERO, D3D11_BLEND_ONE
 	transparentDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	transparentDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
