@@ -19,7 +19,7 @@ ID3D11DepthStencilState* RenderStates::NoDoubleBlendDSS = 0;
 void RenderStates::InitAll(ID3D11Device* device)
 {
 	//
-	// WireframeRS
+	// 뼈대 그리는 레스터화기 상태
 	//
 	D3D11_RASTERIZER_DESC wireframeDesc;
 	ZeroMemory(&wireframeDesc, sizeof(D3D11_RASTERIZER_DESC));
@@ -31,7 +31,7 @@ void RenderStates::InitAll(ID3D11Device* device)
 	HR(device->CreateRasterizerState(&wireframeDesc, &WireframeRS));
 
 	//
-	// NoCullRS
+	// 통상적인 레스터화기 상태, 후면 제거는 안했다.
 	//
 	D3D11_RASTERIZER_DESC noCullDesc;
 	ZeroMemory(&noCullDesc, sizeof(D3D11_RASTERIZER_DESC));
@@ -43,12 +43,12 @@ void RenderStates::InitAll(ID3D11Device* device)
 	HR(device->CreateRasterizerState(&noCullDesc, &NoCullRS));
 
 	//
-	// CullClockwiseRS
+	// 거울 반대변에 그려질 물건에 대한 레스터화기 상태
 	//
 
-	// Note: Define such that we still cull backfaces by making front faces CCW.
-	// If we did not cull backfaces, then we have to worry about the BackFace
-	// property in the D3D11_DEPTH_STENCIL_DESC.
+	// 주의: 반시계 방향을 전면 삼각형으로 간주해서 후면 삼각형들을 선별한다.
+	// 후면 선별을 비활성화하는 것이 아님을 주의할 것.
+	// 후면 선별을 하지 않는다면 D3D11_DEPTH_STENCIL_DESC의 BackFace 속성에 신경을 써야 한다.
 	D3D11_RASTERIZER_DESC cullClockwiseDesc;
 	ZeroMemory(&cullClockwiseDesc, sizeof(D3D11_RASTERIZER_DESC));
 	cullClockwiseDesc.FillMode = D3D11_FILL_SOLID;
@@ -71,7 +71,7 @@ void RenderStates::InitAll(ID3D11Device* device)
 	HR(device->CreateBlendState(&alphaToCoverageDesc, &AlphaToCoverageBS));
 
 	//
-	// TransparentBS
+	// 투명 혼합 상태
 	//
 
 	D3D11_BLEND_DESC transparentDesc = { 0 };
@@ -109,7 +109,12 @@ void RenderStates::InitAll(ID3D11Device* device)
 	HR(device->CreateBlendState(&noRenderTargetWritesDesc, &NoRenderTargetWritesBS));
 
 	//
-	// MarkMirrorDSS
+	// 거울 깊이, 스텐실 버퍼 상태 설정
+	// 거울은 일단 깊이 버퍼 쓰기, 후면 버퍼 쓰기를 비활성화하고 오직 스텐실에만 기록되게 해야한다.
+	// 스텐실 이외의 쓰기 기능을 끄는 이유는 반대편에서 비출 해골을 거울에 비친 것마냥 보여야 하기 때문이다.
+	// 거울이 스텐실 버퍼에 렌더링 될 때는 스텐실 버퍼 판정이 항상 성공하도록 
+	// D3D11_COMPARISON_ALWAYS 이 설정을 해야한다.
+	// 즉, 깊이 버퍼 판정에 따라서 스텐실 버퍼 값이 0, 1 둘 중에 하나가 된다.
 	//
 
 	D3D11_DEPTH_STENCIL_DESC mirrorDesc; // 깊이, 스텐실 상태 집합
@@ -127,7 +132,6 @@ void RenderStates::InitAll(ID3D11Device* device)
 	mirrorDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS; // 스텐실 판정 비교 함수를 결정하는 멤버
 
 	// 후면 삼각형에 대한 스텐실 버퍼 적용 방식 설정, 보통 후면 제거를 하기에 안쓰인다.
-	// We are not rendering backfacing polygons, so these settings do not matter.
 	mirrorDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	mirrorDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
 	mirrorDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
@@ -136,7 +140,8 @@ void RenderStates::InitAll(ID3D11Device* device)
 	HR(device->CreateDepthStencilState(&mirrorDesc, &MarkMirrorDSS)); // 위와 같이 설정된 스텐실깊이 상태를 MarkMirrorDSS에 담아둔다.
 
 	//
-	// DrawReflectionDSS
+	// 거울에 반사된 물체에 대한 깊이, 스텐실 상태 설정
+	// 이 상태를 쓰는 시점에서 스텐실 버퍼는 거울 영역에 1로 표시되어 있다.
 	//
 
 	D3D11_DEPTH_STENCIL_DESC drawReflectionDesc;
@@ -150,7 +155,7 @@ void RenderStates::InitAll(ID3D11Device* device)
 	drawReflectionDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	drawReflectionDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
 	drawReflectionDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	drawReflectionDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+	drawReflectionDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL; // 스텐실이 1이여야 정상적으로 그려진다.
 
 	// We are not rendering backfacing polygons, so these settings do not matter.
 	drawReflectionDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
@@ -177,7 +182,7 @@ void RenderStates::InitAll(ID3D11Device* device)
 	noDoubleBlendDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_INCR;
 	noDoubleBlendDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
 
-	// We are not rendering backfacing polygons, so these settings do not matter.
+	// 후면 삼각형에 대한 스텐실 버퍼 적용 방식 설정, 보통 후면 제거를 하기에 안쓰인다.
 	noDoubleBlendDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	noDoubleBlendDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
 	noDoubleBlendDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_INCR;

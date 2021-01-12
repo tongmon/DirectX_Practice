@@ -16,6 +16,11 @@
 //
 //***************************************************************************************
 
+// 스텐실 버퍼를 이용하여 특정 영역을 그리지 않는 것을 배우는 예제이다.
+// 스텐실 버퍼라는 것은 후면, 깊이 버퍼와 같은 해상도를 가지는 버퍼이고
+// 일정 부분 렌더링을 막는 용도로 쓰인다.
+// 일정 부분 렌더링을 막는 용도로는 거울, 그림자 등이 있다.
+
 #include "d3dApp.h"
 #include "d3dx11Effect.h"
 #include "GeometryGenerator.h"
@@ -312,7 +317,7 @@ void MirrorApp::DrawScene()
 	D3DX11_TECHNIQUE_DESC techDesc;
 
 	//
-	// Draw the floor and walls to the back buffer as normal.
+	// 벽과 지면을 일반적인 방식으로 그린다.
 	//
 
 	activeTech->GetDesc(&techDesc);
@@ -345,7 +350,7 @@ void MirrorApp::DrawScene()
 	}
 
 	//
-	// Draw the skull to the back buffer as normal.
+	// 해골도 일반적인 방식으로 그려준다.
 	//
 
 	activeSkullTech->GetDesc(&techDesc);
@@ -370,7 +375,13 @@ void MirrorApp::DrawScene()
 	}
 
 	//
-	// Draw the mirror to stencil buffer only.
+	// 거울을 스텐실 버퍼에만 그려준다.
+	// 거울의 가시적 부분에 해당하는 스텐실 항목들을 1로 설정하여
+	// 결과적으로 거울 픽셀들을 스텐실 버퍼에 표시해 두는 효과를 낸다.
+	// 주의할 점은 거울을 제일 마지막에 그려야하는 것이다.
+	// 두개골을 먼저 렌더링해서 두개골의 깊이 값들이 깊이 버퍼에 기록되어 있어야 거울을 렌더링할 때
+	// 두개골에 가려진 부분이 깊이 판정에 실패해서 스텐실 버퍼가 갱신되지 않는다.
+	// 그렇게 하지 않으면 반사상이 해골을 뚫고 출력된다.
 	//
 
 	activeTech->GetDesc(&techDesc);
@@ -390,27 +401,30 @@ void MirrorApp::DrawScene()
 		Effects::BasicFX->SetWorldViewProj(worldViewProj);
 		Effects::BasicFX->SetTexTransform(XMMatrixIdentity());
 
-		// Do not write to render target.
+		// 혼합 상태를 후면 버퍼에 기록되지 않는 상태로 설정한다.
 		// 혼합 상태 출력 병합기 단계에 묶기
 		md3dImmediateContext->OMSetBlendState(RenderStates::NoRenderTargetWritesBS, blendFactor, 0xffffffff);
 
-		// Render visible mirror pixels to stencil buffer.
-		// Do not write mirror depth to depth buffer at this point, otherwise it will occlude the reflection.
+		// 가시적인 거울 픽셀들을 스텐실 버퍼에 그린다.
+		// 이 시점에서는 깊이 버퍼 쓰기 기능을 막는데 이유는 거울에 비칠 해골을 담당하는
+		// 녀석이 거울 뒤에 있기 때문에 깊이 버퍼를 이때 써버리면 반사 효과가 막혀버려 비추는 해골이 안보인다.
+		// 거울같은 효과를 내기 위해 깊이 버퍼 쓰기를 막아야 한다.
 		// 깊이 스텐실 상태 출력 병합기 단계에 묶기, 마지막 인자는 32비트 스텐실 기준 값을 의미한다.
 		md3dImmediateContext->OMSetDepthStencilState(RenderStates::MarkMirrorDSS, 1);
 
 		pass->Apply(0, md3dImmediateContext);
-		md3dImmediateContext->Draw(6, 24);
+		md3dImmediateContext->Draw(6, 24); // 거울 그리기
 
-		// Restore states.
+		// 상태 복원
 		md3dImmediateContext->OMSetDepthStencilState(0, 0); // 스텐실 기본 상태 복원
-		md3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff);
+		md3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff); // 혼합 상태 복원
 	}
 
 
 	//
-	// Draw the skull reflection.
+	// 반사되서 보일 반대편 해골 그리기
 	//
+
 	activeSkullTech->GetDesc(&techDesc);
 	for (UINT p = 0; p < techDesc.Passes; ++p)
 	{
@@ -419,9 +433,9 @@ void MirrorApp::DrawScene()
 		md3dImmediateContext->IASetVertexBuffers(0, 1, &mSkullVB, &stride, &offset);
 		md3dImmediateContext->IASetIndexBuffer(mSkullIB, DXGI_FORMAT_R32_UINT, 0);
 
-		XMVECTOR mirrorPlane = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); // xy plane
-		XMMATRIX R = XMMatrixReflect(mirrorPlane);
-		XMMATRIX world = XMLoadFloat4x4(&mSkullWorld) * R;
+		XMVECTOR mirrorPlane = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); // xy 평면
+		XMMATRIX R = XMMatrixReflect(mirrorPlane); // 반사 행렬 획득
+		XMMATRIX world = XMLoadFloat4x4(&mSkullWorld) * R; // mSkullWorld를 대칭하는 행렬 획득
 		XMMATRIX worldInvTranspose = MathHelper::InverseTranspose(world);
 		XMMATRIX worldViewProj = world * view * proj;
 
@@ -430,7 +444,8 @@ void MirrorApp::DrawScene()
 		Effects::BasicFX->SetWorldViewProj(worldViewProj);
 		Effects::BasicFX->SetMaterial(mSkullMat);
 
-		// Cache the old light directions, and reflect the light directions.
+		// 광원도 해골과 비슷하게 반사시킨다.
+		// 원래의 빛 방향들을 보존해 두고 빛 방향들을 반사시킨다.
 		XMFLOAT3 oldLightDirections[3];
 		for (int i = 0; i < 3; ++i)
 		{
@@ -441,32 +456,36 @@ void MirrorApp::DrawScene()
 			XMStoreFloat3(&mDirLights[i].Direction, reflectedLightDir);
 		}
 
-		Effects::BasicFX->SetDirLights(mDirLights);
+		Effects::BasicFX->SetDirLights(mDirLights); // 반대 방향의 빛 잠시 설정
 
-		// Cull clockwise triangles for reflection.
+		// 거울은 모든게 반대가 되기에 기존의 시계방향이 앞면인 레스터화기 설정이 아닌
+		// 반시계방향이 앞면인 레스터화기 설정으로 진행한다. 기존의 후면 제거도 앞면 제거가 된다.
 		md3dImmediateContext->RSSetState(RenderStates::CullClockwiseRS);
 
-		// Only draw reflection into visible mirror pixels as marked by the stencil buffer. 
+		// 스텐실 버퍼 항목이 1과 같은 픽셀만 렌더링한다. 가시적인 거울 픽셀만
+		// 스텐실 버퍼 항목이 1이므로, 반사된 두개골을 거울의 가시적인 부분에만 렌더링된다.
 		md3dImmediateContext->OMSetDepthStencilState(RenderStates::DrawReflectionDSS, 1);
 		pass->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(mSkullIndexCount, 0, 0);
 
-		// Restore default states.
+		// 설정 복구
 		md3dImmediateContext->RSSetState(0);
 		md3dImmediateContext->OMSetDepthStencilState(0, 0);
 
-		// Restore light directions.
+		// 빛 방향 복구
 		for (int i = 0; i < 3; ++i)
 		{
 			mDirLights[i].Direction = oldLightDirections[i];
 		}
 
-		Effects::BasicFX->SetDirLights(mDirLights);
+		Effects::BasicFX->SetDirLights(mDirLights); // 잠시 설정했던 반대 방향 빛을 다시 원 방향으로 설정함
 	}
 
 	//
-	// Draw the mirror to the back buffer as usual but with transparency
-	// blending so the reflection shows through.
+	// 이제 제일 마지막에 실제 거울을 그린다.
+	// 실제 거울은 일반적인 방식으로 그린다.
+	// 거울을 반투명하게 해줘야 바로 전 단계에서 그렸던 반사 해골들이 출력될 수 있다.
+	// 따라서 반투명 혼합 상태를 지정해준다.
 	// 
 
 	activeTech->GetDesc(&techDesc);
@@ -488,14 +507,15 @@ void MirrorApp::DrawScene()
 		Effects::BasicFX->SetMaterial(mMirrorMat);
 		Effects::BasicFX->SetDiffuseMap(mMirrorDiffuseMapSRV);
 
-		// Mirror
+		// 거울
+		// 반투명 혼합 상태 설정
 		md3dImmediateContext->OMSetBlendState(RenderStates::TransparentBS, blendFactor, 0xffffffff);
 		pass->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->Draw(6, 24);
 	}
 
 	//
-	// Draw the skull shadow.
+	// 해골의 그림자 출력
 	//
 	activeSkullTech->GetDesc(&techDesc);
 	for (UINT p = 0; p < techDesc.Passes; ++p)
