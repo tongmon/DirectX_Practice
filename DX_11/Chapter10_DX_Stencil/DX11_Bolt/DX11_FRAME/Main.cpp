@@ -1,18 +1,14 @@
-//***************************************************************************************
-// BoltDemo.cpp by Frank Luna (C) 2011 All Rights Reserved.
-//
-// Chapter 10, Exercise 7 Solution.  Demonstrates additive blending and setting the 
-// proper depth/stencil state.
-//
-// Controls:
-//		Hold the left mouse button down and move the mouse to rotate.
-//      Hold the right mouse button down to zoom in and out.
-//
-//      Press '1' - Lighting only render mode.
-//      Press '2' - Texture render mode.
-//      Press '3' - Fog render mode.
-//
-//***************************************************************************************
+// 전기 예제
+// 전기 예제를 하면서 많이 고생을 했다....
+// 일단 하면서 의문이 든 것이 크게 3가지가 있다.
+// 1. 전기 텍스쳐 렌더링 테크 패스에 안개를 추가하면 문제가 되는 것
+// 2. 가산 혼합하면 왜 검은색 부분이 투명처럼 보이나
+// 3. 깊이 안쓰고 전기 원기둥을 그리는데 어떻게 카메라에 더 가까운 지면에 원기둥이 가려지나
+// 1번은 안개를 전기 원기둥에 추가하면 투명했던 부분이 부자연스러워지는데 이는 생각해보니 당연하다.
+// 먼저 지면, 물을 그리고 패스를 돌리면서 안개를 씌운 배경에다가 다시 안개를 또 씌우니까
+// 투명 부분에 더 짙은 안개가 끼게 된다.
+// 2번, 3번은 DrawScene 함수에다가 내가 찾은 이유를 적어놓았다.
+// 1,2,3번에 대한 궁금증이 모두 풀리게된 예제였다....
 
 #include "d3dApp.h"
 #include "d3dx11Effect.h"
@@ -62,45 +58,59 @@ private:
 	void BuildBoltGeometryBuffers(float radius, float length);
 
 private:
+	// 지면 정점, 인덱스
 	ID3D11Buffer* mLandVB;
 	ID3D11Buffer* mLandIB;
 
+	// 물 정점, 인덱스
 	ID3D11Buffer* mWavesVB;
 	ID3D11Buffer* mWavesIB;
 
+	// 전기 원기둥 정점, 인덱스
 	ID3D11Buffer* mBoltCylinderVB;
 	ID3D11Buffer* mBoltCylinderIB;
 
+	// 텍스쳐 리소스 할당
 	ID3D11ShaderResourceView* mGrassMapSRV;
 	ID3D11ShaderResourceView* mWavesMapSRV;
 	ID3D11ShaderResourceView* mBoltMapSRV[60];
 
-	Waves mWaves;
+	Waves mWaves; // 파도 클래스(물 생성)
 
-	DirectionalLight mDirLights[3];
+	DirectionalLight mDirLights[3]; // 방향광 3개
+
+	// 각종 물체 특성, 전역색, 물체색, 반영광 받는 색
 	Material mLandMat;
 	Material mWavesMat;
 	Material mBoltMat;
 
+	// 텍스쳐 변환 행렬
 	XMFLOAT4X4 mGrassTexTransform;
 	XMFLOAT4X4 mWaterTexTransform;
 	XMFLOAT4X4 mBoltTexTransform;
+
+	// 물체 변환 행렬
 	XMFLOAT4X4 mLandWorld;
 	XMFLOAT4X4 mWavesWorld;
 	XMFLOAT4X4 mBoltWorld;
 
+	// 시점, 투영 행렬
 	XMFLOAT4X4 mView;
 	XMFLOAT4X4 mProj;
 
+	// 지면, 전기 원기둥의 인덱스 카운트
 	UINT mLandIndexCount;
 	UINT mBoltIndexCount;
 
-	UINT mBoltFrameIndex;
+	UINT mBoltFrameIndex; // 전기 텍스쳐 60개 돌리는 인덱스
 
+	// 물 텍스쳐 위치 지정
 	XMFLOAT2 mWaterTexOffset;
 
+	// 렌더링 옵션
 	RenderOptions mRenderOptions;
 
+	// 카메라 위치
 	XMFLOAT3 mEyePosW;
 
 	float mTheta;
@@ -137,19 +147,23 @@ BlendApp::BlendApp(HINSTANCE hInstance)
 	mLastMousePos.x = 0;
 	mLastMousePos.y = 0;
 
+	// 행렬 초기화
 	XMMATRIX I = XMMatrixIdentity();
 	XMStoreFloat4x4(&mLandWorld, I);
 	XMStoreFloat4x4(&mWavesWorld, I);
 	XMStoreFloat4x4(&mView, I);
 	XMStoreFloat4x4(&mProj, I);
 
+	// 전기 원기둥 변환 행렬
 	XMMATRIX boltScale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	XMMATRIX boltOffset = XMMatrixTranslation(8.0f, 5.0f, -15.0f);
 	XMStoreFloat4x4(&mBoltWorld, boltScale * boltOffset);
 
+	// 풀 텍스쳐 격자 확장
 	XMMATRIX grassTexScale = XMMatrixScaling(5.0f, 5.0f, 0.0f);
 	XMStoreFloat4x4(&mGrassTexTransform, grassTexScale);
 
+	// 빛 속성 설정
 	mDirLights[0].Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	mDirLights[0].Diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	mDirLights[0].Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
@@ -323,13 +337,14 @@ void BlendApp::UpdateScene(float dt)
 	// Animate bolt texture.
 	//
 
+	// 전기 원기둥 텍스쳐 변환 행렬 업데이트
 	XMMATRIX boltScale = XMMatrixScaling(3.0f, 1.5f, 1.0f);
 	XMMATRIX boltTranslation = XMMatrixTranslation(mTimer.TotalTime() * 0.02f, 0.0f, 0.0f);
 	XMStoreFloat4x4(&mBoltTexTransform, boltScale * boltTranslation);
 
 
 	//
-	// Animate bolt animation frame.
+	// 전기 텍스쳐 인덱스 수정
 	//
 
 	static float t = 0.0f;
@@ -339,7 +354,6 @@ void BlendApp::UpdateScene(float dt)
 	{
 		mBoltFrameIndex++;
 		t = 0.0f;
-
 		if (mBoltFrameIndex == 60)
 			mBoltFrameIndex = 0;
 	}
@@ -384,6 +398,9 @@ void BlendApp::DrawScene()
 	ID3DX11EffectTechnique* boltTech = NULL;
 	ID3DX11EffectTechnique* landAndWavesTech = NULL;
 
+	// 여기서 boltTech는 Light3TexAlphaClipTech 상태가 아닌
+	// Light0TexTech 상태여야 한다. 일단 Bolt텍스쳐 파일 자체가
+	// 알파값이 설정된 파일이 아니라 버려지는 픽셀이 없다.
 	switch (mRenderOptions)
 	{
 	case RenderOptions::Lighting:
@@ -457,7 +474,19 @@ void BlendApp::DrawScene()
 	}
 
 	//
-	// Draw the bolt last with additive blending and no depth writes.
+	// 깊이 버퍼가 없이 가산 혼합을 사용하여 전기 원기둥 렌더링
+	// 어떤 물체 내에서도 거리가 앞이고, 거리가 뒤이고 이런 앞 뒤가 존재한다.
+	// 바로 이 전기 원기둥이 그런데 이 물체를 그릴 때 만약 깊이를 사용하여
+	// 렌더링을 하면 원기둥 앞면의 전기 텍스쳐가 뒷면의 전기 텍스쳐를 가려버리는
+	// 이러한 효과가 나타난다.
+	// 이러한 효과를 없애려면 깊이 버퍼에 깊이값 쓰기를 하지 않고 그냥
+	// 물건 자체의 앞뒤가 없는 것 처럼 그리면 된다.
+	// 물건 자체의 깊이가 없는 것이지 깊이 판정은 존재하여 지면에 가려질 곳을 가려진다.
+	// 깊이 판정이 존재한다는 것은 이 물체를 그릴 때 이 물체에 대한 좌표를 기반으로 가릴지 말지 결정은 한다는 것이다.
+	// 이 물체가 지면 보다 더 앞에 있다면 그려지긴 하겠지만 깊이 버퍼를 갱신하지는 않는다.
+	// 혼합 기법으로 가산 혼합을 사용했는데 원래 텍스쳐에서 검하던 색이 투명색과 같이 보이는 것은
+	// (0,0,0)[전기 텍스쳐 검은색 부분] * (1,1,1) + (어떤 배경 3원색) * (1,1,1)을 진행하면 배경색만 보인다.
+	// 물론 이는 전기 텍스쳐의 전기 부분도 마찬가지로 이루어진다.
 	// 
 
 	boltTech->GetDesc(&techDesc);
@@ -480,6 +509,7 @@ void BlendApp::DrawScene()
 
 		md3dImmediateContext->RSSetState(RenderStates::NoCullRS);
 		md3dImmediateContext->OMSetBlendState(RenderStates::AdditiveBS, blendFactor, 0xffffffff);
+		//md3dImmediateContext->OMSetBlendState(RenderStates::TransparentBS, blendFactor, 0xffffffff);
 		md3dImmediateContext->OMSetDepthStencilState(RenderStates::DepthWriteOffDSS, 0);
 		boltTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(mBoltIndexCount, 0, 0);
