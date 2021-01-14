@@ -209,7 +209,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="FX\Basic.cod" />
-    <None Include="FX\Basic.fxo" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="FX\Basic.fx" />

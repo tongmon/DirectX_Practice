@@ -61,4 +61,7 @@ C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathvector.i
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathmisc.inl(518,43): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathmisc.inl(519,40): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathmisc.inl(519,51): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-  DX11_FRAME.vcxproj -> C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_BlendDemo\Debug\DX11_FRAME.exe
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_DepthCnt\DX11_FRAME\Main.cpp(270,36): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_DepthCnt\DX11_FRAME\Main.cpp(271,36): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_DepthCnt\DX11_FRAME\Main.cpp(272,23): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  DX11_FRAME.vcxproj -> C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_DepthCnt\Debug\DX11_FRAME.exe

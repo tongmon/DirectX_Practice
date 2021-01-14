@@ -1,4 +1,19 @@
-//
+// 깊이 복잡도 문제
+// 깊이 복잡도를 스텐실 버퍼를 이용하여 체크할 수 있다는 것을 배우는 문제다.
+// 일단 깊이 복잡도를 체크하는 방법은 물건을 그릴 때마다 그려진 부분의
+// 스텐실 픽셀 값을 증가시키는 것이다.
+// 이렇게 하면 물건이 많이 겹치는 부분은 스텐실 버퍼에 높은 숫자를 가지게 되고
+// 이렇게 스텐실 버퍼에 깊이 복잡도가 담기게 된 것을 시각적으로 표현만 해주면 된다.
+// 시각적으로 표현을 할 때는 창 하나를 만들어서 스텐실 버퍼 값이 1이면 빨강
+// 2이면 파랑 3이면 녹색... 뭐 이런식으로 값이 같은 부분만 출력해주면
+// 스텐실 버퍼 값에 따라 즉 깊이 복잡도에 따라 색이 알록달록하게 그려진다.
+// 이 창 하나를 그리는게 굉장히 애를 먹었는데...
+// 일단 깊이 복잡도를 반영하는 창은 빛을 꺼야해서 fx파일에 빛을 끄는 렌더링 옵션을 추가했고
+// 시야가 계속 마우스 좌표에 따라 달라지기 때문에 그 카메라 앞에 창을 계속 붙여놔야해서
+// 적절한 행렬변환을 수행했다.
+// 일단 마우스 움직임을 제어하면서 mPhi, mTheta를 이용하기에 이를 사용하는
+// Yaw, Pitch, Roll을 사용했다.
+// 결과적으로 깊이 복잡도 체크보다 투영창이 카메라 따라다니게 하는게 더 어려웠던 문제이다....
 
 #include "d3dApp.h"
 #include "d3dx11Effect.h"
@@ -250,14 +265,16 @@ void BlendApp::UpdateScene(float dt)
 	XMMATRIX V = XMMatrixLookAtLH(pos, target, up);
 	XMStoreFloat4x4(&mView, V);
 
-	x = (mRadius - 40) * sinf(mPhi) * cosf(mTheta);
-	z = (mRadius - 40) * sinf(mPhi) * sinf(mTheta);
-	y = (mRadius - 40) * cosf(mPhi);
+	// 투영판 위치를 시점(카메라)에 고정하고 같이 움직인다.
+	// 반지름을 조금 작게하여 카메라 렌즈에 투영판을 붙인듯한 효과를 준다.
+	x = (mRadius - 1.01) * sinf(mPhi) * cosf(mTheta);
+	z = (mRadius - 1.01) * sinf(mPhi) * sinf(mTheta);
+	y = (mRadius - 1.01) * cosf(mPhi);
 
-	XMMATRIX rotateMat = XMMatrixRotationRollPitchYaw(0, -mTheta, -mPhi);
-	XMMATRIX rectScale = XMMatrixScaling(15.0f, 15.0f, 15.0f);
-	XMMATRIX rectOffset = XMMatrixTranslation(x, y, z);
-	XMStoreFloat4x4(&mBoxWorld, rectScale * rotateMat * rectOffset);
+	XMMATRIX rotateMat = XMMatrixRotationRollPitchYaw(0, -mTheta, -mPhi); // 바라보는 방향으로 회전
+	XMMATRIX rectScale = XMMatrixScaling(15.0f, 15.0f, 15.0f); // 카메라 화면 다 가릴정도의 크기
+	XMMATRIX rectOffset = XMMatrixTranslation(x, y, z); // 카메라와 위치가 같으면 안되니까 조금 앞으로 이동
+	XMStoreFloat4x4(&mRectWorld, rectScale * rotateMat * rectOffset); // S * R * T
 
 	//
 	// Every quarter second, generate a random wave.
@@ -355,7 +372,7 @@ void BlendApp::DrawScene()
 	// 지면, 물과 분리하여 다룬다.
 	ID3DX11EffectTechnique* boxTech = NULL;
 	ID3DX11EffectTechnique* landAndWavesTech = NULL;
-	ID3DX11EffectTechnique* rectTech = Effects::BasicFX->Light1Tech;
+	ID3DX11EffectTechnique* rectTech = Effects::BasicFX->Light0Tech; // 투영창은 빛을 사용하지 않는다.
 
 	switch (mRenderOptions)
 	{
@@ -375,12 +392,8 @@ void BlendApp::DrawScene()
 
 	D3DX11_TECHNIQUE_DESC techDesc;
 
-	//
-	// Draw the box with alpha clipping.
-	// 
-
+	// 혼합을 사용하지 않는 박스부터 알파값 자르기를 사용해 그려준다.
 	boxTech->GetDesc(&techDesc); 
-	// 혼합을 사용하지 않는 박스부터 그려준다.
 	for (UINT p = 0; p < techDesc.Passes; ++p)
 	{
 		md3dImmediateContext->IASetVertexBuffers(0, 1, &mBoxVB, &stride, &offset);
@@ -402,31 +415,6 @@ void BlendApp::DrawScene()
 		md3dImmediateContext->OMSetDepthStencilState(RenderStates::IncStencilDSS, 0);
 		boxTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(36, 0, 0);
-
-		// 레스터화기 단계 초기화
-		md3dImmediateContext->RSSetState(0);
-	}
-
-	rectTech->GetDesc(&techDesc);
-	for (UINT p = 0; p < techDesc.Passes; ++p)
-	{
-		md3dImmediateContext->IASetVertexBuffers(0, 1, &mRectVB, &stride, &offset);
-		md3dImmediateContext->IASetIndexBuffer(mRectIB, DXGI_FORMAT_R32_UINT, 0);
-
-		// Set per object constants.
-		XMMATRIX world = XMLoadFloat4x4(&mRectWorld);
-		XMMATRIX worldInvTranspose = MathHelper::InverseTranspose(world);
-		XMMATRIX worldViewProj = world * view * proj;
-
-		Effects::BasicFX->SetWorld(world);
-		Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
-		Effects::BasicFX->SetWorldViewProj(worldViewProj);
-		Effects::BasicFX->SetMaterial(mProjRect);
-
-		md3dImmediateContext->RSSetState(RenderStates::NoCullRS); // 레스터화기 종류 지정
-		md3dImmediateContext->OMSetDepthStencilState(RenderStates::IncStencilDSS, 0);
-		boxTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
-		md3dImmediateContext->DrawIndexed(6, 0, 0);
 
 		// 레스터화기 단계 초기화
 		md3dImmediateContext->RSSetState(0);
@@ -492,6 +480,38 @@ void BlendApp::DrawScene()
 
 		// 혼합 상태 초기화
 		md3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff);
+	}
+
+	// 투영창은 박스, 물, 지면을 모두 그린 후 마지막에 그려준다.
+	// 깊이에 따라 투영창 색상이 달라진다.
+	XMFLOAT4 Col[6] = { {1,0,0,1}, {1,1,0,1}, {1,0,1,1}, {0,1,0,1}, {0,0,1,1}, {0,1,1,1} };
+	for (size_t i = 0; i < 6; i++)
+	{
+		rectTech->GetDesc(&techDesc);
+		for (UINT p = 0; p < techDesc.Passes; ++p)
+		{
+			md3dImmediateContext->IASetVertexBuffers(0, 1, &mRectVB, &stride, &offset);
+			md3dImmediateContext->IASetIndexBuffer(mRectIB, DXGI_FORMAT_R32_UINT, 0);
+
+			// Set per object constants.
+			XMMATRIX world = XMLoadFloat4x4(&mRectWorld);
+			XMMATRIX worldInvTranspose = MathHelper::InverseTranspose(world);
+			XMMATRIX worldViewProj = world * view * proj;
+
+			Effects::BasicFX->SetWorld(world);
+			Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
+			Effects::BasicFX->SetWorldViewProj(worldViewProj);
+			mProjRect.Diffuse = Col[i];
+			Effects::BasicFX->SetMaterial(mProjRect);
+
+			md3dImmediateContext->RSSetState(RenderStates::NoCullRS); // 레스터화기 종류 지정
+			md3dImmediateContext->OMSetDepthStencilState(RenderStates::DistStencilDSS, i);
+			rectTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
+			md3dImmediateContext->DrawIndexed(6, 0, 0);
+
+			// 레스터화기 단계 초기화
+			md3dImmediateContext->RSSetState(0);
+		}
 	}
 
 	HR(mSwapChain->Present(0, 0));
@@ -714,10 +734,10 @@ void BlendApp::BuildRectGeometryBuffers()
 	std::vector<Vertex::Basic32> vertices;
 	Vertex::Basic32 buf;
 	buf.Normal = { 0,1,0 }; buf.Tex = { 0,0 };
-	buf.Pos = { 1, 1, 0 }; vertices.push_back(buf);
-	buf.Pos = { 1, -1, 0 }; vertices.push_back(buf);
-	buf.Pos = { -1, -1, 0 }; vertices.push_back(buf);
-	buf.Pos = { -1, 1, 0 }; vertices.push_back(buf);
+	buf.Pos = { 1, 0, 1 }; vertices.push_back(buf);
+	buf.Pos = { 1, 0, -1 }; vertices.push_back(buf);
+	buf.Pos = { -1, 0, -1 }; vertices.push_back(buf);
+	buf.Pos = { -1, 0, 1 }; vertices.push_back(buf);
 
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;

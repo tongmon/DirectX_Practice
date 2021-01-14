@@ -13,3 +13,5 @@ C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter09_DX_Ble
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter09_DX_Blend\DX11_BlendDemo\Debug\LightHelper.cso
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_BlendDemo\Debug\Basic.cso
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_BlendDemo\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_DepthCnt\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_DepthCnt\Debug\LightHelper.cso

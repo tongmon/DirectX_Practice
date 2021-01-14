@@ -2,15 +2,15 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_BlendDemo\Debug\DX11_FRAME.exe</FullPath>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_DepthCnt\Debug\DX11_FRAME.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_BlendDemo\Debug\Basic.cso</FullPath>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_DepthCnt\Debug\Basic.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_BlendDemo\Debug\LightHelper.cso</FullPath>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_DepthCnt\Debug\LightHelper.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />

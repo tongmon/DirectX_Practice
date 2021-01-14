@@ -72,8 +72,13 @@ VertexOut VS(VertexIn vin)
 }
  
 float4 PS(VertexOut pin, uniform int gLightCount, uniform bool gUseTexure, uniform bool gAlphaClip, uniform bool gFogEnabled) : SV_Target
-{
-	// Interpolating normal can unnormalize it, so normalize it.
+{ 
+    if (!gLightCount)
+    {
+        return gMaterial.Diffuse;
+    }
+    
+    // Interpolating normal can unnormalize it, so normalize it.
     pin.NormalW = normalize(pin.NormalW);
 
 	// The toEye vector is used in lighting.
@@ -161,6 +166,16 @@ float4 PS(VertexOut pin, uniform int gLightCount, uniform bool gUseTexure, unifo
 	litColor.a = gMaterial.Diffuse.a * texColor.a;
 
     return litColor;
+}
+
+technique11 Light0
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS()));
+        SetGeometryShader(NULL);
+        SetPixelShader(CompileShader(ps_5_0, PS(0, false, false, false)));
+    }
 }
 
 technique11 Light1

@@ -26,6 +26,7 @@ public:
 	// Depth/stencil ป๓ลย
 	static ID3D11DepthStencilState* NormalDSS;
 	static ID3D11DepthStencilState* IncStencilDSS;
+	static ID3D11DepthStencilState* DistStencilDSS;
 };
 
 #endif // RENDERSTATES_H

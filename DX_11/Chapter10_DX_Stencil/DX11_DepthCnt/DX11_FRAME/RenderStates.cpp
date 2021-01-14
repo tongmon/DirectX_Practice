@@ -12,6 +12,7 @@ ID3D11BlendState* RenderStates::TransparentBS = 0;
 
 ID3D11DepthStencilState* RenderStates::NormalDSS = 0;
 ID3D11DepthStencilState* RenderStates::IncStencilDSS = 0;
+ID3D11DepthStencilState* RenderStates::DistStencilDSS = 0;
 
 void RenderStates::InitAll(ID3D11Device* device)
 {
@@ -109,6 +110,27 @@ void RenderStates::InitAll(ID3D11Device* device)
 	IncDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
 	HR(device->CreateDepthStencilState(&IncDesc, &IncStencilDSS));
+
+	D3D11_DEPTH_STENCIL_DESC distDesc;
+	distDesc.DepthEnable = true;
+	distDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	distDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	distDesc.StencilEnable = true;
+	distDesc.StencilReadMask = 0xff;
+	distDesc.StencilWriteMask = 0xff;
+
+	distDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	distDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	distDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP; // 스텐실과 깊이 버퍼 판정이 모두 성공했으면 스텐실 버퍼 증가시킴
+	distDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL; // 0으로 같으면 픽셀을 그림자 색으로 혼합
+
+	// 후면 삼각형에 대한 스텐실 버퍼 적용 방식 설정, 보통 후면 제거를 하기에 안쓰인다.
+	distDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	distDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	distDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	distDesc.BackFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+
+	HR(device->CreateDepthStencilState(&distDesc, &DistStencilDSS));
 }
 
 void RenderStates::DestroyAll()
@@ -117,4 +139,6 @@ void RenderStates::DestroyAll()
 	ReleaseCOM(NoCullRS);
 	ReleaseCOM(AlphaToCoverageBS);
 	ReleaseCOM(TransparentBS);
+	ReleaseCOM(IncStencilDSS);
+	ReleaseCOM(DistStencilDSS);
 }

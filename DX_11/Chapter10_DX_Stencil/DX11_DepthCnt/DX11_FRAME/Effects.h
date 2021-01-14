@@ -45,6 +45,7 @@ public:
 	void SetMaterial(const Material& mat) { Mat->SetRawValue(&mat, 0, sizeof(Material)); }
 	void SetDiffuseMap(ID3D11ShaderResourceView* tex) { DiffuseMap->SetResource(tex); }
 
+	ID3DX11EffectTechnique* Light0Tech;
 	ID3DX11EffectTechnique* Light1Tech;
 	ID3DX11EffectTechnique* Light2Tech;
 	ID3DX11EffectTechnique* Light3Tech;
