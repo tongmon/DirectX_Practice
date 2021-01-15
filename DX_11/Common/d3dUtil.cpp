@@ -12,10 +12,10 @@ ID3D11ShaderResourceView* d3dHelper::CreateTexture2DArraySRV(
 		UINT mipFilter)
 {
 	//
-	// Load the texture elements individually from file.  These textures
-	// won't be used by the GPU (0 bind flags), they are just used to 
-	// load the image data from file.  We use the STAGING usage so the
-	// CPU can read the resource.
+	// 각 텍스쳐 원소를 파일로부터 개별적으로 적재한다.
+	// 이 텍스쳐들은 GPU가 사용하는 것이 아니다 (결속 플래그가 0)
+	// 이들은 그냥 파일ㅇ서 이미지 자료를 적재하기 위한 것일 뿐이다.
+	// CPU에서 자원을 읽어야 하므로 용도를 예비(staging)로 설정한다.
 	//
 
 	UINT size = filenames.size();
@@ -39,13 +39,14 @@ ID3D11ShaderResourceView* d3dHelper::CreateTexture2DArraySRV(
         loadInfo.MipFilter = mipFilter;
 		loadInfo.pSrcInfo  = 0;
 
+		// 각 이미지 자원 할당
         HR(D3DX11CreateTextureFromFile(device, filenames[i].c_str(), 
 			&loadInfo, 0, (ID3D11Resource**)&srcTex[i], 0));
 	}
 
 	//
-	// Create the texture array.  Each element in the texture 
-	// array has the same format/dimensions.
+	// 텍스쳐 배열을 생성한다.
+	// 텍스쳐 배열의 모든 원소는 형식과 크기가 동일하다.
 	//
 
 	D3D11_TEXTURE2D_DESC texElementDesc;
@@ -68,18 +69,23 @@ ID3D11ShaderResourceView* d3dHelper::CreateTexture2DArraySRV(
 	HR(device->CreateTexture2D( &texArrayDesc, 0, &texArray));
 
 	//
-	// Copy individual texture elements into texture array.
+	// 개별 텍스쳐 원소를 텍스쳐 배열에 복사한다.
 	//
 
-	// for each texture element...
+	// 각각의 텍스쳐 원소에 대해
 	for(UINT texElement = 0; texElement < size; ++texElement)
 	{
-		// for each mipmap level...
+		// 각각 밉맵 수준에 대해
 		for(UINT mipLevel = 0; mipLevel < texElementDesc.MipLevels; ++mipLevel)
 		{
 			D3D11_MAPPED_SUBRESOURCE mappedTex2D;
 			HR(context->Map(srcTex[texElement], mipLevel, D3D11_MAP_READ, 0, &mappedTex2D));
 
+			// D3D11CalcSubresource(mipLevel, texElement, texElementDesc.MipLevels) 함수는
+			// 텍스쳐 배열의 어떤 한 부분에 대한 인덱스 계산을 해주는 함수이다.
+			// index = arraySlice * mipLevels + mipSlice
+			// mipLevels은 밉맵이 몇개가 있느냐, arraySlice는 현재까지 지나온 텍스쳐 종류, mipSlice는 현재 밉맵 위치
+			// 밑의 코드는 각 이미지의 밉맵 자원을 할당하는 것
 			context->UpdateSubresource(texArray, 
 				D3D11CalcSubresource(mipLevel, texElement, texElementDesc.MipLevels),
 				0, mappedTex2D.pData, mappedTex2D.RowPitch, mappedTex2D.DepthPitch);
@@ -89,7 +95,7 @@ ID3D11ShaderResourceView* d3dHelper::CreateTexture2DArraySRV(
 	}	
 
 	//
-	// Create a resource view to the texture array.
+	// 텍스쳐 배열에 대한 자원 뷰를 생성한다.
 	//
 	
 	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
@@ -104,7 +110,7 @@ ID3D11ShaderResourceView* d3dHelper::CreateTexture2DArraySRV(
 	HR(device->CreateShaderResourceView(texArray, &viewDesc, &texArraySRV));
 
 	//
-	// Cleanup--we only need the resource view.
+	// 마지막까지 필요한 것은 자원뷰 뿐이기에 나머지 할당 자원들 해제
 	//
 
 	ReleaseCOM(texArray);

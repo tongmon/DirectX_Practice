@@ -11,7 +11,7 @@
 
 namespace Vertex
 {
-	// Basic 32-byte vertex structure.
+	// 기본 도형의 정점 구조
 	struct Basic32
 	{
 		Basic32() : Pos(0.0f, 0.0f, 0.0f), Normal(0.0f, 0.0f, 0.0f), Tex(0.0f, 0.0f) {}
@@ -24,10 +24,11 @@ namespace Vertex
 		XMFLOAT2 Tex;
 	};
 
+	// 나무 스프라이트의 정점 구조
 	struct TreePointSprite
 	{
-		XMFLOAT3 Pos;
-		XMFLOAT2 Size;
+		XMFLOAT3 Pos; // 나무 빌보드 정점 중심 위치
+		XMFLOAT2 Size; // 기하 쉐이더에서 위 중심점 하나를 이 크기의 사각형으로 만든다.
 	};
 }
 

@@ -209,9 +209,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="FX\Basic.cod" />
-    <None Include="FX\Basic.fxo" />
     <None Include="FX\TreeSprite.cod" />
-    <None Include="FX\TreeSprite.fxo" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="FX\Basic.fx" />
