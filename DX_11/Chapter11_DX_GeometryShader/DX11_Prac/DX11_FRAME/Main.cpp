@@ -46,7 +46,7 @@ private:
 	void BuildCrateGeometryBuffers();
 	void BuildTreeSpritesBuffer();
 	void DrawTreeSprites(CXMMATRIX viewProj);
-	void BuildCylinderBuffer(float Rad, float Height, UINT Slcnt, UINT Stcnt);
+	void BuildCylinderBuffer(float Rad, float Height, UINT Stcnt);
 	void DrawCylinder(CXMMATRIX viewProj);
 
 private:
@@ -242,6 +242,7 @@ bool TreeBillboardApp::Init()
 	BuildWaveGeometryBuffers();
 	BuildCrateGeometryBuffers();
 	BuildTreeSpritesBuffer();
+	BuildCylinderBuffer(4, 10, 4);
 
 	return true;
 }
@@ -407,6 +408,7 @@ void TreeBillboardApp::DrawScene()
 	// Draw the box.
 	// 
 
+	/*
 	boxTech->GetDesc(&techDesc);
 	for (UINT p = 0; p < techDesc.Passes; ++p)
 	{
@@ -433,6 +435,9 @@ void TreeBillboardApp::DrawScene()
 		// Restore default render state.
 		md3dImmediateContext->RSSetState(0);
 	}
+	*/
+
+	DrawCylinder(viewProj);
 
 	//
 	// Draw the hills and water with texture and fog (no alpha clipping needed).
@@ -780,9 +785,10 @@ void TreeBillboardApp::DrawTreeSprites(CXMMATRIX viewProj)
 	}
 }
 
-void TreeBillboardApp::BuildCylinderBuffer(float Rad, float Height, UINT SliceCnt, UINT StackCnt)
+void TreeBillboardApp::BuildCylinderBuffer(float Rad, float Height, UINT StackCnt)
 {
 	std::vector<Vertex::CylinderV> vert;
+	UINT SliceCnt = 8;
 
 	float dTheta = 2.0f * XM_PI / SliceCnt; // 한 바퀴에서 슬라이스 개수 만큼 분할하여 나누어준다.
 	for (UINT j = 0; j <= SliceCnt; ++j)
@@ -845,10 +851,10 @@ void TreeBillboardApp::DrawCylinder(CXMMATRIX viewProj)
 		treeTech = Effects::CylinderFX->Light3Tech;
 		break;
 	case RenderOptions::Textures:
-		treeTech = Effects::CylinderFX->Light3TexAlphaClipTech;
+		treeTech = Effects::CylinderFX->Light3Tech;
 		break;
 	case RenderOptions::TexturesAndFog:
-		treeTech = Effects::CylinderFX->Light3TexAlphaClipFogTech;
+		treeTech = Effects::CylinderFX->Light3Tech;
 		break;
 	}
 
@@ -864,9 +870,11 @@ void TreeBillboardApp::DrawCylinder(CXMMATRIX viewProj)
 		{
 			md3dImmediateContext->OMSetBlendState(RenderStates::AlphaToCoverageBS, blendFactor, 0xffffffff);
 		}
+		md3dImmediateContext->RSSetState(RenderStates::NoCullRS);
 		treeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->Draw(CyVertCnt, 0);
 
 		md3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff);
+		md3dImmediateContext->RSSetState(0);
 	}
 }

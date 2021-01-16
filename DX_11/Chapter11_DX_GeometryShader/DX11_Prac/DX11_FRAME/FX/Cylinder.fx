@@ -46,8 +46,9 @@ struct VertexIn
 
 struct VertexOut
 {
-	float3 CenterW : POSITION;
-	float2 SizeW   : SIZE;
+	float3 PosW    : POSITION;
+	float3 NormalW : NORMAL;
+	float3 SizeW   : SIZE;
 };
 
 struct GeoOut
@@ -55,7 +56,6 @@ struct GeoOut
 	float4 PosH    : SV_POSITION;
     float3 PosW    : POSITION;
     float3 NormalW : NORMAL;
-    float2 Tex     : TEXCOORD;
 	// 이 fx를 한번 사용해서 한번에 여러개의 물체를 그리면 그 물체 수 만큼
 	// fx 파일이 자동으로 인덱스를 증가 시키면서 해당 그려치는 물체에 대한 ID를 생성한다.
     uint   PrimID  : SV_PrimitiveID; // 고유 물체 ID
@@ -66,69 +66,76 @@ VertexOut VS(VertexIn vin)
 	VertexOut vout;
 
 	// 정점 쉐이더에서 뭘 하지 않고 그대로 기하 쉐이더로 넘긴다.
-	vout.CenterW = vin.PosW;
-	vout.SizeW   = vin.SizeW;
+	vout.PosW = vin.PosL;
+	vout.NormalW = vin.NormalL;
+	vout.SizeW   = vin.SizeL;
 
 	return vout;
 }
- 
-// 각 점을 사각형(정점 4개)으로 확장하므로, 기하 쉐이더 실행 당
-// 최대 출력 정점 개수는 4이다.
-[maxvertexcount(4)]
-void GS(point VertexOut gin[1], // 점을 하나 넣고
-        uint primID : SV_PrimitiveID, 
-        inout TriangleStream<GeoOut> triStream) // 완성된 구조를 삼각형 스트림에 담는다.
-{	
-	//
-	// 빌보드가 y축에 정렬되어서 시점을 향하도록 하는,
-	// 세계 공간을 기준으로 한 빌보드의 국소 좌표계를 계산한다.
-	//
 
-	float3 up = float3(0.0f, 1.0f, 0.0f); // y 축에 수직, 나무는 위로 자라니까.
-	float3 look = gEyePosW - gin[0].CenterW; // 나무 중심에서 카메라까지 방향의 벡터 획득
-	look.y = 0.0f; // y축 정렬이라 했으니 y는 0으로 고정한다.
-	look = normalize(look); // 정규화하여 크기 1로 만든다.
-	// 외적을 통해 나무 중심에서 시점까지 벡터와 y축 모두에게 수직인 오른쪽 벡터를 획득한다.
-	float3 right = cross(up, look);
+[maxvertexcount(100)]
+void GS(line VertexOut gin[8], uint primID : SV_PrimitiveID,
+	inout TriangleStream<GeoOut> triStream) // 완성된 구조를 삼각형 스트림에 담는다.
+{
+    float3 PosNomal[100][2];
+    float4 posH[100];
+    float height = gin[0].SizeW.x;
+    int StackCnt = gin[0].SizeW.z;
+    int VertSize = StackCnt * 8;
+    int bufIndex = 0;
+    for (int k = 0; k <= StackCnt; k++)
+    {
+        int Cy = -height / 2 + height / StackCnt * k;
+		for (int j = 0; j < 8; j++)
+        {
+            float Cx = gin[j].PosW.x;
+            float Cz = gin[j].PosW.z;
+            PosNomal[bufIndex][0] = mul(float4(Cx, Cy, Cz, 1.0f), gWorld).xyz;
 
-	//
-	// 사각형을 이루는 삼각형 띠 정점들의 세계 공간 위치를 계산한다.
-	//
-	float halfWidth  = 0.5f*gin[0].SizeW.x; // 너비의 절반
-	float halfHeight = 0.5f*gin[0].SizeW.y; // 높이의 절반
-	
-	/*
-	v[3] ------- v[1]
-	 |             |
-	 |             |
-	 |   CenterW   |
-	 |             |
-	 |             |
-	v[2] ------- v[0]
-	이러한 사각형이 카메라를 정면으로 응시하게 만드는 것이다.
-	*/
-	float4 v[4]; 
-	v[0] = float4(gin[0].CenterW + halfWidth*right - halfHeight*up, 1.0f);
-	v[1] = float4(gin[0].CenterW + halfWidth*right + halfHeight*up, 1.0f);
-	v[2] = float4(gin[0].CenterW - halfWidth*right - halfHeight*up, 1.0f);
-	v[3] = float4(gin[0].CenterW - halfWidth*right + halfHeight*up, 1.0f);
-
-	//
-	// 사각형 정점들을 동차 절단 공간으로 변환하고
-	// 하나의 삼각형을 띠로서 출력한다.
-	//
-	GeoOut gout;
-	[unroll]
-	for(int i = 0; i < 4; ++i)
-	{
-		gout.PosH     = mul(v[i], gViewProj); // 시점, 투영 행렬을 곱해준다.
-		gout.PosW     = v[i].xyz;
-		gout.NormalW  = look;
-		gout.Tex      = gTexC[i];
-		gout.PrimID   = primID;
-		
-		triStream.Append(gout);
-	}
+            float3 T = float3(-Cz, 0, Cx);
+            float3 B = float3(0, -Cy, 0);
+            float3 N = cross(T, B);
+            N = normalize(N);		
+            PosNomal[bufIndex][1] = mul(N, (float3x3) gWorldInvTranspose);
+			
+            posH[bufIndex++] = mul(float4(Cx, Cy, Cz, 1.0f), gWorldViewProj);
+        }
+    }
+    GeoOut gout;
+    gout.PrimID = primID;
+    for (int i = 0;i<StackCnt;i++)
+    {
+        for (int j = 0; j < 8;j++)
+        {
+            gout.NormalW = PosNomal[i * 8 + j][1];
+            gout.PosW = PosNomal[i * 8 + j][0];
+            gout.PosH = posH[i * 8 + j];
+            triStream.Append(gout);
+            gout.NormalW = PosNomal[(i + 1) * 8 + j][1];
+            gout.PosW = PosNomal[(i + 1) * 8 + j][0];
+            gout.PosH = posH[(i + 1) * 8 + j];
+            triStream.Append(gout);
+            gout.NormalW = PosNomal[(i + 1) * 8 + j + 1][1];
+            gout.PosW = PosNomal[(i + 1) * 8 + j + 1][0];
+            gout.PosH = posH[(i + 1) * 8 + j + 1];
+            triStream.Append(gout);
+            triStream.RestartStrip();
+			
+            gout.NormalW = PosNomal[i * 8 + j][1];
+            gout.PosW = PosNomal[i * 8 + j][0];
+            gout.PosH = posH[i * 8 + j];
+            triStream.Append(gout);
+            gout.NormalW = PosNomal[(i + 1) * 8 + j + 1][1];
+            gout.PosW = PosNomal[(i + 1) * 8 + j + 1][0];
+            gout.PosH = posH[(i + 1) * 8 + j + 1];
+            triStream.Append(gout);
+            gout.NormalW = PosNomal[i * 8 + j + 1][1];
+            gout.PosW = PosNomal[i * 8 + j + 1][0];
+            gout.PosH = posH[i * 8 + j + 1];
+            triStream.Append(gout);
+            triStream.RestartStrip();
+        }
+    }
 }
 
 float4 PS(GeoOut pin, uniform int gLightCount, uniform bool gUseTexure, uniform bool gAlphaClip, uniform bool gFogEnabled) : SV_Target
@@ -149,10 +156,7 @@ float4 PS(GeoOut pin, uniform int gLightCount, uniform bool gUseTexure, uniform 
     float4 texColor = float4(1, 1, 1, 1);
     if(gUseTexure)
 	{
-		// 텍스쳐에서 표본 추출
-		float3 uvw = float3(pin.Tex, pin.PrimID%4); // PrimID마다 각기 다른 나무 텍스쳐 사용
-		// uvw --> (텍스쳐 x, 텍스쳐 y, 텍스쳐 배열 인덱스 번호)
-		texColor = gTreeMapArray.Sample( samLinear, uvw );
+		texColor = gDiffuseMap.Sample(samAnisotropic, float2(0, 0));
 
 		if(gAlphaClip)
 		{
