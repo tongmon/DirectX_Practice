@@ -1,4 +1,2 @@
-﻿C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter11_DX_GeometryShader\DX11_Prac\DX11_FRAME\FX\Cylinder.fx(77,24): error X3513: array dimension for line must be 2
-  C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter11_DX_GeometryShader\DX11_Prac\DX11_FRAME\FX\Cylinder.fx(225,22): There was an error compiling expression
-  
-  compilation failed; no code produced
+﻿  compilation succeeded; see C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter11_DX_GeometryShader\DX11_Prac\Debug\Cylinder.cso
+  DX11_FRAME.vcxproj -> C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter11_DX_GeometryShader\DX11_Prac\Debug\DX11_FRAME.exe

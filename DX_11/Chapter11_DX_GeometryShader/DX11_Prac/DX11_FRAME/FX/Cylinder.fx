@@ -73,70 +73,100 @@ VertexOut VS(VertexIn vin)
 	return vout;
 }
 
-[maxvertexcount(100)]
-void GS(line VertexOut gin[8], uint primID : SV_PrimitiveID,
+// 선을 받아서 원기둥의 한 면을 구성하는 기하 셰이더
+// 이 기하 셰이더를 사용하기 위해서는 적절한 정점 구조가 필요하다.
+// 정점 구조는 점의 위치, 크기가 필요한데 이 때 크기는 2가지 정보가
+// 필요한데 원기둥의 높이, 원기둥 스택 개수가 이에 해당된다.
+// 내가 작성한 코드는 처음에 법선벡터도 필요하고 크기도 슬라이스 정보까지
+// 필요한 줄 알아서 정점 구조가 위치, 법선, 크기(float3)으로 짜져있는데
+// 막상 짜보니 정보를 이보다 더 적게 필요로 하더라...
+// TriangleStream에 출력할 정점을 넣게 되면 삼각형 띠 형태로 출력이 된다.
+// 그래서 밑의 코드는 한 면을 완전히 잘 덮어준다.
+[maxvertexcount(40)]
+void GS(line VertexOut gin[2], uint primID : SV_PrimitiveID,
 	inout TriangleStream<GeoOut> triStream) // 완성된 구조를 삼각형 스트림에 담는다.
 {
-    float3 PosNomal[100][2];
-    float4 posH[100];
-    float height = gin[0].SizeW.x;
-    int StackCnt = gin[0].SizeW.z;
-    int VertSize = StackCnt * 8;
-    int bufIndex = 0;
-    for (int k = 0; k <= StackCnt; k++)
-    {
-        int Cy = -height / 2 + height / StackCnt * k;
-		for (int j = 0; j < 8; j++)
-        {
-            float Cx = gin[j].PosW.x;
-            float Cz = gin[j].PosW.z;
-            PosNomal[bufIndex][0] = mul(float4(Cx, Cy, Cz, 1.0f), gWorld).xyz;
-
-            float3 T = float3(-Cz, 0, Cx);
-            float3 B = float3(0, -Cy, 0);
-            float3 N = cross(T, B);
-            N = normalize(N);		
-            PosNomal[bufIndex][1] = mul(N, (float3x3) gWorldInvTranspose);
-			
-            posH[bufIndex++] = mul(float4(Cx, Cy, Cz, 1.0f), gWorldViewProj);
-        }
-    }
+    float Hlen = gin[0].SizeW.x; // 원기둥 높이
+    float Cx = gin[0].PosW.x, Cy, Cz = gin[0].PosW.z; // 선의 시작 정점
+    float Cx2 = gin[1].PosW.x, Cz2 = gin[1].PosW.z; // 선의 끝 정점
+    int StackCnt = gin[0].SizeW.z; // 스택 개수
+    float3 N = normalize(float3(Cx, 0, Cz)), N2 = normalize(float3(Cx2, 0, Cz2)); // 두 정점의 법선 벡터
+    
     GeoOut gout;
     gout.PrimID = primID;
-    for (int i = 0;i<StackCnt;i++)
+    
+    // 선을 받아서 원기둥의 한면을 구성하는 
+    for (int k = 0; k <= StackCnt; k++)
     {
-        for (int j = 0; j < 8;j++)
-        {
-            gout.NormalW = PosNomal[i * 8 + j][1];
-            gout.PosW = PosNomal[i * 8 + j][0];
-            gout.PosH = posH[i * 8 + j];
-            triStream.Append(gout);
-            gout.NormalW = PosNomal[(i + 1) * 8 + j][1];
-            gout.PosW = PosNomal[(i + 1) * 8 + j][0];
-            gout.PosH = posH[(i + 1) * 8 + j];
-            triStream.Append(gout);
-            gout.NormalW = PosNomal[(i + 1) * 8 + j + 1][1];
-            gout.PosW = PosNomal[(i + 1) * 8 + j + 1][0];
-            gout.PosH = posH[(i + 1) * 8 + j + 1];
-            triStream.Append(gout);
-            triStream.RestartStrip();
-			
-            gout.NormalW = PosNomal[i * 8 + j][1];
-            gout.PosW = PosNomal[i * 8 + j][0];
-            gout.PosH = posH[i * 8 + j];
-            triStream.Append(gout);
-            gout.NormalW = PosNomal[(i + 1) * 8 + j + 1][1];
-            gout.PosW = PosNomal[(i + 1) * 8 + j + 1][0];
-            gout.PosH = posH[(i + 1) * 8 + j + 1];
-            triStream.Append(gout);
-            gout.NormalW = PosNomal[i * 8 + j + 1][1];
-            gout.PosW = PosNomal[i * 8 + j + 1][0];
-            gout.PosH = posH[i * 8 + j + 1];
-            triStream.Append(gout);
-            triStream.RestartStrip();
-        }
+        // 높이 측정
+        Cy = -Hlen / 2 + Hlen / StackCnt * k;
+        
+        // 선의 첫번째 정점 넣고
+        gout.PosW = mul(float4(Cx, Cy, Cz, 1.0f), gWorld).xyz;
+        gout.NormalW = mul(N, (float3x3) gWorldInvTranspose);
+        gout.PosH = mul(float4(Cx, Cy, Cz, 1.0f), gWorldViewProj);
+        triStream.Append(gout);
+    
+        // 선의 두번째 정점 넣고
+        gout.PosW = mul(float4(Cx2, Cy, Cz2, 1.0f), gWorld).xyz;
+        gout.NormalW = mul(N2, (float3x3) gWorldInvTranspose);
+        gout.PosH = mul(float4(Cx2, Cy, Cz2, 1.0f), gWorldViewProj);
+        triStream.Append(gout);
     }
 }
+
+/*
+// 경고표시가 뜨는 기하 셰이더 코드
+// 모든 경로에서 gout[]의 값을 읽을 수 없다고 오류를 내뿜는데
+// 왜 그런지 이유를 모르겠다.
+// 스택 오버플로우에서 찾아봐도 안나온다.
+[maxvertexcount(40)]
+void GS(line VertexOut gin[2], uint primID : SV_PrimitiveID,
+	inout TriangleStream<GeoOut> triStream) // 완성된 구조를 삼각형 스트림에 담는다.
+{
+    float Hlen = gin[0].SizeW.x;
+    float Cx = gin[0].PosW.x, Cy = -Hlen / 2, Cz = gin[0].PosW.z;
+    float Cx2 = gin[1].PosW.x, Cz2 = gin[1].PosW.z;
+    int StackCnt = gin[0].SizeW.z;
+    float3 N = normalize(float3(Cx, 0, Cz)), N2 = normalize(float3(Cx2, 0, Cz2));
+    GeoOut gout[4];
+    gout[0].PrimID = gout[1].PrimID = gout[2].PrimID = gout[3].PrimID = primID;
+    
+    // 첫번째 정점 넣고
+    gout[0].PosW = mul(float4(Cx, Cy, Cz, 1.0f), gWorld).xyz;
+    gout[0].NormalW = mul(N, (float3x3) gWorldInvTranspose);
+    gout[0].PosH = mul(float4(Cx, Cy, Cz, 1.0f), gWorldViewProj);
+    
+    // 두번째 정점 넣고
+    gout[1].PosW = mul(float4(Cx2, Cy, Cz2, 1.0f), gWorld).xyz;
+    gout[1].NormalW = mul(N2, (float3x3) gWorldInvTranspose);
+    gout[1].PosH = mul(float4(Cx2, Cy, Cz2, 1.0f), gWorldViewProj);
+    
+    for (int k = 1; k <= StackCnt; k++)
+    {
+        // 높이 측정
+        Cy = -Hlen / 2 + Hlen / StackCnt * k;
+        
+        // 세번째 정점 넣고
+        gout[2].PosW = mul(float4(Cx, Cy, Cz, 1.0f), gWorld).xyz;
+        gout[2].NormalW = mul(N, (float3x3) gWorldInvTranspose);
+        gout[2].PosH = mul(float4(Cx, Cy, Cz, 1.0f), gWorldViewProj);
+    
+        // 네번째 정점 넣고
+        gout[3].PosW = mul(float4(Cx2, Cy, Cz2, 1.0f), gWorld).xyz;
+        gout[3].NormalW = mul(N2, (float3x3) gWorldInvTranspose);
+        gout[3].PosH = mul(float4(Cx2, Cy, Cz2, 1.0f), gWorldViewProj);
+        
+        for (int j = 0; j < 4; j++)
+        {
+            triStream.Append(gout[j]);
+        }
+		triStream.RestartStrip();
+        gout[0] = gout[2];
+        gout[1] = gout[3];
+    }
+}
+*/
 
 float4 PS(GeoOut pin, uniform int gLightCount, uniform bool gUseTexure, uniform bool gAlphaClip, uniform bool gFogEnabled) : SV_Target
 {
@@ -224,6 +254,26 @@ technique11 Light3
         SetVertexShader( CompileShader( vs_5_0, VS() ) );
 		SetGeometryShader( CompileShader( gs_5_0, GS() ) );
         SetPixelShader( CompileShader( ps_5_0, PS(3, false, false, false) ) );
+    }
+}
+
+technique11 Light3Fog
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS()));
+        SetGeometryShader(CompileShader(gs_5_0, GS()));
+        SetPixelShader(CompileShader(ps_5_0, PS(3, false, false, true)));
+    }
+}
+
+technique11 Light3AlphaClipFog
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS()));
+        SetGeometryShader(CompileShader(gs_5_0, GS()));
+        SetPixelShader(CompileShader(ps_5_0, PS(3, false, true, true)));
     }
 }
 

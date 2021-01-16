@@ -46,7 +46,7 @@ private:
 	void BuildCrateGeometryBuffers();
 	void BuildTreeSpritesBuffer();
 	void DrawTreeSprites(CXMMATRIX viewProj);
-	void BuildCylinderBuffer(float Rad, float Height, UINT Stcnt);
+	void BuildCylinderBuffer(float Rad, float Height, UINT Slcnt, UINT Stcnt);
 	void DrawCylinder(CXMMATRIX viewProj);
 
 private:
@@ -60,7 +60,6 @@ private:
 	ID3D11Buffer* mBoxIB;
 
 	ID3D11Buffer* mCylinderVB;
-	ID3D11Buffer* mCylinderIB;
 
 	ID3D11Buffer* mTreeSpritesVB;
 
@@ -92,6 +91,7 @@ private:
 
 	static const UINT TreeCount = 16;
 	UINT CyVertCnt;
+	UINT BoxIndCnt = 0;
 
 	bool mAlphaToCoverageOn;
 
@@ -126,7 +126,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 
 TreeBillboardApp::TreeBillboardApp(HINSTANCE hInstance)
 	: D3DApp(hInstance), mLandVB(0), mLandIB(0), mWavesVB(0), mWavesIB(0), mBoxVB(0), mBoxIB(0), mTreeSpritesVB(0),
-	mCylinderVB(0), mCylinderIB(0), mGrassMapSRV(0), mWavesMapSRV(0), mBoxMapSRV(0), mAlphaToCoverageOn(true), CyVertCnt(0),
+	mCylinderVB(0), mGrassMapSRV(0), mWavesMapSRV(0), mBoxMapSRV(0), mAlphaToCoverageOn(true), CyVertCnt(0),
 	mWaterTexOffset(0.0f, 0.0f), mEyePosW(0.0f, 0.0f, 0.0f), mLandIndexCount(0), mRenderOptions(RenderOptions::TexturesAndFog),
 	mTheta(1.3f * MathHelper::Pi), mPhi(0.4f * MathHelper::Pi), mRadius(80.0f)
 {
@@ -142,14 +142,14 @@ TreeBillboardApp::TreeBillboardApp(HINSTANCE hInstance)
 	XMStoreFloat4x4(&mView, I);
 	XMStoreFloat4x4(&mProj, I);
 
-	XMMATRIX boxScale = XMMatrixScaling(15.0f, 15.0f, 15.0f);
-	XMMATRIX boxOffset = XMMatrixTranslation(8.0f, 5.0f, -15.0f);
+	XMMATRIX boxScale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	XMMATRIX boxOffset = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	XMStoreFloat4x4(&mBoxWorld, boxScale * boxOffset);
 
 	XMMATRIX grassTexScale = XMMatrixScaling(5.0f, 5.0f, 0.0f);
 	XMStoreFloat4x4(&mGrassTexTransform, grassTexScale);
 
-	XMMATRIX CylinderOffset = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	XMMATRIX CylinderOffset = XMMatrixTranslation(0.0f, 20.0f, 0.0f);
 	XMStoreFloat4x4(&mCylinderWorld, CylinderOffset);
 
 	mDirLights[0].Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
@@ -197,6 +197,7 @@ TreeBillboardApp::~TreeBillboardApp()
 	ReleaseCOM(mWavesIB);
 	ReleaseCOM(mBoxVB);
 	ReleaseCOM(mBoxIB);
+	ReleaseCOM(mCylinderVB);
 	ReleaseCOM(mTreeSpritesVB);
 	ReleaseCOM(mGrassMapSRV);
 	ReleaseCOM(mWavesMapSRV);
@@ -242,7 +243,7 @@ bool TreeBillboardApp::Init()
 	BuildWaveGeometryBuffers();
 	BuildCrateGeometryBuffers();
 	BuildTreeSpritesBuffer();
-	BuildCylinderBuffer(4, 10, 4);
+	BuildCylinderBuffer(10, 10, 20, 4);
 
 	return true;
 }
@@ -366,6 +367,8 @@ void TreeBillboardApp::DrawScene()
 	// the geometry we draw next.
 	//
 
+	DrawCylinder(viewProj);
+
 	md3dImmediateContext->IASetInputLayout(InputLayouts::Basic32);
 	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	UINT stride = sizeof(Vertex::Basic32);
@@ -408,7 +411,6 @@ void TreeBillboardApp::DrawScene()
 	// Draw the box.
 	// 
 
-	/*
 	boxTech->GetDesc(&techDesc);
 	for (UINT p = 0; p < techDesc.Passes; ++p)
 	{
@@ -430,14 +432,11 @@ void TreeBillboardApp::DrawScene()
 		//md3dImmediateContext->OMSetBlendState(RenderStates::AlphaToCoverageBS, blendFactor, 0xffffffff);
 		md3dImmediateContext->RSSetState(RenderStates::NoCullRS);
 		boxTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
-		md3dImmediateContext->DrawIndexed(36, 0, 0);
+		md3dImmediateContext->DrawIndexed(BoxIndCnt, 0, 0);
 
 		// Restore default render state.
 		md3dImmediateContext->RSSetState(0);
 	}
-	*/
-
-	DrawCylinder(viewProj);
 
 	//
 	// Draw the hills and water with texture and fog (no alpha clipping needed).
@@ -667,7 +666,8 @@ void TreeBillboardApp::BuildCrateGeometryBuffers()
 	GeometryGenerator::MeshData box;
 
 	GeometryGenerator geoGen;
-	geoGen.CreateBox(1.0f, 1.0f, 1.0f, box);
+	//geoGen.CreateBox(1.0f, 1.0f, 1.0f, box);
+	geoGen.CreateCylinder(10, 10, 10, 20, 4, box);
 
 	//
 	// Extract the vertex elements we are interested in and pack the
@@ -696,6 +696,7 @@ void TreeBillboardApp::BuildCrateGeometryBuffers()
 	//
 	// Pack the indices of all the meshes into one index buffer.
 	//
+	BoxIndCnt = box.Indices.size();
 
 	D3D11_BUFFER_DESC ibd;
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
@@ -785,10 +786,9 @@ void TreeBillboardApp::DrawTreeSprites(CXMMATRIX viewProj)
 	}
 }
 
-void TreeBillboardApp::BuildCylinderBuffer(float Rad, float Height, UINT StackCnt)
+void TreeBillboardApp::BuildCylinderBuffer(float Rad, float Height, UINT SliceCnt, UINT StackCnt)
 {
 	std::vector<Vertex::CylinderV> vert;
-	UINT SliceCnt = 8;
 
 	float dTheta = 2.0f * XM_PI / SliceCnt; // 한 바퀴에서 슬라이스 개수 만큼 분할하여 나누어준다.
 	for (UINT j = 0; j <= SliceCnt; ++j)
@@ -798,15 +798,9 @@ void TreeBillboardApp::BuildCylinderBuffer(float Rad, float Height, UINT StackCn
 		float s = sinf(j * dTheta);
 		vertex.Pos = { Rad * c, 0, Rad * s };
 
-		XMFLOAT3 TangentU(-s, 0.0f, c);
-		XMFLOAT3 bitangent(0, -Height, 0);
+		vertex.Normal = { 0,0,0 };
 
-		XMVECTOR T = XMLoadFloat3(&TangentU);
-		XMVECTOR B = XMLoadFloat3(&bitangent);
-		XMVECTOR N = XMVector3Normalize(XMVector3Cross(T, B));
-		XMStoreFloat3(&vertex.Normal, N);
-
-		vertex.Size = { Height, SliceCnt, StackCnt };
+		vertex.Size = { Height, (float)SliceCnt, (float)StackCnt };
 
 		vert.push_back(vertex);
 	}
@@ -854,7 +848,7 @@ void TreeBillboardApp::DrawCylinder(CXMMATRIX viewProj)
 		treeTech = Effects::CylinderFX->Light3Tech;
 		break;
 	case RenderOptions::TexturesAndFog:
-		treeTech = Effects::CylinderFX->Light3Tech;
+		treeTech = Effects::CylinderFX->Light3FogTech;
 		break;
 	}
 

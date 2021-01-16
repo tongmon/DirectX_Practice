@@ -19,3 +19,4 @@ C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter11_DX_Geo
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter11_DX_GeometryShader\DX11_Prac\Debug\Basic.cso
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter11_DX_GeometryShader\DX11_Prac\Debug\LightHelper.cso
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter11_DX_GeometryShader\DX11_Prac\Debug\TreeSprite.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter11_DX_GeometryShader\DX11_Prac\Debug\Cylinder.cso

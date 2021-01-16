@@ -241,7 +241,7 @@ technique11 Light3TexAlphaClip
         SetPixelShader( CompileShader( ps_5_0, PS(3, true, true, false) ) );
     }
 }
-            
+
 technique11 Light3TexAlphaClipFog
 {
     pass P0

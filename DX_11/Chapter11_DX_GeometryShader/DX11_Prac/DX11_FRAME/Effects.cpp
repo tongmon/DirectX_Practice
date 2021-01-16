@@ -123,6 +123,8 @@ CylinderEffect::CylinderEffect(ID3D11Device* device, const std::wstring& filenam
 	: Effect(device, filename)
 {
 	Light3Tech = mFX->GetTechniqueByName("Light3");
+	Light3FogTech = mFX->GetTechniqueByName("Light3Fog");
+	Light3AlphaClipFogTech = mFX->GetTechniqueByName("Light3AlphaClipFog");
 	Light3TexAlphaClipTech = mFX->GetTechniqueByName("Light3TexAlphaClip");
 	Light3TexAlphaClipFogTech = mFX->GetTechniqueByName("Light3TexAlphaClipFog");
 

@@ -142,6 +142,8 @@ public:
 	ID3DX11EffectTechnique* Light3Tech;
 	ID3DX11EffectTechnique* Light3TexAlphaClipTech;
 	ID3DX11EffectTechnique* Light3TexAlphaClipFogTech;
+	ID3DX11EffectTechnique* Light3FogTech;
+	ID3DX11EffectTechnique* Light3AlphaClipFogTech;
 
 	ID3DX11EffectMatrixVariable* WorldViewProj;
 	ID3DX11EffectMatrixVariable* World;
