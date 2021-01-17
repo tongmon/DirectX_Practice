@@ -1,0 +1,575 @@
+//=============================================================================
+// Basic.fx by Frank Luna (C) 2011 All Rights Reserved.
+//
+// Basic effect that currently supports transformations, lighting, and texturing.
+//=============================================================================
+
+// 거리에 따른 LOD 구현
+// 기하 셰이더 사용시 유의할 점은 기하 셰이더에서 사용하는 GeoOut는
+// 픽셀 셰이더에서 사용하는 VertexOut의 원소를 모두 포함해야 한다는 것이다.
+// 즉 VertexOut에 텍스쳐 좌표가 포함되는데 GeoOut에는 포함이 안되면 에러가 난다.
+// 또 유의할 점은 SV_POSITION 명칭이 붙은 변수는 무조건 함수를 빠져나가면서
+// 초기화가 되어야 한다는 것이다.
+// 이를 구현하면서 많은 삽질을 통해 HLSL과 좀 더 친숙해졌다....
+// 처음에 cpp에서 하던 방식과 같이 인덱스 배열을 만들어서 넘기고
+// 넣고 하려 했으나 HLSL에서는 값으로 전달하기에 처리 속도가 너무 느려지는
+// 문제가 발생했다...
+// 그래서 코드를 직접 전개하여 적었다... 
+// 더 줄일 수 있는 방법이 있을 텐데 나중에 한번 봐야겠다.
+
+#include "LightHelper.fx"
+ 
+cbuffer cbPerFrame
+{
+	DirectionalLight gDirLights[3];
+	float3 gEyePosW;
+
+	float  gFogStart;
+	float  gFogRange;
+	float4 gFogColor;
+};
+
+cbuffer cbPerObject
+{
+	float4x4 gWorld;
+	float4x4 gWorldInvTranspose;
+	float4x4 gWorldViewProj;
+	float4x4 gTexTransform;
+	Material gMaterial;
+};
+
+// Nonnumeric values cannot be added to a cbuffer.
+Texture2D gDiffuseMap;
+
+SamplerState samAnisotropic
+{
+	Filter = ANISOTROPIC;
+	MaxAnisotropy = 4;
+
+	AddressU = WRAP;
+	AddressV = WRAP;
+};
+
+struct VertexIn
+{
+	float3 PosL    : POSITION;
+	float3 NormalL : NORMAL;
+	float2 Tex     : TEXCOORD;
+};
+
+struct VertexOut
+{
+	float4 PosH    : SV_POSITION;
+    float3 PosW    : POSITION;
+    float3 NormalW : NORMAL;
+	float2 Tex     : TEXCOORD;
+};
+
+struct GeoOut
+{
+    float4 PosH : SV_POSITION;
+    float3 PosW : POSITION;
+    float3 NormalW : NORMAL;
+    float2 Tex : TEXCOORD;
+    uint PrimID : SV_PrimitiveID;
+};
+
+void Subdivide(VertexOut inVerts[3], out VertexOut outVerts[6])
+{
+    VertexOut m[3];
+    
+    m[0].PosW = 0.5f * (inVerts[0].PosW + inVerts[1].PosW);
+    m[1].PosW = 0.5f * (inVerts[1].PosW + inVerts[2].PosW);
+    m[2].PosW = 0.5f * (inVerts[2].PosW + inVerts[0].PosW);
+    
+    m[0].Tex = 0.5f * (inVerts[0].Tex + inVerts[1].Tex);
+    m[1].Tex = 0.5f * (inVerts[1].Tex + inVerts[2].Tex);
+    m[2].Tex = 0.5f * (inVerts[2].Tex + inVerts[0].Tex);
+    
+    [unroll]
+    for (uint i = 0; i < 3; i++)
+    {
+        m[i].PosW = normalize(m[i].PosW);
+        m[i].NormalW = m[i].PosW;
+    }
+    
+    outVerts[0] = inVerts[0];
+    outVerts[1] = m[0];
+    outVerts[2] = m[2];
+    outVerts[3] = m[1];
+    outVerts[4] = inVerts[2];
+    outVerts[5] = inVerts[1];
+}
+
+VertexOut VS(VertexIn vin, uniform bool gUseGeo)
+{
+    VertexOut vout;
+	
+    if (gUseGeo)
+    {
+        vout.PosW = vin.PosL;
+        vout.NormalW = vin.NormalL;
+        vout.Tex = vin.Tex;
+        vout.PosH = float4(vin.PosL, 1.0f);
+    }
+    else
+    {
+        // Transform to world space space.
+        vout.PosW = mul(float4(vin.PosL, 1.0f), gWorld).xyz;
+        vout.NormalW = mul(vin.NormalL, (float3x3) gWorldInvTranspose);
+		
+	    // Transform to homogeneous clip space.
+        vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);
+	
+	    // Output vertex attributes for interpolation across triangle.
+        vout.Tex = mul(float4(vin.Tex, 0.0f, 1.0f), gTexTransform).xy;
+    }
+
+    return vout;
+}
+
+[maxvertexcount(40)]
+void GS(triangle VertexOut gin[3], // 삼각형을 하나 넣고
+        uint primID : SV_PrimitiveID,
+        inout TriangleStream<GeoOut> triStream) // 완성된 구조를 삼각형 스트림에 담는다.
+{
+    float3 Dpos[3];
+    for (int p = 0;p < 3;p++)
+    {
+        Dpos[p] = mul(float4(gin[p].PosW, 1.0f), gWorld).xyz;
+    }
+    
+    float3 cPos = Dpos[0] + Dpos[1] + Dpos[2];
+    float distToEye = length(gEyePosW - cPos / 3);
+    
+    VertexOut Vert[15], vbuf[6];
+    uint Vsize = 0;
+    
+    if (distToEye < 80)
+    {
+        VertexOut buf[3], vbuf2[3][6];        
+        Subdivide(gin, vbuf);
+        
+        buf[0] = vbuf[0];
+        buf[1] = vbuf[1];
+        buf[2] = vbuf[2];
+        Subdivide(buf, vbuf2[0]);
+        
+        buf[0] = vbuf[2];
+        buf[1] = vbuf[3];
+        buf[2] = vbuf[4];
+        Subdivide(buf, vbuf2[1]);
+        
+        buf[0] = vbuf[1];
+        buf[1] = vbuf[5];
+        buf[2] = vbuf[3];
+        Subdivide(buf, vbuf2[2]);
+        
+        Vert[Vsize++] = vbuf[0];
+        Vert[Vsize++] = vbuf2[0][2];
+        Vert[Vsize++] = vbuf[2];
+        Vert[Vsize++] = vbuf2[1][2];
+        Vert[Vsize++] = vbuf[4];
+        Vert[Vsize++] = vbuf2[0][1];
+        Vert[Vsize++] = vbuf2[0][3];
+        Vert[Vsize++] = vbuf2[1][1];
+        Vert[Vsize++] = vbuf2[1][3];
+        Vert[Vsize++] = vbuf[1];
+        Vert[Vsize++] = vbuf2[2][2];
+        Vert[Vsize++] = vbuf[3];
+        Vert[Vsize++] = vbuf2[2][1];
+        Vert[Vsize++] = vbuf2[2][3];
+        Vert[Vsize++] = vbuf[5];
+    }
+    else if (80 <= distToEye && distToEye < 120)
+    {
+        Subdivide(gin, vbuf);
+        
+        Vert[Vsize++] = vbuf[0];
+        Vert[Vsize++] = vbuf[1];
+        Vert[Vsize++] = vbuf[2];
+        Vert[Vsize++] = vbuf[3];
+        Vert[Vsize++] = vbuf[4];
+        Vert[Vsize++] = vbuf[5];
+    }
+    else
+    {
+        Vert[Vsize++] = gin[0];
+        Vert[Vsize++] = gin[1];
+        Vert[Vsize++] = gin[2];
+    }
+
+    GeoOut gbuf, gOut[15];
+    gbuf.PrimID = primID;
+    
+    for (uint k = 0; k < Vsize; k++)
+    {
+        gbuf.PosH = mul(float4(Vert[k].PosW, 1.0f), gWorldViewProj);
+        gbuf.PosW = mul(float4(Vert[k].PosW, 1.0f), gWorld).xyz;
+        gbuf.NormalW = mul(Vert[k].NormalW, (float3x3) gWorldInvTranspose);
+        gbuf.Tex = mul(float4(Vert[k].Tex, 0.0f, 1.0f), gTexTransform).xy;
+        gOut[k] = gbuf;
+    }
+    
+    if (Vsize == 15)
+    {
+        for (int j = 0; j < 4;j++)
+        {
+            triStream.Append(gOut[j]);
+            triStream.Append(gOut[j + 5]);
+        }
+        triStream.Append(gOut[4]);
+        triStream.RestartStrip();
+        for (int k = 0; k < 3; k++)
+        {
+            triStream.Append(gOut[5 + k]);
+            triStream.Append(gOut[5 + k + 4]);
+        }
+        triStream.Append(gOut[8]);
+        triStream.RestartStrip();
+        for (int i = 0; i < 2; i++)
+        {
+            triStream.Append(gOut[9 + i]);
+            triStream.Append(gOut[9 + i + 3]);
+        }
+        triStream.Append(gOut[11]);
+        triStream.RestartStrip();
+        triStream.Append(gOut[12]);
+        triStream.Append(gOut[14]);
+        triStream.Append(gOut[13]);
+    }
+    else if (Vsize == 6)
+    {
+        for (int j = 0;j < 5;j++)
+        {
+            triStream.Append(gOut[j]);
+        }
+        triStream.RestartStrip();
+        triStream.Append(gOut[1]);
+        triStream.Append(gOut[5]);
+        triStream.Append(gOut[3]);
+    }
+    else
+    {
+        triStream.Append(gOut[0]);
+        triStream.Append(gOut[1]);
+        triStream.Append(gOut[2]);
+    }
+}
+ 
+float4 PS(VertexOut pin, uniform int gLightCount, uniform bool gUseTexure, uniform bool gAlphaClip, uniform bool gFogEnabled) : SV_Target
+{
+	// Interpolating normal can unnormalize it, so normalize it.
+    pin.NormalW = normalize(pin.NormalW);
+
+	// The toEye vector is used in lighting.
+	float3 toEye = gEyePosW - pin.PosW;
+
+	// Cache the distance to the eye from this surface point.
+	float distToEye = length(toEye);
+
+	// Normalize.
+	toEye /= distToEye;
+	
+    // Default to multiplicative identity.
+    float4 texColor = float4(1, 1, 1, 1);
+    if(gUseTexure)
+	{
+		// Sample texture.
+		texColor = gDiffuseMap.Sample( samAnisotropic, pin.Tex );
+
+		if(gAlphaClip)
+		{
+			// Discard pixel if texture alpha < 0.1.  Note that we do this
+			// test as soon as possible so that we can potentially exit the shader 
+			// early, thereby skipping the rest of the shader code.
+			clip(texColor.a - 0.1f);
+		}
+	}
+	 
+	//
+	// Lighting.
+	//
+
+	float4 litColor = texColor;
+	if( gLightCount > 0  )
+	{
+		// Start with a sum of zero.
+		float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
+		float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
+		float4 spec    = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+		// Sum the light contribution from each light source.  
+		[unroll]
+		for(int i = 0; i < gLightCount; ++i)
+		{
+			float4 A, D, S;
+			ComputeDirectionalLight(gMaterial, gDirLights[i], pin.NormalW, toEye, 
+				A, D, S);
+
+			ambient += A;
+			diffuse += D;
+			spec    += S;
+		}
+
+		// Modulate with late add.
+		litColor = texColor*(ambient + diffuse) + spec;
+	}
+
+	//
+	// Fogging
+	//
+
+	if( gFogEnabled )
+	{
+		float fogLerp = saturate( (distToEye - gFogStart) / gFogRange ); 
+
+		// Blend the fog color and the lit color.
+		litColor = lerp(litColor, gFogColor, fogLerp);
+	}
+
+	// Common to take alpha from diffuse material and texture.
+	litColor.a = gMaterial.Diffuse.a * texColor.a;
+
+    return litColor;
+}
+
+technique11 Light1
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(1, false, false, false) ) );
+    }
+}
+
+technique11 Light2
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(2, false, false, false) ) );
+    }
+}
+
+technique11 Light3
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(3, false, false, false) ) );
+    }
+}
+
+technique11 Light0Tex
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(0, true, false, false) ) );
+    }
+}
+
+technique11 Light1Tex
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(1, true, false, false) ) );
+    }
+}
+
+technique11 Light2Tex
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(2, true, false, false) ) );
+    }
+}
+
+technique11 Light3Tex
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(3, true, false, false) ) );
+    }
+}
+
+technique11 Light0TexAlphaClip
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(0, true, true, false) ) );
+    }
+}
+
+technique11 Light1TexAlphaClip
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(1, true, true, false) ) );
+    }
+}
+
+technique11 Light2TexAlphaClip
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(2, true, true, false) ) );
+    }
+}
+
+technique11 Light3TexAlphaClip
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(3, true, true, false) ) );
+    }
+}
+
+technique11 Light1Fog
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(1, false, false, true) ) );
+    }
+}
+
+technique11 Light2Fog
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(2, false, false, true) ) );
+    }
+}
+
+technique11 Light3Fog
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(3, false, false, true) ) );
+    }
+}
+
+technique11 Light0TexFog
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(0, true, false, true) ) );
+    }
+}
+
+technique11 Light1TexFog
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(1, true, false, true) ) );
+    }
+}
+
+technique11 Light2TexFog
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(2, true, false, true) ) );
+    }
+}
+
+technique11 Light3TexFog
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(3, true, false, true) ) );
+    }
+}
+
+technique11 Light0TexAlphaClipFog
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(0, true, true, true) ) );
+    }
+}
+
+technique11 Light1TexAlphaClipFog
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(1, true, true, true) ) );
+    }
+}
+
+technique11 Light2TexAlphaClipFog
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(2, true, true, true) ) );
+    }
+}
+
+technique11 Light3TexAlphaClipFog
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(false)));
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS(3, true, true, true) ) );
+    }
+}
+
+technique11 Light3Sphere
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(true)));
+        SetGeometryShader(CompileShader(gs_5_0, GS()));
+        SetPixelShader(CompileShader(ps_5_0, PS(3, false, false, false)));
+    }
+}
+
+technique11 Light3SphereFog
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VS(true)));
+        SetGeometryShader(CompileShader(gs_5_0, GS()));
+        SetPixelShader(CompileShader(ps_5_0, PS(3, false, false, true)));
+    }
+}
