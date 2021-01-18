@@ -162,15 +162,16 @@ void VecAddApp::DoComputeWork()
 
 	std::ofstream fout("results.txt");
 
-	// Copy the output buffer to system memory.
+	// 출력 버퍼를 시스템 메모리에 복사
 	md3dImmediateContext->CopyResource(mOutputDebugBuffer, mOutputBuffer);
 
-	// Map the data for reading.
+	// 자료를 매핑해서 읽어들임.
 	D3D11_MAPPED_SUBRESOURCE mappedData;
 	md3dImmediateContext->Map(mOutputDebugBuffer, 0, D3D11_MAP_READ, 0, &mappedData);
 
 	Data* dataView = reinterpret_cast<Data*>(mappedData.pData);
 
+	// 결과를 result.txt에다가 기록한다.
 	for (int i = 0; i < mNumElements; ++i)
 	{
 		fout << "(" << dataView[i].v1.x << ", " << dataView[i].v1.y << ", " << dataView[i].v1.z <<
@@ -184,6 +185,9 @@ void VecAddApp::DoComputeWork()
 
 void VecAddApp::BuildBuffersAndViews()
 {
+	// 기하 셰이더에서 계산할 값들 초기화
+	// 정상적으로 dataA와 dataB가 합쳐져 출력이 된다면
+	// result.txt에 ( 0, 2*i, i, i, -i ) 가 쓰여야한다.
 	std::vector<Data> dataA(mNumElements);
 	std::vector<Data> dataB(mNumElements);
 	for (int i = 0; i < mNumElements; ++i)
@@ -195,7 +199,7 @@ void VecAddApp::BuildBuffersAndViews()
 		dataB[i].v2 = XMFLOAT2(0, -i);
 	}
 
-	// Create a buffer to be bound as a shader input (D3D11_BIND_SHADER_RESOURCE).
+	// 쉐이더 입력으로 묶이는 버퍼 생성 (D3D11_BIND_SHADER_RESOURCE).
 	D3D11_BUFFER_DESC inputDesc;
 	inputDesc.Usage = D3D11_USAGE_DEFAULT;
 	inputDesc.ByteWidth = sizeof(Data) * mNumElements;
@@ -216,7 +220,7 @@ void VecAddApp::BuildBuffersAndViews()
 	ID3D11Buffer* bufferB = 0;
 	HR(md3dDevice->CreateBuffer(&inputDesc, &vinitDataB, &bufferB));
 
-	// Create a read-write buffer the compute shader can write to (D3D11_BIND_UNORDERED_ACCESS).
+	// 버퍼의 시스템 메모리 버전을 생성해서 GPU 결과를 읽어들인다.
 	D3D11_BUFFER_DESC outputDesc;
 	outputDesc.Usage = D3D11_USAGE_DEFAULT;
 	outputDesc.ByteWidth = sizeof(Data) * mNumElements;
@@ -227,10 +231,11 @@ void VecAddApp::BuildBuffersAndViews()
 
 	HR(md3dDevice->CreateBuffer(&outputDesc, 0, &mOutputBuffer));
 
-	// Create a system memory version of the buffer to read the results back from.
-	outputDesc.Usage = D3D11_USAGE_STAGING;
+	// 결과를 받기 위한 시스템 메모리 버퍼 생성
+	// GPU 메모리에서 값을 복사해 이곳에 저장할 수 있다.
+	outputDesc.Usage = D3D11_USAGE_STAGING; // 예비 용도
 	outputDesc.BindFlags = 0;
-	outputDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	outputDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ; // CPU 읽기 접근 가능
 	HR(md3dDevice->CreateBuffer(&outputDesc, 0, &mOutputDebugBuffer));
 
 
