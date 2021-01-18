@@ -1,0 +1,19 @@
+Blur 예제를 다루면서 자원 할당 부분에서 헷갈린 부분이 있어서 정리한다.
+D3DX11CreateShaderResourceViewFromFile(md3dDevice, L"Textures/grass.dds", 0, 0, &mGrassMapSRV, 0)
+셰이더 자원은 이 함수 하나로 끝난다고 생각했는데
+생각해보니 이는 텍스쳐 파일을 셰이더 자원 뷰에 결속시키는 편리한 함수였고
+이 함수 호출시에 자동으로 셰이더 자원 뷰 할당, 텍스쳐 파일 바인딩이 이루어지는 것이다.
+따라서 정통적인 방식으로 할당하는 것을 다시 상기할 필요가 있다.
+깊이, 스텐실 버퍼를 생성할 때 이 버퍼도 그냥 2차원 텍스쳐 배열이라
+CreateTexture2D 함수를 호출하여 생성했다.
+CreateTexture2D는 속성 서술 구조체 D3D11_TEXTURE2D_DESC를 필요로 하니
+적절한 서술을 한 뒤에 CreateTexture2D에 넣어준다.
+CreateTexture2D는 마지막 인자로 자원 버퍼를 가리키는 포인터를 뱉고
+이를 이용하여 적절히 
+CreateShaderResourceView, CreateRenderTargetView, CreateUnorderedAccessView
+위와 같은 함수들을 사용해 텍스쳐, 후면 버퍼, 계산 셰이딩 뷰 등에 사용할 자원을
+만들면 된다.
+단순히 CreateTexture2D는 화면 크기의 격자 배열을 만드는 함수라고 보면된다.
+D3DX11CreateShaderResourceViewFromFile 이 함수는
+D3DX11CreateTextureFromFile, CreateTexture2D, CreateShaderResourceView
+이 밑의 함수들을 적절히 섞어놓은 함수라고 보면 된다.

@@ -14,6 +14,28 @@
 //
 //***************************************************************************************
 
+// 블러 처리의 기본 개념
+// 일단 A, B 두개의 읽기 쓰기가 가능한 텍스쳐 버퍼 두개가 필요하다.
+// 두 텍스쳐는 자원 모드를 번갈아가며 쓰기에 셰이더 자원 뷰, 순서 없는 뷰
+// 모두를 쓸 수 있는 상태여야 한다.
+// 그리고 최종 블러 처리를 한 결과는 이 텍스쳐 버퍼에 들어가기에
+// 화면 출력시에 텍스쳐 버퍼 내용을 후면 버퍼로 옮기기도 해야 한다.
+// 처음 A는 셰이더 자원 뷰이고 계산 셰이더의 입력이 된다.
+// B는 순서 없는 뷰이고 계산 셰이더의 출력이 된다.
+// A(입력 이미지) --(수평 Blur)--> B(출력 이미지)
+// 수평 흐리기가 끝났으므로 수직 흐리기를 진행한다.
+// B(수평 흐리기가 끝난 입력 이미지) --(수직 Blur)--> A(출력 이미지)
+// 결과적으로 A에 Blur처리가 끝난 이미지가 저장되어 있다.
+// 이를 반복할 수록 점점 더 화면을 흐리게 만들 수 있다.
+// 여기서 내가 혼동을 겪은 것이 있는데 자원 할당 부분에서
+// D3DX11CreateShaderResourceViewFromFile(md3dDevice, L"Textures/grass.dds", 0, 0, & mGrassMapSRV, 0)
+// 셰이더 자원은 이 함수 하나로 끝난다고 생각했는데
+// 생각해보니 이는 텍스쳐 파일을 셰이더 자원 뷰에 결속시키는 편리한 함수였고
+// 이 함수 호출시에 자동으로 셰이더 자원 뷰 할당, 텍스쳐 파일 바인딩이 이루어지는 것이다.
+// 따라서 정통적인 방식으로 할당하는 것을 다시 상기할 필요가 있다.
+// 깊이, 스텐실 버퍼를 생성할 때 이 버퍼도 그냥 2차원 텍스쳐 배열이라
+// 
+
 #include "d3dApp.h"
 #include "d3dx11Effect.h"
 #include "GeometryGenerator.h"
@@ -249,12 +271,19 @@ bool BlurApp::Init()
 
 void BlurApp::OnResize()
 {
-	D3DApp::OnResize();
+	D3DApp::OnResize(); // 가상 함수
 
-	// Recreate the resources that depend on the client area size.
+	// 자원을 클라이언트 영역 크기에 맞게 다시 생성
+
+	// 화면 밖 텍스처의 크기를 조정하고
+	// 뷰들 (렌더 대상 뷰, 셰이더 자원 뷰, 순서 없는 뷰)을 다시 만든다.
 	BuildOffscreenViews();
+
+	// 텍스쳐 B의 크기를 조정하고
+	// 뷰들 (렌더 대상 뷰, 셰이더 자원 뷰, 순서 없는 뷰)을 다시 만든다.
 	mBlur.Init(md3dDevice, mClientWidth, mClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM);
 
+	// 투영 행렬 재구성
 	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
 	XMStoreFloat4x4(&mProj, P);
 }
@@ -799,34 +828,37 @@ void BlurApp::BuildScreenQuadGeometryBuffers()
 
 void BlurApp::BuildOffscreenViews()
 {
-	// We call this function everytime the window is resized so that the render target is a quarter
-	// the client area dimensions.  So Release the previous views before we create new ones.
-	ReleaseCOM(mOffscreenSRV);
-	ReleaseCOM(mOffscreenRTV);
-	ReleaseCOM(mOffscreenUAV);
+	// 변화된 클라이언트 크기에 따라갈 수 있게 윈도우가 재조정 될 때마다 이 함수를 호출한다.
+	// 전에 있던 뷰들을 해제하고 새로운 뷰를 만든다.
+	ReleaseCOM(mOffscreenSRV); // 셰이더 자원 해제
+	ReleaseCOM(mOffscreenRTV); // 렌더 타겟 해제
+	ReleaseCOM(mOffscreenUAV); // 순서 없는 자원 해제
 
-	D3D11_TEXTURE2D_DESC texDesc;
+	D3D11_TEXTURE2D_DESC texDesc; // 텍스쳐 속성 서술 구조체
 
 	texDesc.Width = mClientWidth;
 	texDesc.Height = mClientHeight;
 	texDesc.MipLevels = 1;
 	texDesc.ArraySize = 1;
-	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // 0 ~ 1 부호없는 16비트 값
 	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
-	texDesc.Usage = D3D11_USAGE_DEFAULT;
+	texDesc.Usage = D3D11_USAGE_DEFAULT; // GPU만 읽고 쓰기 가능
+	// 화면 밖에 렌더링을 하는 것이기에 D3D11_BIND_RENDER_TARGET 플래그를 꼭 넣어준다.
+	// 결과적으로 렌더링을 하는 것이다.
+	// D3D11_BIND_RENDER_TARGET --> 텍스쳐를 렌더 대상으로 파이프 라인에 묶음
 	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
 	texDesc.CPUAccessFlags = 0;
 	texDesc.MiscFlags = 0;
 
-	ID3D11Texture2D* offscreenTex = 0;
+	ID3D11Texture2D* offscreenTex = 0; // 화면 밖 텍스쳐 자원 버퍼를 가리키는 포인터
 	HR(md3dDevice->CreateTexture2D(&texDesc, 0, &offscreenTex));
 
 	// Null description means to create a view to all mipmap levels using 
 	// the format the texture was created with.
-	HR(md3dDevice->CreateShaderResourceView(offscreenTex, 0, &mOffscreenSRV));
-	HR(md3dDevice->CreateRenderTargetView(offscreenTex, 0, &mOffscreenRTV));
-	HR(md3dDevice->CreateUnorderedAccessView(offscreenTex, 0, &mOffscreenUAV));
+	HR(md3dDevice->CreateShaderResourceView(offscreenTex, 0, &mOffscreenSRV)); // 셰이더 자원 뷰 할당
+	HR(md3dDevice->CreateRenderTargetView(offscreenTex, 0, &mOffscreenRTV)); // 렌더링 타겟 자원 뷰 할당
+	HR(md3dDevice->CreateUnorderedAccessView(offscreenTex, 0, &mOffscreenUAV)); // 계산 셰이딩과 소통을 위한 뷰 할당
 
 	// View saves a reference to the texture so we can release our reference.
 	ReleaseCOM(offscreenTex);

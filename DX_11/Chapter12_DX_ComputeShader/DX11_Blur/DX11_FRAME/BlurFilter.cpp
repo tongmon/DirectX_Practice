@@ -78,6 +78,9 @@ void BlurFilter::Init(ID3D11Device* device, UINT width, UINT height, DXGI_FORMAT
     blurredTexDesc.CPUAccessFlags = 0;
     blurredTexDesc.MiscFlags      = 0;
 
+	// mBlurredOutputTex 은 SRV, UAV 용도로 쓰게 되고 이들은 결국 
+	// blurredTex 자원을 건드리지만 용도가 다를 뿐이다.
+	// 결과적으로 같은 자원을 건드리는 포인터라고 보면 된다.
 	ID3D11Texture2D* blurredTex = 0;
 	HR(device->CreateTexture2D(&blurredTexDesc, 0, &blurredTex));
 
@@ -104,12 +107,12 @@ void BlurFilter::BlurInPlace(ID3D11DeviceContext* dc,
 							 int blurCount)
 {
 	//
-	// Run the compute shader to blur the offscreen texture.
+	// 계산 셰이더를 실행해서 화면 밖 텍스쳐를 흐린다.
 	// 
 
 	for(int i = 0; i < blurCount; ++i)
 	{
-		// HORIZONTAL blur pass.
+		// 수평 흐리기 패스
 		D3DX11_TECHNIQUE_DESC techDesc;
 		Effects::BlurFX->HorzBlurTech->GetDesc( &techDesc );
 		for(UINT p = 0; p < techDesc.Passes; ++p)
@@ -118,22 +121,26 @@ void BlurFilter::BlurInPlace(ID3D11DeviceContext* dc,
 			Effects::BlurFX->SetOutputMap(mBlurredOutputTexUAV);
 			Effects::BlurFX->HorzBlurTech->GetPassByIndex(p)->Apply(0, dc);
 
-			// How many groups do we need to dispatch to cover a row of pixels, where each
-			// group covers 256 pixels (the 256 is defined in the ComputeShader).
+			// numGroupsX는 이미지의 픽셀 행 하나를 처리하는 데 필요한 스레드 그룹의 개수이다.
+			// 각 쓰레드 그룹은 256개의 픽셀을 처리하게 된다.
+			// 256개는 계산 셰이더에 정의되어 있다.
 			UINT numGroupsX = (UINT)ceilf(mWidth / 256.0f);
-			dc->Dispatch(numGroupsX, mHeight, 1);
+			dc->Dispatch(numGroupsX, mHeight, 1); // 스레드 배분 (x, y, z)
 		}
 	
-		// Unbind the input texture from the CS for good housekeeping.
+		// 자원의 효율적인 관리를 위해 입력 텍스쳐를 계산 셰이더에서 떼어낸다.
+		// CS(계산 셰이더 단계에서)Set(설정한다.)ShaderResources(셰이더 자원을)
+		// 여기서는 nullSRV로 설정했다.
 		ID3D11ShaderResourceView* nullSRV[1] = { 0 };
 		dc->CSSetShaderResources( 0, 1, nullSRV );
 
-		// Unbind output from compute shader (we are going to use this output as an input in the next pass, 
-		// and a resource cannot be both an output and input at the same time.
+		// 출력 텍스쳐도 계산 셰이더에서 떼어낸다.
+		// 이 출력을 다음 패스의 입력으로 사용한다. A --> B
+		// 하나의 자원을 동시에 입력과 출력에 모두 사용할 수는 없다.
 		ID3D11UnorderedAccessView* nullUAV[1] = { 0 };
 		dc->CSSetUnorderedAccessViews( 0, 1, nullUAV, 0 );
 	
-		// VERTICAL blur pass.
+		// 수직 흐리기 패스
 		Effects::BlurFX->VertBlurTech->GetDesc( &techDesc );
 		for(UINT p = 0; p < techDesc.Passes; ++p)
 		{
@@ -141,8 +148,9 @@ void BlurFilter::BlurInPlace(ID3D11DeviceContext* dc,
 			Effects::BlurFX->SetOutputMap(inputUAV);
 			Effects::BlurFX->VertBlurTech->GetPassByIndex(p)->Apply(0, dc);
 
-			// How many groups do we need to dispatch to cover a column of pixels, where each
-			// group covers 256 pixels  (the 256 is defined in the ComputeShader).
+			// numGroupsY는 이미지의 픽셀 열 하나를 처리하는 데 필요한 스레드 그룹의 개수이다.
+			// 각 쓰레드 그룹은 256개의 픽셀을 처리하게 된다.
+			// 256개는 계산 셰이더에 정의되어 있다.
 			UINT numGroupsY = (UINT)ceilf(mHeight / 256.0f);
 			dc->Dispatch(mWidth, numGroupsY, 1);
 		}
@@ -151,6 +159,6 @@ void BlurFilter::BlurInPlace(ID3D11DeviceContext* dc,
 		dc->CSSetUnorderedAccessViews( 0, 1, nullUAV, 0 );
 	}
 
-	// Disable compute shader.
+	// 계산 셰이더를 비활성화한다.
 	dc->CSSetShader(0, 0, 0);
 }
