@@ -14,7 +14,7 @@
 //
 //***************************************************************************************
 
-// 블러 처리의 기본 개념
+// DX 블러 처리의 기본 개념
 // 일단 A, B 두개의 읽기 쓰기가 가능한 텍스쳐 버퍼 두개가 필요하다.
 // 두 텍스쳐는 자원 모드를 번갈아가며 쓰기에 셰이더 자원 뷰, 순서 없는 뷰
 // 모두를 쓸 수 있는 상태여야 한다.
@@ -22,19 +22,13 @@
 // 화면 출력시에 텍스쳐 버퍼 내용을 후면 버퍼로 옮기기도 해야 한다.
 // 처음 A는 셰이더 자원 뷰이고 계산 셰이더의 입력이 된다.
 // B는 순서 없는 뷰이고 계산 셰이더의 출력이 된다.
+// 간단이 입력 형태는 셰이더 리소스 뷰 형태, 출력 형태는 계산 셰이더에서 받기에
+// 순서 없는 뷰 형태가 되면 된다.
 // A(입력 이미지) --(수평 Blur)--> B(출력 이미지)
 // 수평 흐리기가 끝났으므로 수직 흐리기를 진행한다.
 // B(수평 흐리기가 끝난 입력 이미지) --(수직 Blur)--> A(출력 이미지)
 // 결과적으로 A에 Blur처리가 끝난 이미지가 저장되어 있다.
 // 이를 반복할 수록 점점 더 화면을 흐리게 만들 수 있다.
-// 여기서 내가 혼동을 겪은 것이 있는데 자원 할당 부분에서
-// D3DX11CreateShaderResourceViewFromFile(md3dDevice, L"Textures/grass.dds", 0, 0, & mGrassMapSRV, 0)
-// 셰이더 자원은 이 함수 하나로 끝난다고 생각했는데
-// 생각해보니 이는 텍스쳐 파일을 셰이더 자원 뷰에 결속시키는 편리한 함수였고
-// 이 함수 호출시에 자동으로 셰이더 자원 뷰 할당, 텍스쳐 파일 바인딩이 이루어지는 것이다.
-// 따라서 정통적인 방식으로 할당하는 것을 다시 상기할 필요가 있다.
-// 깊이, 스텐실 버퍼를 생성할 때 이 버퍼도 그냥 2차원 텍스쳐 배열이라
-// 
 
 #include "d3dApp.h"
 #include "d3dx11Effect.h"
@@ -105,10 +99,12 @@ private:
 	ID3D11ShaderResourceView* mWavesMapSRV;
 	ID3D11ShaderResourceView* mCrateSRV;
 
+	// 하나의 texture2D를 밑과 같이 3개의 형태로 받는다.
 	ID3D11ShaderResourceView* mOffscreenSRV;
 	ID3D11UnorderedAccessView* mOffscreenUAV;
 	ID3D11RenderTargetView* mOffscreenRTV;
 
+	// 블러 변수 선언, BlurFilter 헤더, cpp
 	BlurFilter mBlur;
 	Waves mWaves;
 
@@ -273,7 +269,7 @@ void BlurApp::OnResize()
 {
 	D3DApp::OnResize(); // 가상 함수
 
-	// 자원을 클라이언트 영역 크기에 맞게 다시 생성
+	// 자원을 클라이언트 영역 크기에 맞게 다시 생성, 초기화 부분에도 한 번 실행된다.
 
 	// 화면 밖 텍스처의 크기를 조정하고
 	// 뷰들 (렌더 대상 뷰, 셰이더 자원 뷰, 순서 없는 뷰)을 다시 만든다.
@@ -373,8 +369,11 @@ void BlurApp::UpdateScene(float dt)
 
 void BlurApp::DrawScene()
 {
-	// Render to our offscreen texture.  Note that we can use the same depth/stencil buffer
-	// we normally use since our offscreen texture matches the dimensions.  
+
+	// 화면 밖 부분에 렌더링을 한다.
+	// 렌더링할 때 같은 depth/stencil 버퍼를 사용한다.
+	// 흐리기 효과에서 굳이 깊이, 스텐실 값을 다르게 할 필요가 없고
+	// 차원을 같이하여 그리는 것이 올바르기 때문
 
 	ID3D11RenderTargetView* renderTargets[1] = { mOffscreenRTV };
 	md3dImmediateContext->OMSetRenderTargets(1, renderTargets, mDepthStencilView);
@@ -383,30 +382,36 @@ void BlurApp::DrawScene()
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	//
-	// Draw the scene to the offscreen texture
+	// 화면 밖 부분에 원본 그림을 렌더링을 한다.
 	//
 
 	DrawWrapper();
 
 	//
-	// Restore the back buffer.  The offscreen render target will serve as an input into
-	// the compute shader for blurring, so we must unbind it from the OM stage before we
-	// can use it as an input into the compute shader.
-	//
+	// 진짜 화면에 그려지던 D3DAPP에 정의된 후면 버퍼로 렌더링 타겟을 교체한다.  
+	// 화면 밖에서 렌더링한 결과는 계산 셰이더에서 진행할 블러링 효과의 입력으로 사용한다.
+	// 계산 셰이더에 화면 밖 타겟을 전해주기 전에 밑과 같이 렌더 타겟을 교체해준다.
+	// 
+
 	renderTargets[0] = mRenderTargetView;
 	md3dImmediateContext->OMSetRenderTargets(1, renderTargets, mDepthStencilView);
 
-	//mBlur.SetGaussianWeights(4.0f);
+	//mBlur.SetGaussianWeights(4.0f); // 블러처리 가중치 설정
+
+	// mOffscreenSRV 화면 밖에 그려둔 원본을 넣어서 mOffscreenUAV 형태로 블러처리된 결과가
+	// 도출이되고 실제 결과 텍스쳐 즉, 흐려짐 효과가 적용된 자원은
+	// mOffscreenSRV, blur 객체 내부의 mBlurredOutputTexSRV에 저장이 된다.
+	// 이를 셰이딩 단계에서 텍스쳐 자원에 연결하여 그리면 흐릿한 효과가 완성된 것이다.
 	mBlur.BlurInPlace(md3dImmediateContext, mOffscreenSRV, mOffscreenUAV, 4);
 
 	//
-	// Draw fullscreen quad with texture of blurred scene on it.
+	// 블러처리가 된 후면 버퍼를 그린다.
 	//
 
 	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Silver));
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	DrawScreenQuad();
+	DrawScreenQuad(); // 실제 블러 처리가 된 그림을 그린다.
 
 	HR(mSwapChain->Present(0, 0));
 }
@@ -607,6 +612,7 @@ void BlurApp::DrawScreenQuad()
 		Effects::BasicFX->SetWorldViewProj(identity);
 		Effects::BasicFX->SetTexTransform(identity);
 		Effects::BasicFX->SetDiffuseMap(mBlur.GetBlurredOutput());
+		//Effects::BasicFX->SetDiffuseMap(mOffscreenSRV);
 
 		texOnlyTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(6, 0, 0);
