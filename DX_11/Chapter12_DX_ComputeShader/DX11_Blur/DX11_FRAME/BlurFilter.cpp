@@ -59,7 +59,7 @@ void BlurFilter::Init(ID3D11Device* device, UINT width, UINT height, DXGI_FORMAT
 	mHeight = height;
 	mFormat = format;
 
-	// Note, compressed formats cannot be used for UAV.  We get error like:
+	// UAV에서는 압축 텍스쳐 형식을 사용할 수 없다. 억지로 사용하면 밑과 같은 에러를 뱉는다.
 	// ERROR: ID3D11Device::CreateTexture2D: The format (0x4d, BC3_UNORM) 
 	// cannot be bound as an UnorderedAccessView, or cast to a format that
 	// could be bound as an UnorderedAccessView.  Therefore this format 
@@ -85,10 +85,10 @@ void BlurFilter::Init(ID3D11Device* device, UINT width, UINT height, DXGI_FORMAT
 	HR(device->CreateTexture2D(&blurredTexDesc, 0, &blurredTex));
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	srvDesc.Format = format;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Format = format; // 포맷, 실수형, 정수형 3개 뭐 이런거...
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D; // 2차원 텍스쳐 자원으로 접근
+	srvDesc.Texture2D.MostDetailedMip = 0; // 가장 세밀한 밉맵 레벨
+	srvDesc.Texture2D.MipLevels = 1; // 모든 밉맵 레벨
 	HR(device->CreateShaderResourceView(blurredTex, &srvDesc, &mBlurredOutputTexSRV));
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;

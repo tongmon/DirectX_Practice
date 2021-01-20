@@ -15,5 +15,5 @@ CreateShaderResourceView, CreateRenderTargetView, CreateUnorderedAccessView
 만들면 된다.
 단순히 CreateTexture2D는 화면 크기의 격자 배열을 만드는 함수라고 보면된다.
 D3DX11CreateShaderResourceViewFromFile 이 함수는
-D3DX11CreateTextureFromFile, CreateTexture2D, CreateShaderResourceView
-이 밑의 함수들을 적절히 섞어놓은 함수라고 보면 된다.
+D3DX11CreateTextureFromFile, CreateTexture2D, UpdateSubresource, CreateShaderResourceView
+이 위의 함수들을 적절히 사용해놓은 함수라고 보면 된다.
