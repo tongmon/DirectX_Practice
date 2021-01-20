@@ -3,7 +3,7 @@
 
 #pragma region InputLayoutDesc
 
-const D3D11_INPUT_ELEMENT_DESC InputLayoutDesc::Pos[1] =
+const D3D11_INPUT_ELEMENT_DESC InputLayoutDesc::Pos[1] = // 간단하게 위치만 있는 것을 예제에서 사용함
 {
 	{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}
 };

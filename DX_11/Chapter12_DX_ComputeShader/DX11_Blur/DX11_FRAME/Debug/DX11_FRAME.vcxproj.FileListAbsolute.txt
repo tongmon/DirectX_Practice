@@ -19,3 +19,6 @@ C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_Com
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_ComputeShader\DX11_Blur\Debug\Basic.cso
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_ComputeShader\DX11_Blur\Debug\Blur.cso
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_ComputeShader\DX11_Blur\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_ComputeShader\DX11_Blur - 복사본\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_ComputeShader\DX11_Blur - 복사본\Debug\Blur.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_ComputeShader\DX11_Blur - 복사본\Debug\LightHelper.cso

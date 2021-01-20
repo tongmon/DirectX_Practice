@@ -32,6 +32,13 @@ groupshared float4 gCache[CacheSize];
 void HorzBlurCS(int3 groupThreadID : SV_GroupThreadID,
 				int3 dispatchThreadID : SV_DispatchThreadID)
 {
+    // 기본 예제에서 gInput.Length.x 이런 구문을 사용했는데
+	// 이런 명령은 현재 없나보다.
+	// 텍스쳐 길이를 획득하는 함수를 찾아봤는데 GetDimensions
+	// 함수가 존재하여 이를 사용해서 고쳤다.
+	int W, H; // 가로, 세로 길이
+    gInput.GetDimensions(W, H);
+	
 	//
 	// 대역폭을 줄이기 위해 지역 스레드 저장소를 채운다.
 	// 흐리기 반지름 때문에, 픽셀 N개를 흐리려면 N + 2 * 흐리기 반지름
@@ -58,7 +65,7 @@ void HorzBlurCS(int3 groupThreadID : SV_GroupThreadID,
 	if(groupThreadID.x >= N-gBlurRadius)
     {
 		// 이미지 오른쪽 경계 바깥의 표본을 오른쪽 경계로 한정
-		int x = min(dispatchThreadID.x + gBlurRadius, gInput.Length.x-1);
+        int x = min(dispatchThreadID.x + gBlurRadius, W - 1);
 		gCache[groupThreadID.x+2*gBlurRadius] = gInput[int2(x, dispatchThreadID.y)];
 	}
 
@@ -67,7 +74,7 @@ void HorzBlurCS(int3 groupThreadID : SV_GroupThreadID,
 	// 이 예제도 가로 크기를 256으로 나누었기에 가로 크기가 256의 배수가 아니라면
 	// 나머지가 있을 테고 그 나머지 만큼의 스레드에 이미지 밖의 색상이 기록되면 안되기에
 	// min(dispatchThreadID.xy, gInput.Length.xy-1) 이 연산이 필요하다.
-	gCache[groupThreadID.x+gBlurRadius] = gInput[min(dispatchThreadID.xy, gInput.Length.xy-1)];
+    gCache[groupThreadID.x + gBlurRadius] = gInput[min(dispatchThreadID.xy, (W - 1) * (H - 1))];
 
 	// 다른 그룹 내의 스레드들도 여기까지 진행이 끝나야 다음 단계로 넘어가게
 	// 동기화 시킨다.
@@ -97,6 +104,9 @@ void HorzBlurCS(int3 groupThreadID : SV_GroupThreadID,
 void VertBlurCS(int3 groupThreadID : SV_GroupThreadID,
 				int3 dispatchThreadID : SV_DispatchThreadID)
 {
+    int W, H; // 가로, 세로 길이
+    gInput.GetDimensions(W, H);
+	
 	//
 	// 대역폭을 줄이기 위해 지역 스레드 저장소를 채운다.
 	// 흐리기 반지름 때문에, 픽셀 N개를 흐리려면 N + 2 * 흐리기 반지름
@@ -117,14 +127,14 @@ void VertBlurCS(int3 groupThreadID : SV_GroupThreadID,
 		gCache[groupThreadID.y] = gInput[int2(dispatchThreadID.x, y)];
 	}
 	if(groupThreadID.y >= N-gBlurRadius)
-	{
+	{	
 		// Clamp out of bound samples that occur at image borders.
-		int y = min(dispatchThreadID.y + gBlurRadius, gInput.Length.y-1);
+        int y = min(dispatchThreadID.y + gBlurRadius, H - 1);
 		gCache[groupThreadID.y+2*gBlurRadius] = gInput[int2(dispatchThreadID.x, y)];
 	}
 	
 	// Clamp out of bound samples that occur at image borders.
-	gCache[groupThreadID.y+gBlurRadius] = gInput[min(dispatchThreadID.xy, gInput.Length.xy-1)];
+    gCache[groupThreadID.y + gBlurRadius] = gInput[min(dispatchThreadID.xy, (W - 1) * (H - 1))];
 
 
 	// Wait for all threads to finish.

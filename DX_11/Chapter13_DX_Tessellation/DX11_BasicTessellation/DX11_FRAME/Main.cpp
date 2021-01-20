@@ -156,7 +156,11 @@ void BasicTessellation::DrawScene()
 	XMMATRIX proj = XMLoadFloat4x4(&mProj);
 	XMMATRIX viewProj = view * proj;
 
-	md3dImmediateContext->IASetInputLayout(InputLayouts::Pos);
+	md3dImmediateContext->IASetInputLayout(InputLayouts::Pos); // 위치만 있는 정점으로 세팅
+
+	// 기존 처럼 삼각형 리스트, 선 띠 이런게 아니라 테셀레이션을 할 것이기에 제어점 개수를
+	// 나타내는 플래그를 지정해주어야 한다.
+	// 현재는 4각형을 테셀레이션 할 것이기에 제어점 4개를 의미하는 플래그를 넣는다.
 	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
 
 	UINT stride = sizeof(Vertex::Pos);
@@ -249,6 +253,7 @@ void BasicTessellation::BuildQuadPatchBuffer()
 	vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = 0;
 
+	// 사각형 정점 4개, 제어점 4개
 	XMFLOAT3 vertices[4] =
 	{
 		XMFLOAT3(-10.0f, 0.0f, +10.0f),
