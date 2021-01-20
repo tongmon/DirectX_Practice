@@ -9,6 +9,9 @@
 //
 //***************************************************************************************
 
+// 베지어 곡면에 대한 정보는 이 링크 영상을 보면 이해가 팍 간다.
+// https://www.youtube.com/watch?v=QkCoZbMBedE&ab_channel=JustinLin
+
 #include "d3dApp.h"
 #include "d3dx11Effect.h"
 #include "GeometryGenerator.h"

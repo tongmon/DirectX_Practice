@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter13_DX_Tessellation\DX11_Prac\Debug\DX11_FRAME.exe</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter13_DX_Tessellation\DX11_Prac\Debug\Basic.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter13_DX_Tessellation\DX11_Prac\Debug\Blur.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter13_DX_Tessellation\DX11_Prac\Debug\LightHelper.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter13_DX_Tessellation\DX11_Prac\Debug\Tessellation.cso</FullPath>
+    </ContentFile>
+  </ContentFiles>
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>
