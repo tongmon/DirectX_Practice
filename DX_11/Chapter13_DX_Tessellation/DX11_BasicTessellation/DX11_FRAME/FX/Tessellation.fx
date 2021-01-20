@@ -96,7 +96,7 @@ struct HullOut
 
 // 제어점 덮개 셰이더는 그대로 통과 시키는 과정이다.
 [domain("quad")]
-[partitioning("integer")]
+[partitioning("integer")] // fractional_even, fractional_odd, integer
 [outputtopology("triangle_cw")]
 // 그대로 통과이기 때문에 입력과 출력 제어점의 개수가 4개로 같다.
 // 입력 패치에 대해 제어점 덮개 셰이더의 실행 횟수라고 볼 수도 있다.
