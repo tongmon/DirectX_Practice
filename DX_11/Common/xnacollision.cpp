@@ -680,16 +680,17 @@ VOID ComputeBoundingOrientedBoxFromPoints( OrientedBox* pOut, UINT Count, const 
 
 
 //-----------------------------------------------------------------------------
-// Build a frustum from a persepective projection matrix.  The matrix may only
-// contain a projection; any rotation, translation or scale will cause the
-// constructed frustum to be incorrect.
+// 원근투영 행렬로부터 절두체를 구축한다.
+// 그 행렬에는 투영 변환만 있어야 한다. 회전이나 이동, 비례가 있으면 절두체가
+// 정확하게 만들어지지 않을 수 있다.
+// 절두체는 원점에서 양의 z축 방향으로 바라보고 있기에 쉽게 구해진다.
 //-----------------------------------------------------------------------------
 VOID ComputeFrustumFromProjection( Frustum* pOut, XMMATRIX* pProjection )
 {
     XMASSERT( pOut );
     XMASSERT( pProjection );
 
-    // Corners of the projection frustum in homogenous space.
+    // 동차 공간에서 투영 절두체 꼭짓점들
     static XMVECTOR HomogenousPoints[6] =
     {
         {  1.0f,  0.0f, 1.0f, 1.0f },   // right (at far plane)
@@ -702,32 +703,45 @@ VOID ComputeFrustumFromProjection( Frustum* pOut, XMMATRIX* pProjection )
     };
 
     XMVECTOR Determinant;
-    XMMATRIX matInverse = XMMatrixInverse( &Determinant, *pProjection );
+    XMMATRIX matInverse = XMMatrixInverse( &Determinant, *pProjection ); // 투영 행렬의 역행렬
 
-    // Compute the frustum corners in world space.
+    // 세계 공간에서 절두체 꼭짓점들을 구한다.
+    // 투영 행렬이 뭐하는 녀석인지를 알면 된다.
+    // 투영 행렬은 세계 좌표를 동차 좌표계, 즉 -1 ~ 1 크기인
+    // 좌표계로 옮기는 역할을 하는데 이 행렬의 역행렬을
+    // 동차 좌표계에 곱해주면 반대로 원래 투영 공간 좌표들을 획득할 수가 있다.
     XMVECTOR Points[6];
 
+    // 원래 좌표점 6개를 동차 좌표계로부터 획득한다.
     for( INT i = 0; i < 6; i++ )
     {
-        // Transform point.
+        // 점을 변환
         Points[i] = XMVector4Transform( HomogenousPoints[i], matInverse );
     }
 
     pOut->Origin = XMFLOAT3( 0.0f, 0.0f, 0.0f );
     pOut->Orientation = XMFLOAT4( 0.0f, 0.0f, 0.0f, 1.0f );
 
-    // Compute the slopes.
-    Points[0] = Points[0] * XMVectorReciprocal( XMVectorSplatZ( Points[0] ) );
+    // 기울기들을 계산한다.
+    // XMVectorReciprocal는 벡터의 성분별 역수를 계산하는 함수이고
+    // XMVectorSplatZ 는 Z,X,Y 함수 바리에이션이 있고 값 하나를
+    // 전체에 복사해 넣은 벡터를 반환하는 함수이다.
+    // 그니까 (1,2,3)인데 XMVectorSplatZ 함수 쓰면 (3,3,3)이 반환된다.
+    // 절두체가 양의 z축을 바라보고 있기에 z증가량이 기울기의 밑단 역할을 하게 된다.
+    Points[0] = Points[0] * XMVectorReciprocal( XMVectorSplatZ( Points[0] ) ); // x / z
     Points[1] = Points[1] * XMVectorReciprocal( XMVectorSplatZ( Points[1] ) );
-    Points[2] = Points[2] * XMVectorReciprocal( XMVectorSplatZ( Points[2] ) );
+    Points[2] = Points[2] * XMVectorReciprocal( XMVectorSplatZ( Points[2] ) ); // y / z
     Points[3] = Points[3] * XMVectorReciprocal( XMVectorSplatZ( Points[3] ) );
 
+    // 양 옆은 y랑 관계 없으니 x 값만 뜯어낸다.
     pOut->RightSlope = XMVectorGetX( Points[0] );
     pOut->LeftSlope = XMVectorGetX( Points[1] );
+
+    // 위 아래는 x랑 관계 없으니 y값만 뜯어낸다.
     pOut->TopSlope = XMVectorGetY( Points[2] );
     pOut->BottomSlope = XMVectorGetY( Points[3] );
 
-    // Compute near and far.
+    // 가까운 평면 거리와 먼 평면 거리를 획득
     Points[4] = Points[4] * XMVectorReciprocal( XMVectorSplatW( Points[4] ) );
     Points[5] = Points[5] * XMVectorReciprocal( XMVectorSplatW( Points[5] ) );
 
