@@ -1,0 +1,26 @@
+C:\Users\tongm\source\repos\DX11_FRAME\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME_tester\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK_2\DX11_FRAME\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\color.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_LitSkull\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_LitSkull\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter08_DX_Texture\DX11_LitSkullWithTex\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter08_DX_Texture\DX11_LitSkullWithTex\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter09_DX_Blend\DX11_LitSkullWithTex\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter09_DX_Blend\DX11_LitSkullWithTex\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter09_DX_Blend\DX11_BlendDemo\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter09_DX_Blend\DX11_BlendDemo\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_Mirror\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter10_DX_Stencil\DX11_Mirror\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_ComputeShader\DX11_VecAdd\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_ComputeShader\DX11_VecAdd\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_ComputeShader\DX11_VecAdd\Debug\VecAdd.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_ComputeShader\DX11_Blur\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_ComputeShader\DX11_Blur\Debug\Blur.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_ComputeShader\DX11_Blur\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_ComputeShader\DX11_Blur - 복사본\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_ComputeShader\DX11_Blur - 복사본\Debug\Blur.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter12_DX_ComputeShader\DX11_Blur - 복사본\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter14_DX_Camera\DX11_FP_Camera\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter14_DX_Camera\DX11_FP_Camera\Debug\LightHelper.cso

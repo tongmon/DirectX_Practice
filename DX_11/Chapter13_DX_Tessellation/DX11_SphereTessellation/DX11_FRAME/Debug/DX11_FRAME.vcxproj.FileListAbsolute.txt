@@ -27,3 +27,7 @@ C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter13_DX_Tes
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter13_DX_Tessellation\DX11_Prac\Debug\Blur.cso
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter13_DX_Tessellation\DX11_Prac\Debug\LightHelper.cso
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter13_DX_Tessellation\DX11_Prac\Debug\Tessellation.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter13_DX_Tessellation\DX11_SphereTessellation\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter13_DX_Tessellation\DX11_SphereTessellation\Debug\Blur.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter13_DX_Tessellation\DX11_SphereTessellation\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter13_DX_Tessellation\DX11_SphereTessellation\Debug\Tessellation.cso

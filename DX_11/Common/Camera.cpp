@@ -17,12 +17,12 @@ Camera::~Camera()
 {
 }
 
-XMVECTOR Camera::GetPositionXM()const
+XMVECTOR Camera::GetPositionXM()const // 변환해서 값 반환
 {
 	return XMLoadFloat3(&mPosition);
 }
 
-XMFLOAT3 Camera::GetPosition()const
+XMFLOAT3 Camera::GetPosition()const // 변환해서 값 반환
 {
 	return mPosition;
 }
@@ -89,13 +89,13 @@ float Camera::GetFovY()const
 
 float Camera::GetFovX()const
 {
-	float halfWidth = 0.5f*GetNearWindowWidth();
-	return 2.0f*atan(halfWidth / mNearZ);
+	float halfWidth = 0.5f*GetNearWindowWidth(); // 가로의 절반을 이용해 삼각함수로
+	return 2.0f*atan(halfWidth / mNearZ); // 가로 시야각을 구한다.
 }
 
 float Camera::GetNearWindowWidth()const
 {
-	return mAspect * mNearWindowHeight;
+	return mAspect * mNearWindowHeight; // 구해진 높이로 종횡비를 따져서 가로도 구한다.
 }
 
 float Camera::GetNearWindowHeight()const
@@ -115,14 +115,15 @@ float Camera::GetFarWindowHeight()const
 
 void Camera::SetLens(float fovY, float aspect, float zn, float zf)
 {
-	// cache properties
+	// 속성들을 설정만 해둔다.
 	mFovY = fovY;
 	mAspect = aspect;
 	mNearZ = zn;
 	mFarZ = zf;
 
-	mNearWindowHeight = 2.0f * mNearZ * tanf( 0.5f*mFovY );
-	mFarWindowHeight  = 2.0f * mFarZ * tanf( 0.5f*mFovY );
+	// 수학적으로 그림 그려서 삼각함수로 유도하면 밑의 식이 나온다.
+	mNearWindowHeight = 2.0f * mNearZ * tanf( 0.5f*mFovY ); // 가까운 절두체 크기, 상이 그리지는 곳
+	mFarWindowHeight  = 2.0f * mFarZ * tanf( 0.5f*mFovY ); // 먼 곳, 즉 무대 끝의 절두체 크기
 
 	XMMATRIX P = XMMatrixPerspectiveFovLH(mFovY, mAspect, mNearZ, mFarZ);
 	XMStoreFloat4x4(&mProj, P);
@@ -164,60 +165,83 @@ XMMATRIX Camera::ViewProj()const
 	return XMMatrixMultiply(View(), Proj());
 }
 
-void Camera::Strafe(float d)
+void Camera::Strafe(float d) // 횡이동, 좌우
 {
 	// mPosition += d*mRight
-	XMVECTOR s = XMVectorReplicate(d);
-	XMVECTOR r = XMLoadFloat3(&mRight);
+	XMVECTOR s = XMVectorReplicate(d); // (d,d,d) 벡터 반환
+	XMVECTOR r = XMLoadFloat3(&mRight); // 좌,우로 이동하는 방향의 척도 벡터
 	XMVECTOR p = XMLoadFloat3(&mPosition);
+	// XMVectorMultiplyAdd 함수는 밑의 인자 기준으로 p + s * r을 반환한다.
+	// 즉 현 위치에서 좌,우 뱡향으로 거리 d 만큼을 이동하는 행렬을 획득
 	XMStoreFloat3(&mPosition, XMVectorMultiplyAdd(s, r, p));
 }
 
-void Camera::Walk(float d)
+void Camera::Walk(float d) // 종이동, 앞뒤
 {
 	// mPosition += d*mLook
-	XMVECTOR s = XMVectorReplicate(d);
-	XMVECTOR l = XMLoadFloat3(&mLook);
+	XMVECTOR s = XMVectorReplicate(d); // 이동할 거리
+	XMVECTOR l = XMLoadFloat3(&mLook); // 바라보는 방향으로 이동함
 	XMVECTOR p = XMLoadFloat3(&mPosition);
+	// 횡이동과 같은 원리로 방향만 바라보는 방향이 기준이 되는 것이다.
 	XMStoreFloat3(&mPosition, XMVectorMultiplyAdd(s, l, p));
 }
 
-void Camera::Pitch(float angle)
+void Camera::Pitch(float angle) // 고개 끄덕이는 경우 카메라 움직임
 {
-	// Rotate up and look vector about the right vector.
+	// 상향 벡터와 시선 벡터를 오른쪽 벡터에 대해 회전한다.
 
-	XMMATRIX R = XMMatrixRotationAxis(XMLoadFloat3(&mRight), angle);
+	XMMATRIX R = XMMatrixRotationAxis(XMLoadFloat3(&mRight), angle); // 좌우 방향 벡터가 축이 된다.
 
-	XMStoreFloat3(&mUp,   XMVector3TransformNormal(XMLoadFloat3(&mUp), R));
-	XMStoreFloat3(&mLook, XMVector3TransformNormal(XMLoadFloat3(&mLook), R));
+	XMStoreFloat3(&mUp,   XMVector3TransformNormal(XMLoadFloat3(&mUp), R)); // 상향 벡터 회전
+	XMStoreFloat3(&mLook, XMVector3TransformNormal(XMLoadFloat3(&mLook), R)); // 시점 벡터 회전
 }
 
-void Camera::RotateY(float angle)
+void Camera::RotateY(float angle) // 고개 양방향 도리도리 하는 경우 카메라 움직임
 {
-	// Rotate the basis vectors about the world y-axis.
+	// 기저벡터들을 Y축에 대해 회전한다.
+	// 벡터를 회전하는 것이라 그냥 0,1,0에 축이 붙어있고 회전한다고 보면 된다.
+	// 회전시에 반지름에 대한 걱정이 없이 걍 방향만 회전된다.
 
 	XMMATRIX R = XMMatrixRotationY(angle);
 
-	XMStoreFloat3(&mRight,   XMVector3TransformNormal(XMLoadFloat3(&mRight), R));
+	// XMVector3TransformNormal 함수는 뒷 인자로 주어지는 변환 행렬을
+	// 앞 인자에 곱하여 행렬 변환해주는 함수이다.
+	XMStoreFloat3(&mRight, XMVector3TransformNormal(XMLoadFloat3(&mRight), R));
 	XMStoreFloat3(&mUp, XMVector3TransformNormal(XMLoadFloat3(&mUp), R));
 	XMStoreFloat3(&mLook, XMVector3TransformNormal(XMLoadFloat3(&mLook), R));
 }
 
+void Camera::Roll(float angle) // 고개 양방향 도리도리 하는 경우 카메라 움직임
+{
+	XMMATRIX R = XMMatrixRotationAxis(XMLoadFloat3(&mLook), angle); // 좌우 방향 벡터가 축이 된다.
+
+	XMStoreFloat3(&mUp, XMVector3TransformNormal(XMLoadFloat3(&mUp), R)); // 상향 벡터 회전
+	XMStoreFloat3(&mRight, XMVector3TransformNormal(XMLoadFloat3(&mRight), R)); // 시점 벡터 회전
+}
+
 void Camera::UpdateViewMatrix()
 {
-	XMVECTOR R = XMLoadFloat3(&mRight);
-	XMVECTOR U = XMLoadFloat3(&mUp);
-	XMVECTOR L = XMLoadFloat3(&mLook);
-	XMVECTOR P = XMLoadFloat3(&mPosition);
+	XMVECTOR R = XMLoadFloat3(&mRight); // 좌우 벡터
+	XMVECTOR U = XMLoadFloat3(&mUp); // 상향 벡터
+	XMVECTOR L = XMLoadFloat3(&mLook); // 바라보는 방향 벡터
+	XMVECTOR P = XMLoadFloat3(&mPosition); // 카메라 위치 벡터
 
-	// Keep camera's axes orthogonal to each other and of unit length.
-	L = XMVector3Normalize(L);
-	U = XMVector3Normalize(XMVector3Cross(L, R));
+	// 위의 벡터들을 정규 직교화 하는 작업
+	// 정규 직교화 할 뿐만 아니라 새로 계산하여 새로 구한다.
+	// 왜냐면 새로 계산 과정이 없이 계속 카메라를 움직여대면
+	// 오차가 누적되어 카메라 각 방향 벡터들이 이상해진다.
 
-	// U, L already ortho-normal, so no need to normalize cross product.
-	R = XMVector3Cross(U, L); 
+	// 시선 벡터를 단위벡터로 만든다.
+	L = XMVector3Normalize(L); // 정규화
+	U = XMVector3Normalize(XMVector3Cross(L, R)); // 시점, 자우 벡터를 외적해서 상향벡터를 새로 만든다.
 
-	// Fill in the view matrix entries.
+	// 보정된 좌우 벡터를 새로 계산한다.
+	R = XMVector3Cross(U, L); // U, L 이 이미 모두 정규화되어 R은 정규화 할 필요없다.
+
+	// 시야 행렬의 성분들을 채운다.
+	// 시야에서 세계로 가는 행렬은 기존의 세계 변환 행렬인 W = RT이고
+	// 이것의 역행렬이 세계에서 시야로 가는 시야 행렬이다.
+	// 즉 시야행렬은 역 이동행렬 * 역 회전 행렬이 되는 것이다.
 	float x = -XMVectorGetX(XMVector3Dot(P, R));
 	float y = -XMVectorGetX(XMVector3Dot(P, U));
 	float z = -XMVectorGetX(XMVector3Dot(P, L));
@@ -226,21 +250,25 @@ void Camera::UpdateViewMatrix()
 	XMStoreFloat3(&mUp, U);
 	XMStoreFloat3(&mLook, L);
 
+	// 첫 열
 	mView(0,0) = mRight.x; 
 	mView(1,0) = mRight.y; 
 	mView(2,0) = mRight.z; 
-	mView(3,0) = x;   
+	mView(3,0) = x;
 
+	// 두번째 열
 	mView(0,1) = mUp.x;
 	mView(1,1) = mUp.y;
 	mView(2,1) = mUp.z;
-	mView(3,1) = y;  
+	mView(3,1) = y;
 
+	// 세번째 열
 	mView(0,2) = mLook.x; 
 	mView(1,2) = mLook.y; 
 	mView(2,2) = mLook.z; 
-	mView(3,2) = z;   
+	mView(3,2) = z;
 
+	// 마지막 열
 	mView(0,3) = 0.0f;
 	mView(1,3) = 0.0f;
 	mView(2,3) = 0.0f;
