@@ -352,7 +352,9 @@ void BoxApp::BuildVertexLayout()
 	};
 
 	// 입력 배치 객체 생성
-	D3DX11_PASS_DESC passDesc;
+	D3DX11_PASS_DESC passDesc; // 패스를 서술하는 구조체, 입력 서명
+	// Effect 객체마다 패스가 있고 해당 패스마다 연관된 정점 셰이더가 존재
+	// 효과 객체로부터 패스를 서술하는 구조체 획득 가능
 	mTech->GetPassByIndex(0)->GetDesc(&passDesc);
 	HR(md3dDevice->CreateInputLayout(vertexDesc, 2, passDesc.pIAInputSignature,
 		passDesc.IAInputSignatureSize, &mInputLayout)); // 생성된 입력 배치는 mInputLayout 여기에 담기게 된다.

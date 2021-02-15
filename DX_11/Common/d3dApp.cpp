@@ -97,7 +97,7 @@ int D3DApp::Run()
 		}
 		// Otherwise, do animation/game stuff.
 		else
-        {	
+        {
 			mTimer.Tick();
 
 			if( !mAppPaused )

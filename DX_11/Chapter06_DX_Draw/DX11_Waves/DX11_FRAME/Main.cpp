@@ -209,6 +209,7 @@ void WavesDemo::UpdateScene(float dt)
 	D3D11_MAPPED_SUBRESOURCE mappedData;
 	HR(md3dImmediateContext->Map(mWavesVB, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
 
+	// mappedData.pData에 담겨있는 데이터(사실상 mWaves 정점 데이터)를 새로운 데이터로 덮어씌운다.
 	Vertex* v = reinterpret_cast<Vertex*>(mappedData.pData);
 	for (UINT i = 0; i < mWaves.VertexCount(); ++i)
 	{

@@ -568,21 +568,21 @@ C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathvector.i
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathmisc.inl(518,43): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathmisc.inl(519,40): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathmisc.inl(519,51): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1322,22): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1326,35): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1414,22): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1418,35): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1422,22): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1422,35): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1422,48): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1426,9): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1426,35): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1426,48): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1430,9): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1430,22): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1430,48): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(2751,22): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(2755,35): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1336,22): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1340,35): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1428,22): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1432,35): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1436,22): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1436,35): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1436,48): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1440,9): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1440,35): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1440,48): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1444,9): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1444,22): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(1444,48): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(2765,22): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Common\xnacollision.cpp(2769,35): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
   Main.cpp
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamath.h(2662,52): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamath.h(2662,64): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
@@ -647,10 +647,10 @@ C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathmisc.inl
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathmisc.inl(519,40): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathmisc.inl(519,51): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
   코드를 생성하고 있습니다...
-Effects11d.lib(d3dxGlobal.obj) : warning LNK4099: '' PDB를 'Effects11d.lib(d3dxGlobal.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-Effects11d.lib(EffectAPI.obj) : warning LNK4099: 'Effects11d.pdb' PDB를 'Effects11d.lib(EffectAPI.obj)' 또는 'C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\Effects11d.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+Effects11d.lib(d3dxGlobal.obj) : warning LNK4099: 'Effects11d.pdb' PDB를 'Effects11d.lib(d3dxGlobal.obj)' 또는 'C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\Effects11d.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+Effects11d.lib(EffectAPI.obj) : warning LNK4099: '' PDB를 'Effects11d.lib(EffectAPI.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
 Effects11d.lib(EffectLoad.obj) : warning LNK4099: 'Effects11d.pdb' PDB를 'Effects11d.lib(EffectLoad.obj)' 또는 'C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\Effects11d.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
 Effects11d.lib(EffectNonRuntime.obj) : warning LNK4099: 'Effects11d.pdb' PDB를 'Effects11d.lib(EffectNonRuntime.obj)' 또는 'C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\Effects11d.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-Effects11d.lib(EffectReflection.obj) : warning LNK4099: '' PDB를 'Effects11d.lib(EffectReflection.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+Effects11d.lib(EffectReflection.obj) : warning LNK4099: 'Effects11d.pdb' PDB를 'Effects11d.lib(EffectReflection.obj)' 또는 'C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\Effects11d.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
 Effects11d.lib(EffectRuntime.obj) : warning LNK4099: 'Effects11d.pdb' PDB를 'Effects11d.lib(EffectRuntime.obj)' 또는 'C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\Effects11d.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
   DX11_FRAME.vcxproj -> C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter06_DX_Draw\DX11_Box\Debug\DX11_FRAME.exe
