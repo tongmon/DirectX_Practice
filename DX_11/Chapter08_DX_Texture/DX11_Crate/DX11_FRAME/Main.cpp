@@ -141,6 +141,9 @@ bool CrateApp::Init()
 	// 장치, 파일 이름, 추가적인 이미지 정보(보통은 0)
 	// , 새로운 스레드에 자원을 적재하려면 지정 아니면 0, 셰이더 자원 뷰
 	// , 새로운 스레드 사용 안하면 0
+	// 얘는 D3DX11CreateTextureFromFile과 CreateShaderResourceView를 동시에 실행해주는
+	// 함수로 모든 텍스쳐자원은 원래 위 두 함수 조합으로 생성하는게 맞다.
+	// 다만 셰이더 자원 할당 시에는 밑의 함수가 편해서 그냥 밑 함수를 쓰는 것일 뿐이다.
 	HR(D3DX11CreateShaderResourceViewFromFile(md3dDevice,
 		L"Textures/WoodCrate01.dds", 0, 0, &mDiffuseMapSRV, 0));
 

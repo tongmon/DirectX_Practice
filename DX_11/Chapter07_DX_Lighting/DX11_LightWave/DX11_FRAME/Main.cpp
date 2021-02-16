@@ -296,6 +296,8 @@ void LightingApp::DrawScene()
 	// 이러한 형식으로 넣어야 한다.
 	// 그렇지 않고 밑과 같이 SetRawValue를 해버리면 fx에 3개 3개로 나누어 안들어가고
 	// 4개 2개로 억지로 쑤셔박아진다.
+	// 물론 이는 SetRawValue 함수를 사용하여 fx 파일과 연동할 경우를 말하고
+	// 뭐... SetMatrix 이런 함수 사용해서 연동하면 안전하게 값이 담긴다.
 	// 이를 방지하려고 LightHelper에 pad 값이 추가적으로 존재한다.
 	mfxDirLight->SetRawValue(&mDirLight, 0, sizeof(mDirLight));
 	mfxPointLight->SetRawValue(&mPointLight, 0, sizeof(mPointLight));
