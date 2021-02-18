@@ -527,6 +527,9 @@ void MirrorApp::DrawScene()
 
 		XMVECTOR shadowPlane = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // xz 평면, 그림자가 그려질 평면
 		XMVECTOR toMainLight = -XMLoadFloat3(&mDirLights[0].Direction); // 그림자를 비출 광원으로의 방향
+		// mDirLights[0].Direction 이 변수는 방향을 나타내어 x,y,z,w 자리 중에 w자리가 0이다.
+		// w가 0이면 방향광, 1이면 점광의 대한 그림자를 표현하게 된다.
+		// 방향광은 w가 음수가 될 수도 있어서 역방향으로 무조건 바꿔준다.
 		XMMATRIX S = XMMatrixShadow(shadowPlane, toMainLight); // 그림자 행렬 생성
 		XMMATRIX shadowOffsetY = XMMatrixTranslation(0.0f, 0.001f, 0.0f);
 

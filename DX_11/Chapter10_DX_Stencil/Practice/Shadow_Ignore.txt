@@ -4,7 +4,7 @@
 2차원으로 투영하기에 중복되는 정점이 생기는 경우가 다반사이다.
 이렇게 되면 중복되는 정점에 대해 색이 더 짙어지기에 이를 해결하기
 위해 스텐실 버퍼의 값을 변경시키는 방식을 사용했다.
-따라서 이 색이 더 짙어지는 문제를 해결안하려면 거울 예제에서
+따라서 이 색이 더 짙어지는 문제를 해결'안'하려면 거울 예제에서
 noDoubleBlendDesc의 StencilPassOp를
-D3D11_STENCIL_OP_INCR ---> D3D11_STENCIL_OP_KEEP
+D3D11_STENCIL_OP_INCR ---> D3D11_STENCIL_OP_INCR
 로 바꾸면 된다.

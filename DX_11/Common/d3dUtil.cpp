@@ -47,11 +47,13 @@ ID3D11ShaderResourceView* d3dHelper::CreateTexture2DArraySRV(
 	//
 	// 텍스쳐 배열을 생성한다.
 	// 텍스쳐 배열의 모든 원소는 형식과 크기가 동일하다.
+	// 따라서 0번째 인덱스의 너비, 높이, 밉맵, 형식 정보를 그대로 사용
 	//
 
 	D3D11_TEXTURE2D_DESC texElementDesc;
 	srcTex[0]->GetDesc(&texElementDesc);
 
+	// 텍스쳐 배열의 특성 설정
 	D3D11_TEXTURE2D_DESC texArrayDesc;
 	texArrayDesc.Width              = texElementDesc.Width;
 	texArrayDesc.Height             = texElementDesc.Height;
@@ -100,7 +102,7 @@ ID3D11ShaderResourceView* d3dHelper::CreateTexture2DArraySRV(
 	
 	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
 	viewDesc.Format = texArrayDesc.Format;
-	viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY; // 텍스쳐 배열
 	viewDesc.Texture2DArray.MostDetailedMip = 0;
 	viewDesc.Texture2DArray.MipLevels = texArrayDesc.MipLevels;
 	viewDesc.Texture2DArray.FirstArraySlice = 0;

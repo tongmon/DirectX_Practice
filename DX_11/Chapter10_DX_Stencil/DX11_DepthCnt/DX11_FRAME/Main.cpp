@@ -421,7 +421,7 @@ void BlendApp::DrawScene()
 	}
 
 	//
-	// 산과 물을 출력, 알파값 필셀 폐기가 불필요
+	// 산과 물을 출력, 알파값 픽셀 폐기가 불필요
 	//
 
 	landAndWavesTech->GetDesc(&techDesc);

@@ -167,6 +167,8 @@ void BasicTessellation::DrawScene()
 	// 기존 처럼 삼각형 리스트, 선 띠 이런게 아니라 테셀레이션을 할 것이기에 제어점 개수를
 	// 나타내는 플래그를 지정해주어야 한다.
 	// 현재는 점 4개로 테셀레이션 할 것이기에 제어점 4개를 의미하는 플래그를 넣는다.
+	// 초반 도형의 정점 개수가 4개여서 4_CONTROL... 이 아니라
+	// 제어점이 4개여서 4_CONTROL... 인 것이다.
 	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
 
 	UINT stride = sizeof(Vertex::Pos);

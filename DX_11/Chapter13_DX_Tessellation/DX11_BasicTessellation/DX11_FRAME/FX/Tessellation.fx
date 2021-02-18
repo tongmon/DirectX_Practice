@@ -94,7 +94,7 @@ struct HullOut
 	float3 PosL : POSITION;
 };
 
-// 제어점 덮개 셰이더는 그대로 통과 시키는 과정이다.
+// 제어점 덮개 셰이더는 이 예제에서는 그대로 통과 시키는 과정이다.
 [domain("quad")]
 [partitioning("integer")] // fractional_even, fractional_odd, integer
 [outputtopology("triangle_cw")]
