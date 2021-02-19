@@ -44,9 +44,9 @@ struct VertexIn
 	float2 Tex      : TEXCOORD;
     
     // 인스턴싱에 필요한 값들
-	row_major float4x4 World  : WORLD;
-	float4 Color    : COLOR;
-	uint InstanceId : SV_InstanceID;
+	row_major float4x4 World  : WORLD; // 물체마다 세계 행렬
+	float4 Color    : COLOR; // 물체마다 색상
+	uint InstanceId : SV_InstanceID; // 인스턴싱 물체마다 ID
 };
 
 struct VertexOut

@@ -38,6 +38,7 @@
 #pragma comment (lib,"dxguid.lib")
 #pragma comment (lib,"winmm.lib")
 
+// 인스턴싱 데이터
 struct InstancedData
 {
 	XMFLOAT4X4 World;
@@ -70,11 +71,11 @@ private:
 
 	// Bounding box of the skull.
 	XNA::AxisAlignedBox mSkullBox;
-	XNA::Frustum mCamFrustum;
+	XNA::Frustum mCamFrustum; // 카메라 중심 좌표계인 경우 절두체
 	
 	UINT mVisibleObjectCount;
 
-	// Keep a system memory copy of the world matrices for culling.
+	// 절두체 선별전 모든 물체 정보
 	std::vector<InstancedData> mInstancedData;
 
 	bool mFrustumCullingEnabled;
@@ -215,11 +216,13 @@ void InstancingAndCullingApp::UpdateScene(float dt)
 	mCam.UpdateViewMatrix();
 	mVisibleObjectCount = 0;
 
+	// 절두체 선별이 켜진 상태면
 	if(mFrustumCullingEnabled)
 	{
 		XMVECTOR detView = XMMatrixDeterminant(mCam.View());
 		XMMATRIX invView = XMMatrixInverse(&detView, mCam.View());
 	
+		// 인스턴스 버퍼에 자료를 기록하기 위해 시스템 메모리에 매핑한다.
 		D3D11_MAPPED_SUBRESOURCE mappedData; 
 		md3dImmediateContext->Map(mInstancedBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData);
 
@@ -231,16 +234,19 @@ void InstancingAndCullingApp::UpdateScene(float dt)
 			XMVECTOR Det = XMMatrixDeterminant(W);
 			XMMATRIX invWorld = XMMatrixInverse(&Det, W);
 
-			// View space to the object's local space.
+			// 시야 공간에서 물체의 국소 공간으로 변환
+			// 지금 물체에는 변환 행렬 * 시야 행렬이 곱해져 있다.
+			// 변환 행렬 * 시야 행렬 여기에 (변환 행렬 * 시야 행렬) 역행렬을 곱하면
+			// 물체의 국소 공간이 획득된다.
 			XMMATRIX toLocal = XMMatrixMultiply(invView, invWorld);
 		
-			// Decompose the matrix into its individual parts.
+			// 행렬을 개별 변환들로 분해한다.
 			XMVECTOR scale;
 			XMVECTOR rotQuat;
 			XMVECTOR translation;
 			XMMatrixDecompose(&scale, &rotQuat, &translation, toLocal);
 
-			// Transform the camera frustum from view space to the object's local space.
+			// 카메라 절두체를 시야 공간에서 물체의 국소 공간으로 변환한다.
 			XNA::Frustum localspaceFrustum;
 			XNA::TransformFrustum(&localspaceFrustum, &mCamFrustum, XMVectorGetX(scale), rotQuat, translation);
 

@@ -22,7 +22,7 @@ XMVECTOR Camera::GetPositionXM()const // 변환해서 값 반환
 	return XMLoadFloat3(&mPosition);
 }
 
-XMFLOAT3 Camera::GetPosition()const // 변환해서 값 반환
+XMFLOAT3 Camera::GetPosition()const // 값 반환
 {
 	return mPosition;
 }
@@ -211,7 +211,7 @@ void Camera::RotateY(float angle) // 고개 양방향 도리도리 하는 경우 카메라 움직�
 	XMStoreFloat3(&mLook, XMVector3TransformNormal(XMLoadFloat3(&mLook), R));
 }
 
-void Camera::Roll(float angle) // 고개 양방향 도리도리 하는 경우 카메라 움직임
+void Camera::Roll(float angle) // 고개 양방향 꺾는 경우 카메라 움직임
 {
 	XMMATRIX R = XMMatrixRotationAxis(XMLoadFloat3(&mLook), angle); // 좌우 방향 벡터가 축이 된다.
 
@@ -233,7 +233,7 @@ void Camera::UpdateViewMatrix()
 
 	// 시선 벡터를 단위벡터로 만든다.
 	L = XMVector3Normalize(L); // 정규화
-	U = XMVector3Normalize(XMVector3Cross(L, R)); // 시점, 자우 벡터를 외적해서 상향벡터를 새로 만든다.
+	U = XMVector3Normalize(XMVector3Cross(L, R)); // 시점, 좌우 벡터를 외적해서 상향벡터를 새로 만든다.
 
 	// 보정된 좌우 벡터를 새로 계산한다.
 	R = XMVector3Cross(U, L); // U, L 이 이미 모두 정규화되어 R은 정규화 할 필요없다.
