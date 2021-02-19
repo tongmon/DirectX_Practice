@@ -210,7 +210,7 @@ void InstancingAndCullingApp::UpdateScene(float dt)
 		mFrustumCullingEnabled = false;
 
 	//
-	// Perform frustum culling.
+	// 절두체 선별
 	//
 
 	mCam.UpdateViewMatrix();
@@ -220,11 +220,11 @@ void InstancingAndCullingApp::UpdateScene(float dt)
 	if(mFrustumCullingEnabled)
 	{
 		XMVECTOR detView = XMMatrixDeterminant(mCam.View());
-		XMMATRIX invView = XMMatrixInverse(&detView, mCam.View());
+		XMMATRIX invView = XMMatrixInverse(&detView, mCam.View()); // 시점 행렬 역행렬 획득
 	
 		// 인스턴스 버퍼에 자료를 기록하기 위해 시스템 메모리에 매핑한다.
 		D3D11_MAPPED_SUBRESOURCE mappedData; 
-		md3dImmediateContext->Map(mInstancedBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData);
+		md3dImmediateContext->Map(mInstancedBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData); // 덮어쓰기 허용
 
 		InstancedData* dataView = reinterpret_cast<InstancedData*>(mappedData.pData);
 
@@ -235,12 +235,22 @@ void InstancingAndCullingApp::UpdateScene(float dt)
 			XMMATRIX invWorld = XMMatrixInverse(&Det, W);
 
 			// 시야 공간에서 물체의 국소 공간으로 변환
-			// 지금 물체에는 변환 행렬 * 시야 행렬이 곱해져 있다.
-			// 변환 행렬 * 시야 행렬 여기에 (변환 행렬 * 시야 행렬) 역행렬을 곱하면
+			// 왜 이 짓을 하냐면 현재 해당 물체는 세계 변환 행렬이 곱해져 있지 않고
+			// 자신의 국소 공간에 위치된 상태이다.
+			// 근데 카메라 기준 좌표계로 설정되어 있는 절두체는 World * View 행렬이 곱해져 있는 상태와 같다.
+			// 더 자세하게 보면 물체는 국소 공간에서 세계 좌표계 기준으로 표현되려고 World 행렬이 곱해지고
+			// 다시 판정이 편하게 세계 좌표계에서 카메라 기준 좌표계로 변하게 View 행렬이 곱해지는 것이다.
+			// 현재 mInstancedData에 담긴 물체는 그냥 World, View 이런 행렬이 곱해지기 전 상태이고
+			// 따라서 물체는 국소 공간에 있는 것이다.
+			// 절두체도 물체와 좌표계를 똑같이 맞추어 올바른 절두체 판정이 되게 해주어야 한다.
+			// 예를 들면 국소 공간에서 (0,0,12)는 카메라 좌표계에서는 (1,23,0) 이렇게 표현이 될 수도 있는 것이라
+			// 올바른 판정을 하기위해 좌표계를 똑같이 맞추어 줘야 하는 것이다.
+			// 여기서는 국소 공간으로 절두체를 옮겨 주었지만 반대로 물체를 카메라 기준 좌표계로 옮겨 주어도 된다.
+			// 변환 행렬 * 시야 행렬 여기에 (변환 행렬 * 시야 행렬)의 역행렬을 곱하면
 			// 물체의 국소 공간이 획득된다.
 			XMMATRIX toLocal = XMMatrixMultiply(invView, invWorld);
 		
-			// 행렬을 개별 변환들로 분해한다.
+			// (변환 행렬 * 시야 행렬)의 역행렬을 개별 변환들로 분해한다.
 			XMVECTOR scale;
 			XMVECTOR rotQuat;
 			XMVECTOR translation;
@@ -250,10 +260,12 @@ void InstancingAndCullingApp::UpdateScene(float dt)
 			XNA::Frustum localspaceFrustum;
 			XNA::TransformFrustum(&localspaceFrustum, &mCamFrustum, XMVectorGetX(scale), rotQuat, translation);
 
-			// Perform the box/frustum intersection test in local space.
+			// 국소 공간에서 절두체 평면과 물체의 절단 여부를 가려냄
 			if(XNA::IntersectAxisAlignedBoxFrustum(&mSkullBox, &localspaceFrustum) != 0)
 			{
-				// Write the instance data to dynamic VB of the visible objects.
+				// dataView 동적 버퍼에 절단이 필요없이 그려져야하는 물체를 넣기
+				// 결국 mInstancedBuffer에는 mVisibleObjectCount 만큼의 그리기 유효한
+				// 물체가 담기게 된다.
 				dataView[mVisibleObjectCount++] = mInstancedData[i];
 			}
 		}
@@ -327,6 +339,7 @@ void InstancingAndCullingApp::DrawScene()
 		// 인스턴싱을 사용한 그리기를 할 때는 DrawIndexedInstanced 함수를 이용한다.
 		// 첫번째 인자는 인덱스 개수, 두번째는 인스턴스 개수, 나머지 2개는 인덱스 그리는 것과 같고
 		// 마지막 인자는 인스턴스 첫 원소 색인이다.
+		// 절두체 선별에서 빠지는 물체들을 제외한 유효한 물체의 개수인 mVisibleObjectCount 만큼 그린다.
 		md3dImmediateContext->DrawIndexedInstanced(mSkullIndexCount, mVisibleObjectCount, 0, 0, 0);
 	}
 	
