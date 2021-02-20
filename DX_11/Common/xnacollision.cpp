@@ -1077,6 +1077,7 @@ BOOL IntersectPointFrustum( FXMVECTOR Point, const Frustum* pVolume )
 // Ray-Triangle Intersection", Journal of Graphics Tools, vol. 2, no. 1, 
 // pp 21-28, 1997.
 //-----------------------------------------------------------------------------
+// 반직선과 삼각형의 교차 판단
 BOOL IntersectRayTriangle( FXMVECTOR Origin, FXMVECTOR Direction, FXMVECTOR V0, CXMVECTOR V1, CXMVECTOR V2,
                            FLOAT* pDist )
 {
