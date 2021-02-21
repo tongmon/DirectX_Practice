@@ -49,16 +49,13 @@ private:
 
 private:
 
-	Sky* mSky;
+	Sky* mSky; // 환경 입방체 맵이 씌워질 원에 대한 정점, 인덱스, 쉐이더 리소스 뷰가 포함됨
 
 	ID3D11Buffer* mShapesVB;
 	ID3D11Buffer* mShapesIB;
 
 	ID3D11Buffer* mSkullVB;
 	ID3D11Buffer* mSkullIB;
-
-	ID3D11Buffer* mSkySphereVB;
-	ID3D11Buffer* mSkySphereIB;
 
 	ID3D11ShaderResourceView* mFloorTexSRV;
 	ID3D11ShaderResourceView* mStoneTexSRV;
@@ -389,7 +386,7 @@ void CubeMapApp::DrawScene()
 	}
 
 	//
-	// 입방체 맵을 반사하는 구를 그린다.
+	// 입방체 맵을 반사하는 구를 그린다. (원기둥 위에 올려져 있는거)
 	//
 	activeReflectTech->GetDesc(&techDesc);
 	for (UINT p = 0; p < techDesc.Passes; ++p)
@@ -435,7 +432,7 @@ void CubeMapApp::DrawScene()
 		md3dImmediateContext->DrawIndexed(mSkullIndexCount, 0, 0);
 	}
 
-	mSky->Draw(md3dImmediateContext, mCam);
+	mSky->Draw(md3dImmediateContext, mCam); // 입방체 맵 그리기 (배경 그리기)
 
 	// restore default states, as the SkyFX changes them in the effect file.
 	md3dImmediateContext->RSSetState(0);

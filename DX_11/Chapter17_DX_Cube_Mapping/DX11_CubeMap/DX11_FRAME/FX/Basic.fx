@@ -27,7 +27,7 @@ cbuffer cbPerObject
 
 // Nonnumeric values cannot be added to a cbuffer.
 Texture2D gDiffuseMap;
-TextureCube gCubeMap;
+TextureCube gCubeMap; // 입방체 매핑
 
 SamplerState samAnisotropic
 {
@@ -142,7 +142,7 @@ float4 PS(VertexOut pin,
 			float3 reflectionVector = reflect(incident, pin.NormalW);
 			float4 reflectionColor  = gCubeMap.Sample(samAnisotropic, reflectionVector);
 
-            // 물체가 얼마나 반사되는지에 대한 척도, gMaterial.Reflect
+            // 물체가 얼마나 반사되는지에 대한 척도, gMaterial.Reflect(반사율)
 			litColor += gMaterial.Reflect*reflectionColor;
 		}
 	}

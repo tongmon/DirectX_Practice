@@ -70,7 +70,7 @@ ID3D11ShaderResourceView* Sky::CubeMapSRV()
 
 void Sky::Draw(ID3D11DeviceContext* dc, const Camera& camera)
 {
-	// center Sky about eye in world space
+	// 하늘 입방체의 중심은 시점 위치
 	XMFLOAT3 eyePos = camera.GetPosition();
 	XMMATRIX T = XMMatrixTranslation(eyePos.x, eyePos.y, eyePos.z);
 

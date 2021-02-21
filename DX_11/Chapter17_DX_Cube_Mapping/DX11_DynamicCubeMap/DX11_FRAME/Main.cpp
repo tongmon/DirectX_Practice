@@ -10,6 +10,15 @@
 //
 //***************************************************************************************
 
+// 동적으로 움직이는 물체까지 반사하기 위한 입방체 매핑을 다루는 예제이다.
+// 이 방식이 정적 입방체보다 많이 까다로운데
+// 일단 요약하면 동적 반사가 반영되어 있는 입방체 텍스쳐를 만들어서 그 텍스쳐를
+// 물체에 입히는 것이다.
+// 입방체 면은 6면이기에 해당 동적 반사가 반영될 물체의 중심을 기준으로 6방향의 카메라를 만든다.
+// 각 카메라가 바라보는 모습을 각 렌더타겟 뷰에 입력을 한다.
+// 그리고 이 모습은 동적 입방체 텍스쳐 리소스 뷰에 반영이되고 이 리소스 뷰를 사용하여
+// 해당 물체를 그리면 동적 반사가 반영되어 보인다.
+
 #include "d3dApp.h"
 #include "d3dx11Effect.h"
 #include "GeometryGenerator.h"
@@ -64,8 +73,9 @@ private:
 	ID3D11ShaderResourceView* mStoneTexSRV;
 	ID3D11ShaderResourceView* mBrickTexSRV;
 
+	// 입방체 면을 위한 자원들
 	ID3D11DepthStencilView* mDynamicCubeMapDSV;
-	ID3D11RenderTargetView* mDynamicCubeMapRTV[6];
+	ID3D11RenderTargetView* mDynamicCubeMapRTV[6]; // 입방체의 각 면
 	ID3D11ShaderResourceView* mDynamicCubeMapSRV;
 	D3D11_VIEWPORT mCubeMapViewport;
 
@@ -107,7 +117,7 @@ private:
 	UINT mLightCount;
 
 	Camera mCam;
-	Camera mCubeMapCamera[6];
+	Camera mCubeMapCamera[6]; // 입방체 각 면에 대한 카메라
 
 	POINT mLastMousePos;
 };
@@ -143,7 +153,7 @@ DynamicCubeMapApp::DynamicCubeMapApp(HINSTANCE hInstance)
 
 	mCam.SetPosition(0.0f, 2.0f, -15.0f);
 
-	BuildCubeFaceCamera(0.0f, 2.0f, 0.0f);
+	BuildCubeFaceCamera(0.0f, 2.0f, 0.0f); // 카메라 6개 (0,2,0) 중심으로 만들기
 
 	for (int i = 0; i < 6; ++i)
 	{
@@ -320,31 +330,35 @@ void DynamicCubeMapApp::DrawScene()
 {
 	ID3D11RenderTargetView* renderTargets[1];
 
-	// Generate the cube map.
+	// 장면을 입방체 맵 각 면에 렌더링해서 입방체 맵을 생성한다.
 	md3dImmediateContext->RSSetViewports(1, &mCubeMapViewport);
 	for (int i = 0; i < 6; ++i)
 	{
-		// Clear cube map face and depth buffer.
+		// 입방체 맵 면과 깊이 버퍼 초기화
 		md3dImmediateContext->ClearRenderTargetView(mDynamicCubeMapRTV[i], reinterpret_cast<const float*>(&Colors::Silver));
 		md3dImmediateContext->ClearDepthStencilView(mDynamicCubeMapDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-		// Bind cube map face as render target.
+		// 입방체 맵 면을 렌더 대상으로 묶는다.
 		renderTargets[0] = mDynamicCubeMapRTV[i];
 		md3dImmediateContext->OMSetRenderTargets(1, renderTargets, mDynamicCubeMapDSV);
 
-		// Draw the scene with the exception of the center sphere to this cube map face.
+		// 중앙에 구를 제외한 장면을 이 입방체 맵에 그린다.
 		DrawScene(mCubeMapCamera[i], false);
 	}
 
-	// Restore old viewport and render targets.
+	// 기존 뷰포트와 렌더 대상들을 복원한다.
 	md3dImmediateContext->RSSetViewports(1, &mScreenViewport);
 	renderTargets[0] = mRenderTargetView;
 	md3dImmediateContext->OMSetRenderTargets(1, renderTargets, mDepthStencilView);
 
-	// Have hardware generate lower mipmap levels of cube map.
+	// 하드웨어가 입방체 맵의 하위 밉맵 수준들을 생성하게 한다.
+	// 가운데 구에 입혀질 동적 입방체 텍스쳐가 mDynamicCubeMapSRV 여기에 담기게 되고
+	// 이 최종 입방체 텍스쳐에 대한 밉맵을 생성하는 것이다.
+	// 그리고 mDynamicCubeMapSRV 얘는 참조 상태이기에 같은 텍스쳐 자원을
+	// 참조하는 mDynamicCubeMapRTV 얘네의 변동을 반영한다.
 	md3dImmediateContext->GenerateMips(mDynamicCubeMapSRV);
 
-	// Now draw the scene as normal, but with the center sphere.
+	// 이제 중앙의 구를 포함한 실제 카메라로 보는 세계를 렌더링한다.
 	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Silver));
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
@@ -429,7 +443,7 @@ void DynamicCubeMapApp::DrawScene(const Camera& camera, bool drawCenterSphere)
 	XMMATRIX worldViewProj;
 
 	//
-	// Draw the skull.
+	// 해골 그리기 (환경 반사 없음)
 	//
 	D3DX11_TECHNIQUE_DESC techDesc;
 	activeSkullTech->GetDesc(&techDesc);
@@ -456,7 +470,7 @@ void DynamicCubeMapApp::DrawScene(const Camera& camera, bool drawCenterSphere)
 	md3dImmediateContext->IASetIndexBuffer(mShapesIB, DXGI_FORMAT_R32_UINT, 0);
 
 	//
-	// Draw the grid, cylinders, spheres and box without any cubemap reflection.
+	// 격자, 원기둥, 구, 상자를 환경 반사 없이 그리기
 	// 
 
 	activeTexTech->GetDesc(&techDesc);
@@ -530,7 +544,7 @@ void DynamicCubeMapApp::DrawScene(const Camera& camera, bool drawCenterSphere)
 	}
 
 	//
-	// Draw the center sphere with the dynamic cube map.
+	// 가운데 구를 동적 입방체 렌더링을 사용하여 환경 반사되게 그린다.
 	//
 	if (drawCenterSphere)
 	{
@@ -563,13 +577,14 @@ void DynamicCubeMapApp::DrawScene(const Camera& camera, bool drawCenterSphere)
 	md3dImmediateContext->OMSetDepthStencilState(0, 0);
 }
 
+// 입방체 여섯면을 렌더링하는 카메라 여섯개
 void DynamicCubeMapApp::BuildCubeFaceCamera(float x, float y, float z)
 {
-	// Generate the cube map about the given position.
+	// 카메라 위치 (입방체 맵의 중심) 및 상향 벡터
 	XMFLOAT3 center(x, y, z);
 	XMFLOAT3 worldUp(0.0f, 1.0f, 0.0f);
 
-	// Look along each coordinate axis.
+	// 각 좌표축 방향을 바라보는 시선 벡터
 	XMFLOAT3 targets[6] =
 	{
 		XMFLOAT3(x + 1.0f, y, z), // +X
@@ -580,8 +595,11 @@ void DynamicCubeMapApp::BuildCubeFaceCamera(float x, float y, float z)
 		XMFLOAT3(x, y, z - 1.0f)  // -Z
 	};
 
-	// Use world up vector (0,1,0) for all directions except +Y/-Y.  In these cases, we
-	// are looking down +Y or -Y, so we need a different "up" vector.
+	// +Y/-Y 방향을 제외한 모든 방향에서는 세계 공간 (0,1,0)을
+	// 상향 벡터로 사용한다. 그 방향과 정렬된 +Y/-Y 방향에서는
+	// 다른 벡터를 상향 벡터로 사용한다.
+	// 캠코더를 잡고 앞을 찍다가 위를 찍으려하면 기존의 수직이였던
+	// 축이 어느 방향이 될지 생각해보면 감이 온다.
 	XMFLOAT3 ups[6] =
 	{
 		XMFLOAT3(0.0f, 1.0f, 0.0f),  // +X
@@ -595,7 +613,7 @@ void DynamicCubeMapApp::BuildCubeFaceCamera(float x, float y, float z)
 	for (int i = 0; i < 6; ++i)
 	{
 		mCubeMapCamera[i].LookAt(center, targets[i], ups[i]);
-		mCubeMapCamera[i].SetLens(0.5f * XM_PI, 1.0f, 0.1f, 1000.0f);
+		mCubeMapCamera[i].SetLens(0.5f * XM_PI, 1.0f, 0.1f, 1000.0f); // 시야각 90도에 종횡비 1 : 1
 		mCubeMapCamera[i].UpdateViewMatrix();
 	}
 }
@@ -603,44 +621,47 @@ void DynamicCubeMapApp::BuildCubeFaceCamera(float x, float y, float z)
 void DynamicCubeMapApp::BuildDynamicCubeMapViews()
 {
 	//
-	// Cubemap is a special texture array with 6 elements.
+	// 입방체 맵은 6면을 가진 텍스쳐 배열이다.
 	//
 
 	D3D11_TEXTURE2D_DESC texDesc;
 	texDesc.Width = CubeMapSize;
 	texDesc.Height = CubeMapSize;
 	texDesc.MipLevels = 0;
-	texDesc.ArraySize = 6;
+	texDesc.ArraySize = 6; // 배열 크기
 	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
 	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
-	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE; // 렌더 타겟, SRV로 쓰겠다
 	texDesc.CPUAccessFlags = 0;
-	texDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS | D3D11_RESOURCE_MISC_TEXTURECUBE;
+	texDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS | D3D11_RESOURCE_MISC_TEXTURECUBE; // 밉맵 만들고, 입방체로 쓰겠다
 
 	ID3D11Texture2D* cubeTex = 0;
 	HR(md3dDevice->CreateTexture2D(&texDesc, 0, &cubeTex));
 
 	//
-	// Create a render target view to each cube map face 
-	// (i.e., each element in the texture array).
+	// 입방체의 각 면 (즉 텍스처 배열의 각 원소)마다 하나씩
+	// 렌더 대상 뷰를 생성한다.
 	// 
 
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
 	rtvDesc.Format = texDesc.Format;
 	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
-	rtvDesc.Texture2DArray.ArraySize = 1;
 	rtvDesc.Texture2DArray.MipSlice = 0;
 
-	for (int i = 0; i < 6; ++i)
+	// 배열의 한 원소에 대한 뷰만 생성한다.
+	rtvDesc.Texture2DArray.ArraySize = 1;
+
+	for (int i = 0; i < 6; ++i) // 입방체의 각 면에 대해
 	{
+		// i 번째 원소에 대한 렌더 대상 뷰를 생성한다.
 		rtvDesc.Texture2DArray.FirstArraySlice = i;
 		HR(md3dDevice->CreateRenderTargetView(cubeTex, &rtvDesc, &mDynamicCubeMapRTV[i]));
 	}
 
 	//
-	// Create a shader resource view to the cube map.
+	// 입방체 맵에 대한 셰이더 자원 뷰를 생성한다.
 	//
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
@@ -654,8 +675,8 @@ void DynamicCubeMapApp::BuildDynamicCubeMapViews()
 	ReleaseCOM(cubeTex);
 
 	//
-	// We need a depth texture for rendering the scene into the cubemap
-	// that has the same resolution as the cubemap faces.  
+	// 입방체에 렌더링 할 시에 그에 맞는 깊이 스텐실 버퍼가 필요
+	// 그 버퍼는 입방체 면과 해상도가 같아야 한다.
 	//
 
 	D3D11_TEXTURE2D_DESC depthTexDesc;
@@ -674,7 +695,7 @@ void DynamicCubeMapApp::BuildDynamicCubeMapViews()
 	ID3D11Texture2D* depthTex = 0;
 	HR(md3dDevice->CreateTexture2D(&depthTexDesc, 0, &depthTex));
 
-	// Create the depth stencil view for the entire cube
+	// 깊이 스텐실 뷰 생성
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
 	dsvDesc.Format = depthTexDesc.Format;
 	dsvDesc.Flags = 0;
@@ -685,7 +706,7 @@ void DynamicCubeMapApp::BuildDynamicCubeMapViews()
 	ReleaseCOM(depthTex);
 
 	//
-	// Viewport for drawing into cubemap.
+	// 뷰포트 또한 입방체 면 해상도에 맞게 만들어준다.
 	// 
 
 	mCubeMapViewport.TopLeftX = 0.0f;
