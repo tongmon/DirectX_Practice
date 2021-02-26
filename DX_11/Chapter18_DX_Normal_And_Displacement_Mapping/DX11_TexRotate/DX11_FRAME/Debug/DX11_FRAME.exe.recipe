@@ -2,24 +2,24 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_NormalDisplacementMap\Debug\DX11_FRAME.exe</FullPath>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_TexRotate\Debug\DX11_FRAME.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_NormalDisplacementMap\Debug\Basic.cso</FullPath>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_TexRotate\Debug\Basic.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_NormalDisplacementMap\Debug\DisplacementMap.cso</FullPath>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_TexRotate\Debug\DisplacementMap.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_NormalDisplacementMap\Debug\LightHelper.cso</FullPath>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_TexRotate\Debug\LightHelper.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_NormalDisplacementMap\Debug\NormalMap.cso</FullPath>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_TexRotate\Debug\NormalMap.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_NormalDisplacementMap\Debug\Sky.cso</FullPath>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_TexRotate\Debug\Sky.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />

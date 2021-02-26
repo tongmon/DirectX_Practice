@@ -39,3 +39,8 @@ C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Nor
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_NormalDisplacementMap\Debug\LightHelper.cso
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_NormalDisplacementMap\Debug\NormalMap.cso
 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_NormalDisplacementMap\Debug\Sky.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_TexRotate\Debug\Basic.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_TexRotate\Debug\DisplacementMap.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_TexRotate\Debug\LightHelper.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_TexRotate\Debug\NormalMap.cso
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter18_DX_Normal_And_Displacement_Mapping\DX11_TexRotate\Debug\Sky.cso

@@ -112,8 +112,8 @@ float4 PS(VertexOut pin,
 	float3 normalMapSample = gNormalMap.Sample(samLinear, pin.Tex).rgb; // 해당 텍스쳐 좌표의 법선 맵을 따온다.
     // 이제 광원 계산시에 bumpedNormalW 이 법선 맵의 법선이 쓰인다.
     // 기존에 쓰였던 pin.NormalW 이 녀석은 광원 계산에서 쓰이지 않는다.
-	float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, pin.NormalW, pin.TangentW); // 법선 맵의 기준 좌표계를 세계 공간으로 맞춰준다.
-	 
+	// float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, pin.NormalW, pin.TangentW); // 법선 맵의 기준 좌표계를 세계 공간으로 맞춰준다.	
+    float3 bumpedNormalW = NormalSampleToWorldSpaceWithMatrix(normalMapSample, pin.NormalW, pin.TangentW, gTexTransform);
 	//
 	// Lighting.
 	//
