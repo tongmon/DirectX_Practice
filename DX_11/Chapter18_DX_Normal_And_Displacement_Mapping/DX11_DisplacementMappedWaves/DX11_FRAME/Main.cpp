@@ -1,17 +1,11 @@
-//***************************************************************************************
-// WavesDemo.cpp by Frank Luna (C) 2011 All Rights Reserved.
-//
-// Demonstrates ocean waves using displacement mapping.
-//
-// Controls:
-//		Hold the left mouse button down and move the mouse to rotate.
-//      Hold the right mouse button down to zoom in and out.
-//      Press '1' for wireframe
-//      Press '2' for BasicFX
-//      Press '3' for Normal mapping
-//      Press '4' for Displacement mapping
-//
-//***************************************************************************************
+// 파도치는 모양을 변위 매핑을 통해서 생성하는 코드이다.
+// 기존에는 그냥 동적 버퍼를 사용해서 정점 위치 자체를 변하게하여
+// 파도 같은 느낌을 주었다면 이번에는 법선 맵(변위 정보까지 포함) 2장을 이용하여
+// 파도 느낌을 주었다.
+// 이게 왜 2장 이상을 사용하냐면 1장으로는 울렁거리는 효과를 주기가 힘들고 2장을 사용하여
+// 한장은 느리게, 다른 한장은 빠르게 이동하면 변위가 울렁이는 효과가 나타나서 그렇다.
+// 법선 맵이 2장이기에 쉐이더(Waves.fx)에도 노멀 맵이 2개 정의되어 있는 것을 볼 수 있다.
+// 이를 평균을 내어 최종 변위와 법선을 구하게 된다.
 
 #include "d3dApp.h"
 #include "d3dx11Effect.h"
@@ -87,12 +81,15 @@ private:
 	XMFLOAT4X4 mWavesWorld;
 	XMFLOAT4X4 mSkullWorld;
 
+	// 변위 매핑 2개
 	XMFLOAT2 mWavesDispOffset0;
 	XMFLOAT2 mWavesDispOffset1;
 
+	// 법선 매핑 2개
 	XMFLOAT2 mWavesNormalOffset0;
 	XMFLOAT2 mWavesNormalOffset1;
 
+	// 법선, 변위 매핑 변환 행렬
 	XMFLOAT4X4 mWavesDispTexTransform0;
 	XMFLOAT4X4 mWavesDispTexTransform1;
 	XMFLOAT4X4 mWavesNormalTexTransform0;
@@ -295,7 +292,7 @@ void WavesApp::UpdateScene(float dt)
 
 
 	//
-	// Scroll wave heightmap displacement map textures and normal map texture over time.
+	// 시간에 따라서 법선, 변위 맵을 이동시키는데 2장의 속도는 서로 다르게 해야 파도같이 움직인다.
 	//
 
 	mWavesDispOffset0.x += 0.01f * dt;
@@ -365,9 +362,9 @@ void WavesApp::DrawScene()
 	Effects::WavesFX->SetEyePosW(mCam.GetPosition());
 	Effects::WavesFX->SetCubeMap(mSky->CubeMapSRV());
 
-	// These properties could be set per object if needed.
-	Effects::WavesFX->SetHeightScale0(0.4f);
-	Effects::WavesFX->SetHeightScale1(1.2f);
+	// 파도에 관련된 계수들
+	Effects::WavesFX->SetHeightScale0(0.4f); // 해당 변위 높이 계수
+	Effects::WavesFX->SetHeightScale1(1.2f); // 해당 변위 높이 계수
 	Effects::WavesFX->SetMaxTessDistance(4.0f);
 	Effects::WavesFX->SetMinTessDistance(30.0f);
 	Effects::WavesFX->SetMinTessFactor(2.0f);
@@ -421,6 +418,7 @@ void WavesApp::DrawScene()
 		Effects::WavesFX->SetWaveNormalTexTransform1(XMLoadFloat4x4(&mWavesNormalTexTransform1));
 		Effects::WavesFX->SetMaterial(mWavesMat);
 		Effects::WavesFX->SetDiffuseMap(mStoneTexSRV);
+		// 2장의 법선맵을 설정해준다.
 		Effects::WavesFX->SetNormalMap0(mWavesNormalTexSRV0);
 		Effects::WavesFX->SetNormalMap1(mWavesNormalTexSRV1);
 
