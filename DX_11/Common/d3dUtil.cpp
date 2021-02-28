@@ -176,10 +176,12 @@ ID3D11ShaderResourceView* d3dHelper::CreateRandomTexture1DSRV(ID3D11Device* devi
 	return randomTexSRV;
 }
 
+// 변환 행렬(VP = 시야 행렬 * 투영 행렬)로부터 시야 절두체 평면을 획득.
+// planes[]의 x,y,z,w는 평면 계수를 의미한다.
 void ExtractFrustumPlanes(XMFLOAT4 planes[6], CXMMATRIX M)
 {
 	//
-	// Left
+	// 왼쪽 평면
 	//
 	planes[0].x = M(0,3) + M(0,0);
 	planes[0].y = M(1,3) + M(1,0);
@@ -187,7 +189,7 @@ void ExtractFrustumPlanes(XMFLOAT4 planes[6], CXMMATRIX M)
 	planes[0].w = M(3,3) + M(3,0);
 
 	//
-	// Right
+	// 오른쪽 평면
 	//
 	planes[1].x = M(0,3) - M(0,0);
 	planes[1].y = M(1,3) - M(1,0);
@@ -195,7 +197,7 @@ void ExtractFrustumPlanes(XMFLOAT4 planes[6], CXMMATRIX M)
 	planes[1].w = M(3,3) - M(3,0);
 
 	//
-	// Bottom
+	// 아래쪽 평면
 	//
 	planes[2].x = M(0,3) + M(0,1);
 	planes[2].y = M(1,3) + M(1,1);
@@ -203,7 +205,7 @@ void ExtractFrustumPlanes(XMFLOAT4 planes[6], CXMMATRIX M)
 	planes[2].w = M(3,3) + M(3,1);
 
 	//
-	// Top
+	// 위쪽 평면
 	//
 	planes[3].x = M(0,3) - M(0,1);
 	planes[3].y = M(1,3) - M(1,1);
@@ -211,7 +213,7 @@ void ExtractFrustumPlanes(XMFLOAT4 planes[6], CXMMATRIX M)
 	planes[3].w = M(3,3) - M(3,1);
 
 	//
-	// Near
+	// 가까운 평면
 	//
 	planes[4].x = M(0,2);
 	planes[4].y = M(1,2);
@@ -219,14 +221,14 @@ void ExtractFrustumPlanes(XMFLOAT4 planes[6], CXMMATRIX M)
 	planes[4].w = M(3,2);
 
 	//
-	// Far
+	// 먼 평면
 	//
 	planes[5].x = M(0,3) - M(0,2);
 	planes[5].y = M(1,3) - M(1,2);
 	planes[5].z = M(2,3) - M(2,2);
 	planes[5].w = M(3,3) - M(3,2);
 
-	// Normalize the plane equations.
+	// 평면 방정식 계수들을 정규화한다.
 	for(int i = 0; i < 6; ++i)
 	{
 		XMVECTOR v = XMPlaneNormalize(XMLoadFloat4(&planes[i]));

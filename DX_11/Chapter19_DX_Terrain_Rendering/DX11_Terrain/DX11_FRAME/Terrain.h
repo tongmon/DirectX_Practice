@@ -86,7 +86,7 @@ private:
 
 	Material mMat;
 
-	std::vector<XMFLOAT2> mPatchBoundsY;
+	std::vector<XMFLOAT2> mPatchBoundsY; // x성분에 y의 최솟값, y성분에 y의 최댓값을 저장한다.
 	std::vector<float> mHeightmap;
 };
 

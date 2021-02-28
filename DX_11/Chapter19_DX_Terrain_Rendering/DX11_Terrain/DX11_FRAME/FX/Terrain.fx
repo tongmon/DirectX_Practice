@@ -10,20 +10,21 @@ cbuffer cbPerFrame
 	float  gFogRange;
 	float4 gFogColor;
 	
-	// When distance is minimum, the tessellation is maximum.
-	// When distance is maximum, the tessellation is minimum.
+	// 거리가 최소이면 테셀레이션 계수는 최대이다.
+	// 거리가 최대이면 테셀레이션 계수는 최소이다.
 	float gMinDist;
 	float gMaxDist;
 
-	// Exponents for power of 2 tessellation.  The tessellation
-	// range is [2^(gMinTess), 2^(gMaxTess)].  Since the maximum
-	// tessellation is 64, this means gMaxTess can be at most 6
-	// since 2^6 = 64.
+	// 2의 제곱수 형태의 테셀레이션 계수를 위한 지수. 테셀레이션 계수의
+	// 범위는 2 ^ MinTess, 2 ^ MaxTess까지이고 MinTess는 적어도 0 이상
+	// MaxTess는 많아야 6이하여야 한다.
 	float gMinTess;
 	float gMaxTess;
 	
+	// 정규화된 uv 공간 [0, 1] 에서의 높이 값들 사이의 간격.
 	float gTexelCellSpaceU;
 	float gTexelCellSpaceV;
+	// 세계 공간에서 낱칸들 사이의 간격.
 	float gWorldCellSpace;
 	float2 gTexScale = 50.0f;
 	
@@ -44,7 +45,7 @@ Texture2DArray gLayerMapArray;
 Texture2D gBlendMap;
 Texture2D gHeightMap;
 
-SamplerState samLinear
+SamplerState samLinear // 지형 텍스쳐에 대한 필터
 {
 	Filter = MIN_MAG_MIP_LINEAR;
 
@@ -52,7 +53,7 @@ SamplerState samLinear
 	AddressV = WRAP;
 };
 
-SamplerState samHeightmap
+SamplerState samHeightmap // 높이맵에 대한 텍스쳐 필터
 {
 	Filter = MIN_MAG_LINEAR_MIP_POINT;
 
@@ -78,14 +79,14 @@ VertexOut VS(VertexIn vin)
 {
 	VertexOut vout;
 	
-	// Terrain specified directly in world space.
+	// 이 예제에서 입력된 지형 패치 정점들은 이미 세계 공간에 있다.
 	vout.PosW = vin.PosL;
 
-	// Displace the patch corners to world space.  This is to make 
-	// the eye to patch distance calculation more accurate.
+	// 패치 모퉁이 정점들을 적절한 높이로 조정한다.
+	// 이렇게 하면 이후 시점에서 패치까지의 거리 계산이 좀 더 명확해진다.
 	vout.PosW.y = gHeightMap.SampleLevel( samHeightmap, vin.Tex, 0 ).r;
 
-	// Output vertex attributes to next stage.
+	// 정점 특성들을 다음 단계로 출력한다.
 	vout.Tex      = vin.Tex;
 	vout.BoundsY  = vin.BoundsY;
 	
@@ -96,8 +97,9 @@ float CalcTessFactor(float3 p)
 {
 	float d = distance(p, gEyePosW);
 
-	// max norm in xz plane (useful to see detail levels from a bird's eye).
-	//float d = max( abs(p.x-gEyePosW.x), abs(p.z-gEyePosW.z) );
+	// 여기서는 변위 매핑시에 사용했던 함수와 달리
+	// 세부수준이 2의 배수로 적용되어 거리에 따른 차이가 좀 더 잘보인다.
+	// 그니까 2의 s 승에서 s값이 보간되면서 TessFactor가 2 ^ s로 결정된다.
 	
 	float s = saturate( (d - gMinDist) / (gMaxDist - gMinDist) );
 	
@@ -175,26 +177,27 @@ PatchTess ConstantHS(InputPatch<VertexOut, 4> patch, uint patchID : SV_Primitive
 		return pt;
 	}
 	//
-	// Do normal tessellation based on distance.
+	// 거리에 기초해서 테셀레이션 계수를 계산한다.
 	//
 	else 
 	{
-		// It is important to do the tess factor calculation based on the
-		// edge properties so that edges shared by more than one patch will
-		// have the same tessellation factor.  Otherwise, gaps can appear.
+		// 테셀레이션 계수들을 변의 속성에 근거해서 계산하는 것이 중요하다.
+		// 그래야 여러 패치가 공유하는 변의 테셀레이션 계수가 그러한 모든 패치에서 동일해진다.
+		// 그렇지 않으면 테셀레이션 된 메시에 틈이 생긴다.
 		
-		// Compute midpoint on edges, and patch center
+		// 각 변의 중점과 패치 자체의 중점을 계산한다.
 		float3 e0 = 0.5f*(patch[0].PosW + patch[2].PosW);
 		float3 e1 = 0.5f*(patch[0].PosW + patch[1].PosW);
 		float3 e2 = 0.5f*(patch[1].PosW + patch[3].PosW);
 		float3 e3 = 0.5f*(patch[2].PosW + patch[3].PosW);
-		float3  c = 0.25f*(patch[0].PosW + patch[1].PosW + patch[2].PosW + patch[3].PosW);
+		float3  c = 0.25f*(patch[0].PosW + patch[1].PosW + patch[2].PosW + patch[3].PosW); // 사각형 중심
 		
+		// 카메라와 변 중점 거리에 따라 테셀레이션 계수 설정
 		pt.EdgeTess[0] = CalcTessFactor(e0);
 		pt.EdgeTess[1] = CalcTessFactor(e1);
 		pt.EdgeTess[2] = CalcTessFactor(e2);
 		pt.EdgeTess[3] = CalcTessFactor(e3);
-		
+		// 사각형 중심과 카메라 거리에 따라 테셀레이션 계수 설정
 		pt.InsideTess[0] = CalcTessFactor(c);
 		pt.InsideTess[1] = pt.InsideTess[0];
 	
@@ -235,8 +238,7 @@ struct DomainOut
 	float2 TiledTex : TEXCOORD1;
 };
 
-// The domain shader is called for every vertex created by the tessellator.  
-// It is like the vertex shader after tessellation.
+// 테셀레이션에서 영역 쉐이더는 테셀레이션 된 정점들의 정점 쉐이더 역할을 대신한다.
 [domain("quad")]
 DomainOut DS(PatchTess patchTess, 
              float2 uv : SV_DomainLocation, 
@@ -244,29 +246,32 @@ DomainOut DS(PatchTess patchTess,
 {
 	DomainOut dout;
 	
-	// Bilinear interpolation.
+	// 사각형 패치의 테셀레이션 진행
+	
+	// 가로에 대한 실제 정점 정보를 보간을 통해 끌어낸다.
 	dout.PosW = lerp(
 		lerp(quad[0].PosW, quad[1].PosW, uv.x),
 		lerp(quad[2].PosW, quad[3].PosW, uv.x),
 		uv.y); 
 	
+	// 텍스쳐 좌표도 보간을 통해 얻는다.
 	dout.Tex = lerp(
 		lerp(quad[0].Tex, quad[1].Tex, uv.x),
 		lerp(quad[2].Tex, quad[3].Tex, uv.x),
 		uv.y); 
 		
-	// Tile layer textures over terrain.
+	// 지형에 텍스쳐 계층들을 타일링한다.
 	dout.TiledTex = dout.Tex*gTexScale; 
 	
-	// Displacement mapping
+	// 보간된 uv를 통해 획득된 Tex 좌표를 가지고 변위 매핑.
 	dout.PosW.y = gHeightMap.SampleLevel( samHeightmap, dout.Tex, 0 ).r;
 	
-	// NOTE: We tried computing the normal in the shader using finite difference, 
-	// but the vertices move continuously with fractional_even which creates
-	// noticable light shimmering artifacts as the normal changes.  Therefore,
-	// we moved the calculation to the pixel shader.  
+	// 영역 쉐이더에서 유한차분법을 이용해서 법선을 계산해 보았지만
+	// fractional_even의 경우 정점들이 끊임없이 움직이기 때문에 법선의
+	// 변화에 따라 빛이 가물거리는 현상이 두드러졌다. 그래서 결국은 법선
+	// 계산을 픽셀 셰이더로 옮겼다고 한다.
 	
-	// Project to homogeneous clip space.
+	// 동차 절단 공간으로 투영
 	dout.PosH    = mul(float4(dout.PosW, 1.0f), gViewProj);
 	
 	return dout;
@@ -277,7 +282,12 @@ float4 PS(DomainOut pin,
 		  uniform bool gFogEnabled) : SV_Target
 {
 	//
-	// Estimate normal and tangent using central differences.
+	// 중심차분법을 이용해서 접벡터들과 법선 벡터를 추청한다.
+	// 해당 정점에서 x의 기울기, z의 기울기를 구하고
+	// y에 대한 미분 x --> f(x, y, z) => f(1, dy/dx, 0), 
+	// y에 대한 미분 z --> f(x, y, -z) => f(0, dy/dx, -1)을 해서
+	// 세계 공간 기준으로 서술된 TBN을 획득한다.
+	// z는 텍스쳐 좌표 기준 아래방향이 정방향이라 -z가 맞다.
 	//
 	float2 leftTex   = pin.Tex + float2(-gTexelCellSpaceU, 0.0f);
 	float2 rightTex  = pin.Tex + float2(gTexelCellSpaceU, 0.0f);
@@ -289,6 +299,7 @@ float4 PS(DomainOut pin,
 	float bottomY = gHeightMap.SampleLevel( samHeightmap, bottomTex, 0 ).r;
 	float topY    = gHeightMap.SampleLevel( samHeightmap, topTex, 0 ).r;
 	
+	// 기울기 구해서 TBN 획득
 	float3 tangent = normalize(float3(2.0f*gWorldCellSpace, rightY - leftY, 0.0f));
 	float3 bitan   = normalize(float3(0.0f, bottomY - topY, -2.0f*gWorldCellSpace)); 
 	float3 normalW = cross(tangent, bitan);

@@ -105,11 +105,19 @@ void Terrain::Init(ID3D11Device* device, ID3D11DeviceContext* dc, const InitInfo
 
 	// 높이맵을 패치들의 격자로 분할하되, 격자의 각 패치의 지형 낱칸 개수가
 	// CellsPerPatch가 되게 한다. (정점이라서 +1)
+	// 부연설명을 하면 mInfo.HeightmapHeight 얘는 정점 단위로 높이가 매겨져 있는 높이값이다.
+	// 여기서 1을 빼야 낱칸 단위가 된다.
+	// CellsPerPatch 얘는 낱칸 단위로 64가 매겨져 있는데 패치 하나당 최대 테셀레이션이 되면
+	// 하나의 사각형이 64개의 낱칸을 가진 사각형이 되기에 64로 지정이 되어 있는 것이다.
+	// 그러면 (mInfo.HeightmapHeight-1) / CellsPerPatch 이 녀석은 높이맵을 64길이 단위로
+	// 묶음을 짓는 것이고 여기에 + 1을 한다는 것은 낱칸 단위에서 정점 단위로 바꾸기 때문이다.
+	// 예를 들어 1920이 mInfo.HeightmapHeight 얘면 1919 / 64 = 29 따라서 29개의 높이 방향의 낱칸이 생기고
+	// 이 낱칸을 생성하기 위해서 30개의 높이 방향의 정점이 필요하다.
 	mNumPatchVertRows = ((mInfo.HeightmapHeight-1) / CellsPerPatch) + 1;
 	mNumPatchVertCols = ((mInfo.HeightmapWidth-1) / CellsPerPatch) + 1;
 
 	mNumPatchVertices  = mNumPatchVertRows*mNumPatchVertCols; // 높이맵 정점 개수
-	mNumPatchQuadFaces = (mNumPatchVertRows-1)*(mNumPatchVertCols-1); // 높이맵 격자 개수
+	mNumPatchQuadFaces = (mNumPatchVertRows-1)*(mNumPatchVertCols-1); // 높이맵 격자(낱칸) 개수
 
 	LoadHeightmap();
 	Smooth();
@@ -293,39 +301,44 @@ void Terrain::CalcAllPatchBoundsY()
 
 void Terrain::CalcPatchBoundsY(UINT i, UINT j)
 {
-	// Scan the heightmap values this patch covers and compute the min/max height.
+	// 이 패치가 포괄하는 높이맵 원소들을 훑으면서
+	// 최대, 최소 높이를 구한다.
 
-	UINT x0 = j*CellsPerPatch;
-	UINT x1 = (j+1)*CellsPerPatch;
+	UINT x0 = j * CellsPerPatch;
+	UINT x1 = (j + 1) * CellsPerPatch;
 
-	UINT y0 = i*CellsPerPatch;
-	UINT y1 = (i+1)*CellsPerPatch;
+	UINT y0 = i * CellsPerPatch;
+	UINT y1 = (i + 1) * CellsPerPatch;
 
+	// 한 패치(64x64)에 해당하는 AABB 충돌 박스 생성
 	float minY = +MathHelper::Infinity;
 	float maxY = -MathHelper::Infinity;
-	for(UINT y = y0; y <= y1; ++y)
+	for (UINT y = y0; y <= y1; ++y)
 	{
-		for(UINT x = x0; x <= x1; ++x)
+		for (UINT x = x0; x <= x1; ++x)
 		{
-			UINT k = y*mInfo.HeightmapWidth + x;
+			UINT k = y * mInfo.HeightmapWidth + x;
 			minY = MathHelper::Min(minY, mHeightmap[k]);
 			maxY = MathHelper::Max(maxY, mHeightmap[k]);
 		}
 	}
 
-	UINT patchID = i*(mNumPatchVertCols-1)+j;
+	UINT patchID = i * (mNumPatchVertCols - 1) + j;
 	mPatchBoundsY[patchID] = XMFLOAT2(minY, maxY);
 }
 
 void Terrain::BuildQuadPatchVB(ID3D11Device* device)
 {
-	std::vector<Vertex::Terrain> patchVertices(mNumPatchVertRows*mNumPatchVertCols);
+	std::vector<Vertex::Terrain> patchVertices(mNumPatchVertRows*mNumPatchVertCols); // 높이맵 정점들
 
+	// 원래 지형 격자 만들때와 동일하게 진행
 	float halfWidth = 0.5f*GetWidth();
 	float halfDepth = 0.5f*GetDepth();
 
+	// 낱칸 가로, 세로 길이
 	float patchWidth = GetWidth() / (mNumPatchVertCols-1);
 	float patchDepth = GetDepth() / (mNumPatchVertRows-1);
+	// 텍스쳐 대응 좌표 가로, 세로 길이
 	float du = 1.0f / (mNumPatchVertCols-1);
 	float dv = 1.0f / (mNumPatchVertRows-1);
 
@@ -338,13 +351,13 @@ void Terrain::BuildQuadPatchVB(ID3D11Device* device)
 
 			patchVertices[i*mNumPatchVertCols+j].Pos = XMFLOAT3(x, 0.0f, z);
 
-			// Stretch texture over grid.
+			// 텍스쳐가 격자 전체에 입혀지게 적절한 Tex 좌표 할당
 			patchVertices[i*mNumPatchVertCols+j].Tex.x = j*du;
 			patchVertices[i*mNumPatchVertCols+j].Tex.y = i*dv;
 		}
 	}
 
-	// Store axis-aligned bounding box y-bounds in upper-left patch corner.
+	// 축 정렬 경계상자의 Y 경계들을 왼쪽 상단 모퉁이 패치에 저장해 둔다.
 	for(UINT i = 0; i < mNumPatchVertRows-1; ++i)
 	{
 		for(UINT j = 0; j < mNumPatchVertCols-1; ++j)
@@ -369,37 +382,40 @@ void Terrain::BuildQuadPatchVB(ID3D11Device* device)
 
 void Terrain::BuildQuadPatchIB(ID3D11Device* device)
 {
-	std::vector<USHORT> indices(mNumPatchQuadFaces*4); // 4 indices per quad face
+	// 테셀레이션을 할 것이기 때문에 기존의 격자 인덱스 계산이 삼각형으로
+	// 즉 k += 6 이렇게 계산이 되었지만 테셀레이션 제어점 4개 사각형으로 그릴 것이기에
+	// 인덱스 계산이 k += 4 방식으로 이루어진다.
+	std::vector<USHORT> indices(mNumPatchQuadFaces * 4); // 사각형 패치의 4개의 인덱스
 
-	// Iterate over each quad and compute indices.
+	// 각 사각형 마다 색인들을 계산한다.
 	int k = 0;
-	for(UINT i = 0; i < mNumPatchVertRows-1; ++i)
+	for (UINT i = 0; i < mNumPatchVertRows - 1; ++i)
 	{
-		for(UINT j = 0; j < mNumPatchVertCols-1; ++j)
+		for (UINT j = 0; j < mNumPatchVertCols - 1; ++j)
 		{
-			// Top row of 2x2 quad patch
-			indices[k]   = i*mNumPatchVertCols+j;
-			indices[k+1] = i*mNumPatchVertCols+j+1;
+			// 2x2 사각형 패치의 위쪽 정점 두 개
+			indices[k] = i * mNumPatchVertCols + j;
+			indices[k + 1] = i * mNumPatchVertCols + j + 1;
 
-			// Bottom row of 2x2 quad patch
-			indices[k+2] = (i+1)*mNumPatchVertCols+j;
-			indices[k+3] = (i+1)*mNumPatchVertCols+j+1;
+			// 2x2 사각형 패치의 아래쪽 정점 두 개
+			indices[k + 2] = (i + 1) * mNumPatchVertCols + j;
+			indices[k + 3] = (i + 1) * mNumPatchVertCols + j + 1;
 
-			k += 4; // next quad
+			k += 4; // 다음 사각형으로 이동
 		}
 	}
 
 	D3D11_BUFFER_DESC ibd;
-    ibd.Usage = D3D11_USAGE_IMMUTABLE;
+	ibd.Usage = D3D11_USAGE_IMMUTABLE;
 	ibd.ByteWidth = sizeof(USHORT) * indices.size();
-    ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    ibd.CPUAccessFlags = 0;
-    ibd.MiscFlags = 0;
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
 	ibd.StructureByteStride = 0;
 
-    D3D11_SUBRESOURCE_DATA iinitData;
-    iinitData.pSysMem = &indices[0];
-    HR(device->CreateBuffer(&ibd, &iinitData, &mQuadPatchIB));
+	D3D11_SUBRESOURCE_DATA iinitData;
+	iinitData.pSysMem = &indices[0];
+	HR(device->CreateBuffer(&ibd, &iinitData, &mQuadPatchIB));
 }
 
 void Terrain::BuildHeightmapSRV(ID3D11Device* device)
