@@ -28,6 +28,7 @@ cbuffer cbPerFrame
 	float gWorldCellSpace;
 	float2 gTexScale = 50.0f;
 	
+	// 세계 공간에서 절두체 평면의 평면 계수 6면 저장
 	float4 gWorldFrustumPlanes[6];
 };
 
@@ -106,30 +107,46 @@ float CalcTessFactor(float3 p)
 	return pow(2, (lerp(gMaxTess, gMinTess, s)) );
 }
 
-// Returns true if the box is completely behind (in negative half space) of plane.
+// 상자 전체가 평면의 뒤쪽(음의 반공간)에 있다면 true를 돌려준다.
+// 평면 계수에서 ax + by + cz + w = 0 에서 (a, b, c)는 평면의 법선 벡터를 의미한다.
+// 절두체 평면들의 법선은 항상 공간 내부를 가리키고 있다.
+// 따라서 절두체 평면들의 앞면은 안쪽을 항상 바라보고 있다.
 bool AabbBehindPlaneTest(float3 center, float3 extents, float4 plane)
 {
-	float3 n = abs(plane.xyz);
+    float3 n = abs(plane.xyz); // |n.x|, |n.y|, |n.z|
 	
-	// This is always positive.
+	// 반지름은 항상 양수
+	// extents는 x,y,z 축 방향으로의 반지름이고 이는 합쳐져 대각선으로의 사각형 반지름이 된다.
+	// 이를 벡터 n에 투영하는 연산은 밑과 같다. (n이 크기 1이여서 투영가능)
+	// 결과적으로 밑 까지의 연산은
+	// |x 반지름을 n에 투영한 길이| + |y 반지름을 n에 투영한 길이| + |z 반지름을 n에 투영한 길이|
+	// 즉 AABB의 반지름을 벡터 n에 투영한 길이를 나타낸다.
+	// 절댓값은 n 벡터를 구할 때 이미 붙였고 반지름은 이미 양수라 또 절댓값화를 할 필요가 없다.
+	// OBB 충돌에서 배웠었지만 다시 말하면
+	// 한 방에 r = dot(extents, plane.xyz)를 쓰지 않는 이유가 있다.
+	// 이유는 법선 벡터로 투영을 했을 때 가장 긴 길이를 만드는 모퉁이(대각선 반지름) 벡터로 r을 만들어야 하는데
+	// 그냥 주어진 모퉁이로 냅다 평면의 법선 벡터에 투영시키면 이게 가장 긴 길이를 만들지 않을 수 있기에
+	// dot(extents, abs(plane.xyz)) 이 계산을 하는 것이다.
 	float r = dot(extents, n);
 	
-	// signed distance from center point to plane.
+	// 평면 중점과의 부호 있는 거리.
+	// 평면과 점 사이의 거리를 구하는 공식인데 왜 평면의 법선의 크기로 나누지 않느냐면
+	// 이미 이 함수에 들어오는 평면들의 법선 벡터는 정규화가 되어서 크기가 1이기 때문이다.
+	// 거리는 음수로 나올 수도 있게 절댓값을 씌우지 않음
 	float s = dot( float4(center, 1.0f), plane );
 	
-	// If the center point of the box is a distance of e or more behind the
-	// plane (in which case s is negative since it is behind the plane),
-	// then the box is completely in the negative half space of the plane.
+	// 상자의 중점이 평면 뒤쪽으로 거리 r이상 떨어져 있으면
+	// (평면 뒤쪽이므로 s는 음수) 상자 전체가 평면의 음의 반공간에 있는 것
 	return (s + r) < 0.0f;
 }
 
-// Returns true if the box is completely outside the frustum.
+// 상자가 절두체 바깥이면 true를 돌려준다.
 bool AabbOutsideFrustumTest(float3 center, float3 extents, float4 frustumPlanes[6])
 {
 	for(int i = 0; i < 6; ++i)
 	{
-		// If the box is completely behind any of the frustum planes
-		// then it is outside the frustum.
+		// 상자 전체가 절두체의 적어도 한 평면의 뒤쪽에 있다면
+		// 상자는 절두체 바깥에 있는 것이다.
 		if( AabbBehindPlaneTest(center, extents, frustumPlanes[i]) )
 		{
 			return true;
@@ -150,22 +167,30 @@ PatchTess ConstantHS(InputPatch<VertexOut, 4> patch, uint patchID : SV_Primitive
 	PatchTess pt;
 	
 	//
-	// Frustum cull
+	// 절두체 선별
 	//
 	
-	// We store the patch BoundsY in the first control point.
+	// 패치의 BoundY를 첫 번째 제어점에 저장해 두었고 이를 가져와 사용.
 	float minY = patch[0].BoundsY.x;
 	float maxY = patch[0].BoundsY.y;
 	
-	// Build axis-aligned bounding box.  patch[2] is lower-left corner
-	// and patch[1] is upper-right corner.
+	// 축 정렬 경계상자를 만든다.
+	/*
+	0 --- 1
+	|	  |
+	|	  |
+	2 --- 3
+	1이 x,z가 4개 정점 중에 가장 크고 2가 x,z가 가장 작다.
+	*/
 	float3 vMin = float3(patch[2].PosW.x, minY, patch[2].PosW.z);
 	float3 vMax = float3(patch[1].PosW.x, maxY, patch[1].PosW.z);
 	
+	// AABB의 중점, AABB의 반지름
 	float3 boxCenter  = 0.5f*(vMin + vMax);
 	float3 boxExtents = 0.5f*(vMax - vMin);
 	if( AabbOutsideFrustumTest(boxCenter, boxExtents, gWorldFrustumPlanes) )
 	{
+		// 절두체를 벗어난 패치는 테셀레이션 계수를 0으로 만들어 절단한다.
 		pt.EdgeTess[0] = 0.0f;
 		pt.EdgeTess[1] = 0.0f;
 		pt.EdgeTess[2] = 0.0f;

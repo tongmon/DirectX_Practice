@@ -310,7 +310,7 @@ void Terrain::CalcPatchBoundsY(UINT i, UINT j)
 	UINT y0 = i * CellsPerPatch;
 	UINT y1 = (i + 1) * CellsPerPatch;
 
-	// 한 패치(64x64)에 해당하는 AABB 충돌 박스 생성
+	// 한 패치(64x64)에 해당하는 AABB 충돌 박스 생성, 절두체 충돌에 써먹음
 	float minY = +MathHelper::Infinity;
 	float maxY = -MathHelper::Infinity;
 	for (UINT y = y0; y <= y1; ++y)
@@ -358,12 +358,21 @@ void Terrain::BuildQuadPatchVB(ID3D11Device* device)
 	}
 
 	// 축 정렬 경계상자의 Y 경계들을 왼쪽 상단 모퉁이 패치에 저장해 둔다.
-	for(UINT i = 0; i < mNumPatchVertRows-1; ++i)
+	/*
+	1 ------ 2
+	|		 |
+	|		 |
+	|		 |
+	|		 |
+	3 ------ 4
+	여기에서 정점 1에 이 사각형의 높낮이 경계를 저장해 둔다는 것이다. 
+	*/
+	for (UINT i = 0; i < mNumPatchVertRows - 1; ++i)
 	{
-		for(UINT j = 0; j < mNumPatchVertCols-1; ++j)
+		for (UINT j = 0; j < mNumPatchVertCols - 1; ++j)
 		{
-			UINT patchID = i*(mNumPatchVertCols-1)+j;
-			patchVertices[i*mNumPatchVertCols+j].BoundsY = mPatchBoundsY[patchID];
+			UINT patchID = i * (mNumPatchVertCols - 1) + j;
+			patchVertices[i * mNumPatchVertCols + j].BoundsY = mPatchBoundsY[patchID];
 		}
 	}
 
