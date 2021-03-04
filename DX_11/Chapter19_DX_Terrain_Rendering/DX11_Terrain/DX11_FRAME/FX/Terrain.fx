@@ -81,9 +81,11 @@ VertexOut VS(VertexIn vin)
 	VertexOut vout;
 	
 	// 이 예제에서 입력된 지형 패치 정점들은 이미 세계 공간에 있다.
+	// 이미 0,0이 중심이고 가로, 세로 크기가 2049x2049이며 0.5 간격으로 격자가 생성된다.
+	// 따라서 월드 변환을 곱할 필요가 없다.
 	vout.PosW = vin.PosL;
 
-	// 패치 모퉁이 정점들을 적절한 높이로 조정한다.
+	// 패치 모퉁이(제어점들) 정점들을 적절한 높이로 조정한다.
 	// 이렇게 하면 이후 시점에서 패치까지의 거리 계산이 좀 더 명확해진다.
 	vout.PosW.y = gHeightMap.SampleLevel( samHeightmap, vin.Tex, 0 ).r;
 
@@ -286,7 +288,7 @@ DomainOut DS(PatchTess patchTess,
 		uv.y); 
 		
 	// 지형에 텍스쳐 계층들을 타일링한다.
-	dout.TiledTex = dout.Tex*gTexScale; 
+    dout.TiledTex = dout.Tex * gTexScale;
 	
 	// 보간된 uv를 통해 획득된 Tex 좌표를 가지고 변위 매핑.
 	dout.PosW.y = gHeightMap.SampleLevel( samHeightmap, dout.Tex, 0 ).r;
@@ -310,23 +312,36 @@ float4 PS(DomainOut pin,
 	// 중심차분법을 이용해서 접벡터들과 법선 벡터를 추청한다.
 	// 해당 정점에서 x의 기울기, z의 기울기를 구하고
 	// y에 대한 미분 x --> f(x, y, z) => f(1, dy/dx, 0), 
-	// y에 대한 미분 z --> f(x, y, -z) => f(0, dy/dx, -1)을 해서
+	// y에 대한 미분 z --> f(x, y, -z) => f(0, dy/dz, -1)을 해서
 	// 세계 공간 기준으로 서술된 TBN을 획득한다.
 	// z는 텍스쳐 좌표 기준 아래방향이 정방향이라 -z가 맞다.
 	//
+	
+	// 텍스쳐 x좌표 방향으로 한 격자 전, 후의 좌표 획득
 	float2 leftTex   = pin.Tex + float2(-gTexelCellSpaceU, 0.0f);
 	float2 rightTex  = pin.Tex + float2(gTexelCellSpaceU, 0.0f);
+	
+	// 텍스쳐 z좌표 방향으로 한 격자 전, 후의 좌표 획득
 	float2 bottomTex = pin.Tex + float2(0.0f, gTexelCellSpaceV);
 	float2 topTex    = pin.Tex + float2(0.0f, -gTexelCellSpaceV);
 	
+	// 실제 높이 차이 획득
 	float leftY   = gHeightMap.SampleLevel( samHeightmap, leftTex, 0 ).r;
 	float rightY  = gHeightMap.SampleLevel( samHeightmap, rightTex, 0 ).r;
 	float bottomY = gHeightMap.SampleLevel( samHeightmap, bottomTex, 0 ).r;
 	float topY    = gHeightMap.SampleLevel( samHeightmap, topTex, 0 ).r;
 	
-	// 기울기 구해서 TBN 획득
+	// 기울기 구해서 월드 좌표에서 TBN 획득
 	float3 tangent = normalize(float3(2.0f*gWorldCellSpace, rightY - leftY, 0.0f));
-	float3 bitan   = normalize(float3(0.0f, bottomY - topY, -2.0f*gWorldCellSpace)); 
+	// 텍스쳐 좌표와 세계 좌표의 z축 뱡향은 반대
+	// 예를 들어 높이맵 텍스쳐 좌표에서 (0,0.1)이 실제 좌표에서 (0, y값, 500)에 대응되면
+	// (0,0.2) 이 녀석은 실제 좌표에서 (0, y값, 250)에 대응될 것이다.
+	// 왜냐면 텍스쳐 좌표에서 밑으로 내려갈 수록 텍스쳐 좌표 v는 커지지만 세계좌표에서는 z 값이 작아진다.
+	// 여기서 topTex은 (0,0.1) 얘가 될 것이고 bottomTex은 (0,0.2) 얘가 될 것이다.
+	// 그러면 최종적으로 텍스쳐 축 v 방향의 벡터는 (0,0.2) - (0,0.1) 이렇게 구하게 될 것이고
+	// 이를 세계좌표로 옮겨서 진행하면 (0, y값, 250) - (0, y값, 500) 이러면
+	// y값은 결과적으로 bottomY - topY 이게 되었고 z값은 음수가 되니 밑과 같다.
+	float3 bitan   = normalize(float3(0.0f, bottomY - topY, -2.0f*gWorldCellSpace));
 	float3 normalW = cross(tangent, bitan);
 
 
@@ -343,17 +358,23 @@ float4 PS(DomainOut pin,
 	// Texturing
 	//
 	
-	// Sample layers in texture array.
+	// 텍스쳐 배열에 저장된 텍스쳐 계층들에서 표본들을 추출한다.
+	// 이 녀석들의 알파값은 의미가 없다. 
+	// 재사용성을 늘리기 위해 혼합 맵 텍스쳐를 따로 사용한다.
 	float4 c0 = gLayerMapArray.Sample( samLinear, float3(pin.TiledTex, 0.0f) );
 	float4 c1 = gLayerMapArray.Sample( samLinear, float3(pin.TiledTex, 1.0f) );
 	float4 c2 = gLayerMapArray.Sample( samLinear, float3(pin.TiledTex, 2.0f) );
 	float4 c3 = gLayerMapArray.Sample( samLinear, float3(pin.TiledTex, 3.0f) );
 	float4 c4 = gLayerMapArray.Sample( samLinear, float3(pin.TiledTex, 4.0f) ); 
 	
-	// Sample the blend map.
+	// 혼합 맵에서 알파 성분을 추출한다.
+	// 각 r,g,b,a에 각기 다른 회색조 비율이 담겨있다.
+	// 이 혼합맵에서 pin.Tex을 사용하는 이유는 높이맵과 혼합 비율이 연동되기 때문이다.
+	// 지형이 높아질 수록 눈이 쌓인 지형이라던지 이런 것을 만드는데 효과적이다.
 	float4 t  = gBlendMap.Sample( samLinear, pin.Tex ); 
     
-    // Blend the layers on top of each other.
+    // 계층들을 층층이 혼합한다.
+	// 각기 다른 지형을 각기 다른 비율로 섞어 최종 텍스쳐를 뽑아낸다.
     float4 texColor = c0;
     texColor = lerp(texColor, c1, t.r);
     texColor = lerp(texColor, c2, t.g);

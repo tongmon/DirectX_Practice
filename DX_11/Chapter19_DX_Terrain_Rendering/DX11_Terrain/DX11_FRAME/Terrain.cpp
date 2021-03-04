@@ -50,17 +50,33 @@ float Terrain::GetDepth()const
 	return (mInfo.HeightmapHeight-1)*mInfo.CellSpacing;
 }
 
+// 해당 세계 공간의 위치에서 지형의 높이 값을 획득하게 해주는 함수
+// 일단 주어진 위치가 어느 격자에 속하는지 확인을 하고
+// 그 격자에서 보간을 통해 높이를 획득한다.
 float Terrain::GetHeight(float x, float z)const
 {
-	// Transform from terrain local space to "cell" space.
+	// 지형 국소 공간을 "낱칸" 공간으로 변환한다. (원점을 격자의 왼쪽, 위로 이동한다.)
+	// 지형 국소 공간이 가능한 이유는 이미 지형 격자의 국소 좌표계와
+	// 세계 좌표계가 같다. 중심이 두 좌표계 모두 (0,0,0)이다.
+	// x,z 좌표만 따졌을 경우 원점인 (0,0)를 (-0.5f*GetWidth(), 0.5f*GetDepth())로 바꾼
+	// 좌표계로 변환 한다고 생각해보면 원점이 (0,0) 이였을 경우 좌표계에서 (1,1)은
+	// 말 그대로 원점에서 x로 1, z로 1 만큼 떨어져있어서 (1,1)이다.
+	// 근데 원점이 (-0.5f*GetWidth(), 0.5f*GetDepth()) 이게 되고 z축이 반대 방향이 되면
+	// 기존의 (0,0)은 (0.5f*GetWidth(), 0.5f*GetDepth()) 이와 같이 표현이 될 것이고
+	// 기존의 (1,1)은 원점으로 부터 1,1 떨어져 있다고 했는데 z축이 반전이 되었으니 z는 1이 아닌 -1이 떨어진 것이 되고
+	// 최종좌표는 (0.5f*GetWidth() + 1, 0.5f*GetDepth() - 1) 이게 될 것이다.
+	// mInfo.CellSpacing 이를 나누는 이유는 좌표계 원점만 이동한 것이 아니라
+	// 각 격자의 차이도 기존 0.5였던 CellSpacing을 1로 바꾸기 위해서 나눈 것이다. (실제 계산해보면 답 나온다.)
 	float c = (x + 0.5f*GetWidth()) /  mInfo.CellSpacing;
 	float d = (z - 0.5f*GetDepth()) / -mInfo.CellSpacing;
 
-	// Get the row and column we are in.
+	// 주어진 위치가 속한 행과 열을 구한다. (내림함수 사용)
 	int row = (int)floorf(d);
 	int col = (int)floorf(c);
 
-	// Grab the heights of the cell we are in.
+	// 현재 낱칸의 네 높이들을 구한다.
+	// row*mInfo.HeightmapWidth + col 이 녀석이 색인으로 쓰일 수 있는 것은
+	// 실제 격자를 만들때 순서가 (-0.5f*GetWidth(), 0.5f*GetDepth()) 여기서부터 시작이기 때문이다.
 	// A*--*B
 	//  | /|
 	//  |/ |
@@ -70,22 +86,25 @@ float Terrain::GetHeight(float x, float z)const
 	float C = mHeightmap[(row+1)*mInfo.HeightmapWidth + col];
 	float D = mHeightmap[(row+1)*mInfo.HeightmapWidth + col + 1];
 
-	// Where we are relative to the cell.
+	// 1x1에서 s, t가 1이 넘는지 아닌지 판단
+	// 이를 하는 이유는 사각형도 두개의 삼각형으로 이루어 졌기에
+	// ABC에 속하는지, BCD에 속하는지 판단해야 올바른 높이를 구할 수 있다.
 	float s = c - (float)col;
 	float t = d - (float)row;
 
-	// If upper triangle ABC.
+	// ABC에 속하면 s + t가 1보다 작거나 같다.
 	if( s + t <= 1.0f)
 	{
-		float uy = B - A;
-		float vy = C - A;
+		float uy = B - A; // 벡터 AB에서 높이에 관여하는 원소
+		float vy = C - A; // 벡터 AC에서 높이에 관여하는 원소
 		return A + s*uy + t*vy;
 	}
-	else // lower triangle DCB.
+	else // DCB에 속하는 경우
 	{
-		float uy = C - D;
-		float vy = B - D;
-		return D + (1.0f-s)*uy + (1.0f-t)*vy;
+		float uy = C - D; // 벡터 DC에서 높이에 관여하는 원소
+		float vy = B - D; // 벡터 DB에서 높이에 관여하는 원소
+		// D에서 C,B로 뻗어나가는 벡터라서 방향을 고려해 1 - s, 1 - t를 사용한다.
+		return D + (1.0f - s) * uy + (1.0f - t) * vy;
 	}
 }
 
@@ -109,7 +128,7 @@ void Terrain::Init(ID3D11Device* device, ID3D11DeviceContext* dc, const InitInfo
 	// 여기서 1을 빼야 낱칸 단위가 된다.
 	// CellsPerPatch 얘는 낱칸 단위로 64가 매겨져 있는데 패치 하나당 최대 테셀레이션이 되면
 	// 하나의 사각형이 64개의 낱칸을 가진 사각형이 되기에 64로 지정이 되어 있는 것이다.
-	// 그러면 (mInfo.HeightmapHeight-1) / CellsPerPatch 이 녀석은 높이맵을 64길이 단위로
+	// 그러면 (mInfo.HeightmapHeight-1) / CellsPerPatch 이 녀석은 높이맵을 64 길이 단위로
 	// 묶음을 짓는 것이고 여기에 + 1을 한다는 것은 낱칸 단위에서 정점 단위로 바꾸기 때문이다.
 	// 예를 들어 1920이 mInfo.HeightmapHeight 얘면 1919 / 64 = 29 따라서 29개의 높이 방향의 낱칸이 생기고
 	// 이 낱칸을 생성하기 위해서 30개의 높이 방향의 정점이 필요하다.
@@ -203,6 +222,7 @@ void Terrain::LoadHeightmap()
 	std::vector<unsigned char> in(mInfo.HeightmapWidth * mInfo.HeightmapHeight);
 
 	// 높이맵 파일을 연다.
+	// 이 Raw 파일은 2049 x 2049 정점 만큼의 높이 정보가 들어가있다.
 	std::ifstream inFile;
 	inFile.open(mInfo.HeightMapFilename.c_str(), std::ios_base::binary);
 
@@ -446,14 +466,17 @@ void Terrain::BuildHeightmapSRV(ID3D11Device* device)
 	std::vector<HALF> hmap(mHeightmap.size());
 	std::transform(mHeightmap.begin(), mHeightmap.end(), hmap.begin(), XMConvertFloatToHalf);
 	
+	// 높이맵의 높이 범위를 변경한 하위 리소스를 설정한다.
 	D3D11_SUBRESOURCE_DATA data;
 	data.pSysMem = &hmap[0];
-    data.SysMemPitch = mInfo.HeightmapWidth*sizeof(HALF);
-    data.SysMemSlicePitch = 0;
+	data.SysMemPitch = mInfo.HeightmapWidth * sizeof(HALF); // 가로의 크기
+    data.SysMemSlicePitch = 0; // 3차원 배열에는 깊이 값이 필요하지만 이건 texture2D이다.
 
 	ID3D11Texture2D* hmapTex = 0;
 	HR(device->CreateTexture2D(&texDesc, &data, &hmapTex));
 
+	// 최종적으로 mHeightMapSRV 여기에 [0, 255] --> 알맞은 높이로 변환이된
+	// 리소스가 저장이 된다.
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	srvDesc.Format = texDesc.Format;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;

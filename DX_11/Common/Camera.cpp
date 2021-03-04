@@ -186,6 +186,15 @@ void Camera::Walk(float d) // 종이동, 앞뒤
 	XMStoreFloat3(&mPosition, XMVectorMultiplyAdd(s, l, p));
 }
 
+void Camera::Move(const XMFLOAT3 &Dir, float d)
+{
+	XMVECTOR s = XMVectorReplicate(d); // 이동할 거리
+	XMVECTOR l = XMLoadFloat3(&Dir); // 바라보는 방향으로 이동함
+	XMVECTOR p = XMLoadFloat3(&mPosition);
+	// 횡이동과 같은 원리로 방향만 바라보는 방향이 기준이 되는 것이다.
+	XMStoreFloat3(&mPosition, XMVectorMultiplyAdd(s, l, p));
+}
+
 void Camera::Pitch(float angle) // 고개 끄덕이는 경우 카메라 움직임
 {
 	// 상향 벡터와 시선 벡터를 오른쪽 벡터에 대해 회전한다.

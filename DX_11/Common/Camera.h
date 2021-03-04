@@ -67,6 +67,9 @@ public:
 	void RotateY(float angle);
 	void Roll(float angle);
 
+	// 주어진 벡터 방향으로 이동
+	void Move(const XMFLOAT3& Dir, float d);
+
 	// 매 프레임마다, 카메라 위치나 방향을 수정한 후
 	// 이 메서드를 호출해서 시야 행렬을 재구축한다.
 	void UpdateViewMatrix();
