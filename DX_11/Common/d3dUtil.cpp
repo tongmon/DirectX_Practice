@@ -123,10 +123,11 @@ ID3D11ShaderResourceView* d3dHelper::CreateTexture2DArraySRV(
 	return texArraySRV;
 }
 
+// 난수들이 담기는 텍스쳐 생성
 ID3D11ShaderResourceView* d3dHelper::CreateRandomTexture1DSRV(ID3D11Device* device)
 {
 	// 
-	// Create the random data.
+	// 무작위 자료 생성
 	//
 	XMFLOAT4 randomValues[1024];
 
@@ -144,7 +145,7 @@ ID3D11ShaderResourceView* d3dHelper::CreateRandomTexture1DSRV(ID3D11Device* devi
     initData.SysMemSlicePitch = 0;
 
 	//
-	// Create the texture.
+	// 텍스쳐 생성
 	//
     D3D11_TEXTURE1D_DESC texDesc;
     texDesc.Width = 1024;
@@ -160,7 +161,7 @@ ID3D11ShaderResourceView* d3dHelper::CreateRandomTexture1DSRV(ID3D11Device* devi
     HR(device->CreateTexture1D(&texDesc, &initData, &randomTex));
 
 	//
-	// Create the resource view.
+	// 자원뷰를 생성
 	//
     D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
 	viewDesc.Format = texDesc.Format;

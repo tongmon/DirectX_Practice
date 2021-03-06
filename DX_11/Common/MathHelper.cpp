@@ -36,16 +36,18 @@ XMVECTOR MathHelper::RandUnitVec3()
 	XMVECTOR One  = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
 	XMVECTOR Zero = XMVectorZero();
 
-	// Keep trying until we get a point on/in the hemisphere.
+	// 반구 안의 점이 나올 때까지 시도한다.
 	while(true)
 	{
-		// Generate random point in the cube [-1,1]^3.
+		// 입방체 [-1,1] ^ 3 안의 무작위 점 하나를 생성한다.
 		XMVECTOR v = XMVectorSet(MathHelper::RandF(-1.0f, 1.0f), MathHelper::RandF(-1.0f, 1.0f), MathHelper::RandF(-1.0f, 1.0f), 0.0f);
 
-		// Ignore points outside the unit sphere in order to get an even distribution 
-		// over the unit sphere.  Otherwise points will clump more on the sphere near 
-		// the corners of the cube.
-
+		// 단위 구에 대한 고른 분포를 얻기 위해, 단위 구 바깥의
+		// 점은 무시한다.
+		// 이렇게 하지 않으면 점들이 구보다는 입방체 모퉁이들에 더 많이 모일 것이다.
+		// v * v > One 인가? 를 물어보는 것이다. (반지름이 1인 구에서 그 안쪽의 랜덤 좌표 획득)
+		// 결과적으로 벡터 v 원소에 -1,1 인 녀석이 단 하나라도 포함되면
+		// 다시 랜덤한 다른 수를 뽑아내야 한다.
 		if( XMVector3Greater( XMVector3LengthSq(v), One) )
 			continue;
 

@@ -13,13 +13,13 @@
 class MathHelper
 {
 public:
-	// Returns random float in [0, 1).
+	// [0, 1) 구간의 부동소수점 난수를 돌려준다.
 	static float RandF()
 	{
 		return (float)(rand()) / (float)RAND_MAX;
 	}
 
-	// Returns random float in [a, b).
+	// [a, b) 구간의 부동소수점 난수를 돌려준다.
 	static float RandF(float a, float b)
 	{
 		return a + RandF()*(b-a);
