@@ -269,7 +269,10 @@ void DrawGS(point VertexOut gin[1],
 
 float4 DrawPS(GeoOut pin) : SV_TARGET
 {
-    return gTexArray.Sample(samLinear, float3(pin.Tex, 0)) * pin.Color; // 텍스쳐 배열에서 첫번째 텍스쳐
+	// 원래 본 색상 pin.Color 여기에 텍스쳐 색상을 입히는 것이다. 
+	// 본 색상에는 알파값이 적절하게 매겨져 있을 것이고 그 알파값과 배경과 혼합이 되어 적절한
+	// 색이 렌더링 된다.
+	return gTexArray.Sample(samLinear, float3(pin.Tex, 0)) * pin.Color; // 텍스쳐 배열에서 첫번째 텍스쳐
 }
 
 technique11 DrawTech
