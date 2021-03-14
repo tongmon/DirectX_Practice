@@ -13,6 +13,15 @@
 //
 //***************************************************************************************
 
+// 그림자 매핑 예제
+// 그림자 매핑의 핵심은 광원 시점에서 바라본 그 장면을 텍스쳐 자원에 옮겨 담는 것이라 할 수 있다.
+// 이 옮겨 담아진 장면(물론 깊이 값만)은 그림자 맵 역할을 하여 실제 해당 영역이 그림자가 그려져야하는지
+// 판단을 하는 기준이 된다.
+// 카메라(시점)에서 보는 픽셀들은 모두 그림자 맵과 비교를 통해서 그림자 계수가 곱해서 출력되게 된다.
+// 여기까지가 대략적인 개요고 그림자 계단 현상이랑 그림자 여드름 현상과 같은 추가적인 문제에 대한
+// 해결책까지 완료해야 정상적인 그림자가 그려진다.
+// 그림자 가장자리를 해결하는 기법으로 책에서 나온 PCF 말고 VCM 기법도 있다.
+
 #include "d3dApp.h"
 #include "d3dx11Effect.h"
 #include "GeometryGenerator.h"
@@ -94,6 +103,7 @@ private:
 
 	BoundingSphere mSceneBounds;
 
+	// 그림자 맵 생성을 위한 크기, 변환 행렬 변수들
 	static const int SMapSize = 2048;
 	ShadowMap* mSmap;
 	XMFLOAT4X4 mLightView;
@@ -205,8 +215,8 @@ ShadowsApp::ShadowsApp(HINSTANCE hInstance)
 	mDirLights[0].Specular = XMFLOAT4(0.8f, 0.8f, 0.7f, 1.0f);
 	mDirLights[0].Direction = XMFLOAT3(-0.57735f, -0.57735f, 0.57735f);
 
-	// Shadow acne gets worse as we increase the slope of the polygon (from the
-	// perspective of the light).
+	// 그림자 여드름은 해당 폴리곤의 경사가 심해질 수록 더 도드라진다.
+	// 밑의 주어진 빛 방향에서 테스트 진행해보면 안다.
 	//mDirLights[0].Direction = XMFLOAT3(5.0f/sqrtf(50.0f), -5.0f/sqrtf(50.0f), 0.0f);
 	//mDirLights[0].Direction = XMFLOAT3(10.0f/sqrtf(125.0f), -5.0f/sqrtf(125.0f), 0.0f);
 	//mDirLights[0].Direction = XMFLOAT3(10.0f/sqrtf(116.0f), -4.0f/sqrtf(116.0f), 0.0f);
@@ -863,7 +873,7 @@ void ShadowsApp::DrawSceneToShadowMap()
 	}
 }
 
-// 그림자 맵 화면에 출력하는 함수
+// 그림자 맵을 화면에 출력하는 함수
 void ShadowsApp::DrawScreenQuad()
 {
 	UINT stride = sizeof(Vertex::Basic32);
@@ -875,11 +885,17 @@ void ShadowsApp::DrawScreenQuad()
 	md3dImmediateContext->IASetIndexBuffer(mScreenQuadIB, DXGI_FORMAT_R32_UINT, 0);
 
 	// 그림자 맵 출력 화면의 크기와 위치 조정
+	// 이게 가능한 이유는 애초에 Quad 도형의 좌표는 국소 공간에 있는 상태고
+	// 세계 공간 좌표축으로 정의가 안되어 있다.
+	// 게다가 Quad 도형의 초기 좌표는 가로, 세로 모두 -1 ~ 1까지인 NDC 좌표 공간이고
+	// 여기서 밑의 변환 행렬로 x, y를 절반씩 줄이고 위치를 구석탱이에 몰아넣어서 최종
+	// 그림자 맵을 출력하는 텍스쳐 화면이 박히게 된다.
 	XMMATRIX world(
 		0.5f, 0.0f, 0.0f, 0.0f,
 		0.0f, 0.5f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.5f, -0.5f, 0.0f, 1.0f);
+		// 0.0f, 0.0f, 0.0f, 1.0f); 이렇게 하면 그림자 맵이 화면 정가운데에 배치된다.
 
 	ID3DX11EffectTechnique* tech = Effects::DebugTexFX->ViewRedTech;
 	D3DX11_TECHNIQUE_DESC techDesc;
@@ -912,6 +928,7 @@ void ShadowsApp::BuildShadowTransform()
 	// 장면을 감싸는 광원 공간 직교 투영 상자.
 	// 카메라(광원 위치)에서 바라보는 직교 투영 상자가 구해진다.
 	// 왜냐면 sphereCenterLS를 광원 공간으로 옮겼기 때문이다.
+	// 그렇기에 이 상태에서 x, y, z 를 더하면 광원 좌표계 축 방향으로 더해지는 것이다.
 	float l = sphereCenterLS.x - mSceneBounds.Radius;
 	float b = sphereCenterLS.y - mSceneBounds.Radius;
 	float n = sphereCenterLS.z - mSceneBounds.Radius;
