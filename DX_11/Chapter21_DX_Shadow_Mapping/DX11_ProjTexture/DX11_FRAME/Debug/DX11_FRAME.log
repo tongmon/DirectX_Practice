@@ -1,6 +1,4 @@
 ﻿  compilation succeeded; see C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter21_DX_Shadow_Mapping\DX11_ProjTexture\Debug\Basic.cso
-  compilation succeeded; see C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter21_DX_Shadow_Mapping\DX11_ProjTexture\Debug\DisplacementMap.cso
-  compilation succeeded; see C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter21_DX_Shadow_Mapping\DX11_ProjTexture\Debug\NormalMap.cso
   Main.cpp
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamath.h(2662,52): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamath.h(2662,64): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.

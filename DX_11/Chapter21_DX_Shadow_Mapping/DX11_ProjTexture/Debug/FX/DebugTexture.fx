@@ -39,13 +39,16 @@ VertexOut VS(VertexIn vin)
 
 float4 PS(VertexOut pin) : SV_Target
 {
-	return gTexture.Sample(samLinear, pin.Tex);
+    float4 Diff = gTexture.Sample(samLinear, pin.Tex);
+    clip(Diff.a - 0.1f);
+    
+    return Diff;
 }
 
 float4 PS(VertexOut pin, uniform int index) : SV_Target
 {
 	float4 c = gTexture.Sample(samLinear, pin.Tex).r;
-	
+
 	// draw as grayscale
 	return float4(c.rrr, 1);
 }

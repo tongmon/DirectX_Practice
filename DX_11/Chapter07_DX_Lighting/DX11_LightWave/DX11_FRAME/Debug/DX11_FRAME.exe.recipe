@@ -2,15 +2,15 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_Box\Debug\DX11_FRAME.exe</FullPath>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_LightWave\Debug\DX11_FRAME.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_Box\Debug\LightHelper.cso</FullPath>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_LightWave\Debug\LightHelper.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_Box\Debug\Lighting.cso</FullPath>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_LightWave\Debug\Lighting.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />

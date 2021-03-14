@@ -28,6 +28,7 @@ cbuffer cbPerObject
 Texture2D gShadowMap;
 Texture2D gDiffuseMap;
 Texture2D gNormalMap;
+Texture2D gProjMap;
 
 TextureCube gCubeMap;
 
@@ -36,6 +37,15 @@ SamplerState samLinear
 	Filter = MIN_MAG_MIP_LINEAR;
 	AddressU = WRAP;
 	AddressV = WRAP;
+};
+
+SamplerState samShad2
+{
+    Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = BORDER;
+    AddressV = BORDER;
+    AddressW = BORDER;
+    BorderColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 };
 
 SamplerComparisonState samShadow
@@ -159,7 +169,11 @@ float4 PS(VertexOut pin,
 			spec    += shadow[i]*S;
 		}
 		   
-		litColor = texColor*(ambient + diffuse) + spec;
+        litColor = texColor * (ambient + diffuse) + spec;
+        
+        pin.ShadowPosH.xyz /= pin.ShadowPosH.w;
+        float4 ProjColor = gProjMap.Sample(samShad2, pin.ShadowPosH.xy);
+        litColor += shadow[0] * ProjColor;
 		  
 		if( gReflectionEnabled )
 		{

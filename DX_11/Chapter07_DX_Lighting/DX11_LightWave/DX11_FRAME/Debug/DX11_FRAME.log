@@ -1,6 +1,4 @@
-﻿  compilation succeeded; see C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_Box\Debug\LightHelper.cso
-  compilation succeeded; see C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_Box\Debug\Lighting.cso
-  Main.cpp
+﻿  Main.cpp
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamath.h(2662,52): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamath.h(2662,64): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamath.h(2662,76): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
@@ -63,4 +61,4 @@ C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathvector.i
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathmisc.inl(518,43): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathmisc.inl(519,40): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
 C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\xnamathmisc.inl(519,51): warning C4838: 'unsigned int'에서 'INT'(으)로의 변환에는 축소 변환이 필요합니다.
-  DX11_FRAME.vcxproj -> C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_Box\Debug\DX11_FRAME.exe
+  DX11_FRAME.vcxproj -> C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter07_DX_Lighting\DX11_LightWave\Debug\DX11_FRAME.exe

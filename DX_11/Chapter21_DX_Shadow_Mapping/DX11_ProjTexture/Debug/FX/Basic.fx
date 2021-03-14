@@ -29,6 +29,7 @@ cbuffer cbPerObject
 // Nonnumeric values cannot be added to a cbuffer.
 Texture2D gDiffuseMap;
 Texture2D gShadowMap;
+Texture2D gProjMap;
 
 TextureCube gCubeMap;
 
@@ -37,6 +38,15 @@ SamplerState samLinear
 	Filter = MIN_MAG_MIP_LINEAR;
 	AddressU = WRAP;
 	AddressV = WRAP;
+};
+
+SamplerState samShad2
+{
+    Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = BORDER;
+    AddressV = BORDER;
+    AddressW = BORDER;
+    BorderColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 };
 
 SamplerComparisonState samShadow
@@ -70,17 +80,18 @@ VertexOut VS(VertexIn vin)
 {
 	VertexOut vout;
 	
-	// Transform to world space space.
+	// 세계 공간으로 변환
 	vout.PosW    = mul(float4(vin.PosL, 1.0f), gWorld).xyz;
 	vout.NormalW = mul(vin.NormalL, (float3x3)gWorldInvTranspose);
 		
-	// Transform to homogeneous clip space.
+	// 동차 절단 공간으로 변환
 	vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);
 	
-	// Output vertex attributes for interpolation across triangle.
+	// 정점 특성들을 출력한다. 이들은 삼각형 표면을 따라 보간된다.
 	vout.Tex = mul(float4(vin.Tex, 0.0f, 1.0f), gTexTransform).xy;
 
-	// Generate projective tex-coords to project shadow map onto scene.
+	// 그림자 맵을 장면에 투영하기 위한 투영 텍스쳐 좌표를 생성한다.
+    // gShadowTransform는 국소 공간 --> 그림자 맵 텍스쳐 공간으로의 변환 행렬이다.
 	vout.ShadowPosH = mul(float4(vin.PosL, 1.0f), gShadowTransform);
 
 	return vout;
@@ -93,7 +104,7 @@ float4 PS(VertexOut pin,
 		  uniform bool gFogEnabled, 
 		  uniform bool gReflectionEnabled) : SV_Target
 {
-	// Interpolating normal can unnormalize it, so normalize it.
+	// 보간 때문에 법선이 더 이상 단위벡터가 아닐 수 있으므로 다시 정규화한다.
     pin.NormalW = normalize(pin.NormalW);
 
 	// The toEye vector is used in lighting.
@@ -122,7 +133,7 @@ float4 PS(VertexOut pin,
 	}
 	 
 	//
-	// Lighting.
+	// 조명
 	//
 
 	float4 litColor = texColor;
@@ -133,11 +144,11 @@ float4 PS(VertexOut pin,
 		float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
 		float4 spec    = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-		// Only the first light casts a shadow.
+		// 첫 번째 광원만 그림자를 드리운다.
 		float3 shadow = float3(1.0f, 1.0f, 1.0f);
 		shadow[0] = CalcShadowFactor(samShadow, gShadowMap, pin.ShadowPosH);
 
-		// Sum the light contribution from each light source.  
+		// 각 광원이 기여한 빛을 합한다.
 		[unroll]
 		for(int i = 0; i < gLightCount; ++i)
 		{
@@ -150,8 +161,12 @@ float4 PS(VertexOut pin,
 			spec    += shadow[i]*S;
 		}
 
-		litColor = texColor*(ambient + diffuse) + spec;
-
+        litColor = texColor * (ambient + diffuse) + spec;
+        
+        pin.ShadowPosH.xyz /= pin.ShadowPosH.w;
+        float4 ProjColor = gProjMap.Sample(samShad2, pin.ShadowPosH.xy);
+        litColor += shadow[0] * ProjColor;
+        
 		if( gReflectionEnabled )
 		{
 			float3 incident = -toEye;

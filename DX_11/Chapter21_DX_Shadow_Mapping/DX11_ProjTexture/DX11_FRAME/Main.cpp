@@ -1,5 +1,10 @@
 // 텍스쳐 투영 예제다.
-// 왼쪽 밑에는 빛에서 투사할 이미지, 오른쪽에는 그림자 맵이 위치한다.
+// 화면 왼쪽 밑에는 빛에서 투사할 이미지, 오른쪽에는 그림자 맵이 위치한다.
+// 처음에 그림자 맵을 통상적으로 그리고, 그 후에 깊이버퍼를 때고 광원 시점의 렌더 타겟에 투사할 이미지를 그려준다.
+// 그리고 쉐이더 코드에서는 그림자 판정은 기존대로 수행하면서 그림자 계수가 곱해진 광원 시점의 렌더 타겟 이미지의
+// 해당 픽셀의 색상을 더해주면 된다.
+// 그러면 마지 영화관 프로젝터에서 이미지가 나오는 듯한 느낌을 주게된다.
+// 프로젝터의 크기는 직교투영의 박스 x, y 크기로 조절이 가능하다.
 
 #include "d3dApp.h"
 #include "d3dx11Effect.h"
@@ -991,11 +996,11 @@ void ShadowsApp::BuildShadowTransform()
 	// 카메라(광원 위치)에서 바라보는 직교 투영 상자가 구해진다.
 	// 왜냐면 sphereCenterLS를 광원 공간으로 옮겼기 때문이다.
 	// 그렇기에 이 상태에서 x, y, z 를 더하면 광원 좌표계 축 방향으로 더해지는 것이다.
-	float l = sphereCenterLS.x - mSceneBounds.Radius;
-	float b = sphereCenterLS.y - mSceneBounds.Radius;
+	float l = sphereCenterLS.x - mSceneBounds.Radius / 4;
+	float b = sphereCenterLS.y - mSceneBounds.Radius / 4;
 	float n = sphereCenterLS.z - mSceneBounds.Radius;
-	float r = sphereCenterLS.x + mSceneBounds.Radius;
-	float t = sphereCenterLS.y + mSceneBounds.Radius;
+	float r = sphereCenterLS.x + mSceneBounds.Radius / 4;
+	float t = sphereCenterLS.y + mSceneBounds.Radius / 4;
 	float f = sphereCenterLS.z + mSceneBounds.Radius;
 	XMMATRIX P = XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
 
