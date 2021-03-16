@@ -17,7 +17,7 @@
       <UniqueIdentifier>{95a8ddcb-52f0-4ce6-9684-9d2120b61c28}</UniqueIdentifier>
     </Filter>
     <Filter Include="FX">
-      <UniqueIdentifier>{b3733d79-a268-4726-a1bb-d1ef7981d2c2}</UniqueIdentifier>
+      <UniqueIdentifier>{cfbd36f7-b332-4b1f-bacc-0b3c2c4adeb8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -60,13 +60,10 @@
     <ClCompile Include="Effects.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Octree.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="RenderStates.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ShadowMap.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Sky.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Vertex.cpp">
@@ -116,77 +113,29 @@
     <ClInclude Include="Effects.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Octree.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
     <ClInclude Include="RenderStates.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ShadowMap.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Sky.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Vertex.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="AlignedAllocationPolicy.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="FX\Basic.cod">
+    <None Include="FX\AmbientOcclusion.cod">
       <Filter>FX</Filter>
     </None>
-    <None Include="FX\Basic.fxo">
-      <Filter>FX</Filter>
-    </None>
-    <None Include="FX\BuildShadowMap.cod">
-      <Filter>FX</Filter>
-    </None>
-    <None Include="FX\BuildShadowMap.fxo">
-      <Filter>FX</Filter>
-    </None>
-    <None Include="FX\DebugTexture.cod">
-      <Filter>FX</Filter>
-    </None>
-    <None Include="FX\DebugTexture.fxo">
-      <Filter>FX</Filter>
-    </None>
-    <None Include="FX\DisplacementMap.cod">
-      <Filter>FX</Filter>
-    </None>
-    <None Include="FX\DisplacementMap.fxo">
-      <Filter>FX</Filter>
-    </None>
-    <None Include="FX\NormalMap.cod">
-      <Filter>FX</Filter>
-    </None>
-    <None Include="FX\NormalMap.fxo">
-      <Filter>FX</Filter>
-    </None>
-    <None Include="FX\Sky.cod">
-      <Filter>FX</Filter>
-    </None>
-    <None Include="FX\Sky.fxo">
+    <None Include="FX\AmbientOcclusion.fxo">
       <Filter>FX</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="FX\Basic.fx">
-      <Filter>FX</Filter>
-    </FxCompile>
-    <FxCompile Include="FX\BuildShadowMap.fx">
-      <Filter>FX</Filter>
-    </FxCompile>
-    <FxCompile Include="FX\DebugTexture.fx">
-      <Filter>FX</Filter>
-    </FxCompile>
-    <FxCompile Include="FX\DisplacementMap.fx">
-      <Filter>FX</Filter>
-    </FxCompile>
-    <FxCompile Include="FX\LightHelper.fx">
-      <Filter>FX</Filter>
-    </FxCompile>
-    <FxCompile Include="FX\NormalMap.fx">
-      <Filter>FX</Filter>
-    </FxCompile>
-    <FxCompile Include="FX\Sky.fx">
+    <FxCompile Include="FX\AmbientOcclusion.fx">
       <Filter>FX</Filter>
     </FxCompile>
   </ItemGroup>

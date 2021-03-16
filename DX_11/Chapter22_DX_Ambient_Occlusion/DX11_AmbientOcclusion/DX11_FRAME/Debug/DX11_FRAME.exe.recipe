@@ -2,30 +2,12 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter21_DX_Shadow_Mapping\DX11_ShadowMapping\Debug\DX11_FRAME.exe</FullPath>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter22_DX_Ambient_Occlusion\DX11_AmbientOcclusion\Debug\DX11_FRAME.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter21_DX_Shadow_Mapping\DX11_ShadowMapping\Debug\Basic.cso</FullPath>
-    </ContentFile>
-    <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter21_DX_Shadow_Mapping\DX11_ShadowMapping\Debug\BuildShadowMap.cso</FullPath>
-    </ContentFile>
-    <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter21_DX_Shadow_Mapping\DX11_ShadowMapping\Debug\DebugTexture.cso</FullPath>
-    </ContentFile>
-    <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter21_DX_Shadow_Mapping\DX11_ShadowMapping\Debug\DisplacementMap.cso</FullPath>
-    </ContentFile>
-    <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter21_DX_Shadow_Mapping\DX11_ShadowMapping\Debug\LightHelper.cso</FullPath>
-    </ContentFile>
-    <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter21_DX_Shadow_Mapping\DX11_ShadowMapping\Debug\NormalMap.cso</FullPath>
-    </ContentFile>
-    <ContentFile>
-      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter21_DX_Shadow_Mapping\DX11_ShadowMapping\Debug\Sky.cso</FullPath>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter22_DX_Ambient_Occlusion\DX11_AmbientOcclusion\Debug\AmbientOcclusion.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />

@@ -186,9 +186,8 @@
     <ClCompile Include="..\..\..\Common\xnacollision.cpp" />
     <ClCompile Include="Effects.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Octree.cpp" />
     <ClCompile Include="RenderStates.cpp" />
-    <ClCompile Include="ShadowMap.cpp" />
-    <ClCompile Include="Sky.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -205,34 +204,18 @@
     <ClInclude Include="..\..\..\Common\TextureMgr.h" />
     <ClInclude Include="..\..\..\Common\Waves.h" />
     <ClInclude Include="..\..\..\Common\xnacollision.h" />
+    <ClInclude Include="AlignedAllocationPolicy.h" />
     <ClInclude Include="Effects.h" />
+    <ClInclude Include="Octree.h" />
     <ClInclude Include="RenderStates.h" />
-    <ClInclude Include="ShadowMap.h" />
-    <ClInclude Include="Sky.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="FX\Basic.cod" />
-    <None Include="FX\Basic.fxo" />
-    <None Include="FX\BuildShadowMap.cod" />
-    <None Include="FX\BuildShadowMap.fxo" />
-    <None Include="FX\DebugTexture.cod" />
-    <None Include="FX\DebugTexture.fxo" />
-    <None Include="FX\DisplacementMap.cod" />
-    <None Include="FX\DisplacementMap.fxo" />
-    <None Include="FX\NormalMap.cod" />
-    <None Include="FX\NormalMap.fxo" />
-    <None Include="FX\Sky.cod" />
-    <None Include="FX\Sky.fxo" />
+    <None Include="FX\AmbientOcclusion.cod" />
+    <None Include="FX\AmbientOcclusion.fxo" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="FX\Basic.fx" />
-    <FxCompile Include="FX\BuildShadowMap.fx" />
-    <FxCompile Include="FX\DebugTexture.fx" />
-    <FxCompile Include="FX\DisplacementMap.fx" />
-    <FxCompile Include="FX\LightHelper.fx" />
-    <FxCompile Include="FX\NormalMap.fx" />
-    <FxCompile Include="FX\Sky.fx" />
+    <FxCompile Include="FX\AmbientOcclusion.fx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

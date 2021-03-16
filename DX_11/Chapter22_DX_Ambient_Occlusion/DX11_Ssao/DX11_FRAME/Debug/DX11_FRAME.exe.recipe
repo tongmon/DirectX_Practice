@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter22_DX_Ambient_Occlusion\DX11_Ssao\Debug\DX11_FRAME.exe</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter22_DX_Ambient_Occlusion\DX11_Ssao\Debug\Basic.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter22_DX_Ambient_Occlusion\DX11_Ssao\Debug\Blur.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter22_DX_Ambient_Occlusion\DX11_Ssao\Debug\BuildShadowMap.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter22_DX_Ambient_Occlusion\DX11_Ssao\Debug\DebugTexture.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter22_DX_Ambient_Occlusion\DX11_Ssao\Debug\DisplacementMap.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter22_DX_Ambient_Occlusion\DX11_Ssao\Debug\LightHelper.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter22_DX_Ambient_Occlusion\DX11_Ssao\Debug\NormalMap.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter22_DX_Ambient_Occlusion\DX11_Ssao\Debug\Sky.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter22_DX_Ambient_Occlusion\DX11_Ssao\Debug\Ssao.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter22_DX_Ambient_Occlusion\DX11_Ssao\Debug\SsaoBlur.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter22_DX_Ambient_Occlusion\DX11_Ssao\Debug\SsaoNormalDepth.cso</FullPath>
+    </ContentFile>
+  </ContentFiles>
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>
