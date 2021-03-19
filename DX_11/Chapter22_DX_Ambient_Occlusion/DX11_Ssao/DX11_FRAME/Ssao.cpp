@@ -75,7 +75,7 @@ void Ssao::ComputeSsao(const Camera& camera)
 	mDC->ClearRenderTargetView(mAmbientRTV0, reinterpret_cast<const float*>(&Colors::Black));
 	mDC->RSSetViewports(1, &mAmbientMapViewport);
 
-	// Transform NDC space [-1,+1]^2 to texture space [0,1]^2
+	// NDC 좌표계 범위 [-1,+1]^2 를 텍스쳐 좌표 [0,1]^2 범위로 바꿔주는 행렬
 	static const XMMATRIX T(
 		0.5f, 0.0f, 0.0f, 0.0f,
 		0.0f, -0.5f, 0.0f, 0.0f,
@@ -187,7 +187,7 @@ void Ssao::BuildFullScreenQuad()
 	v[2].Pos = XMFLOAT3(+1.0f, +1.0f, 0.0f);
 	v[3].Pos = XMFLOAT3(+1.0f, -1.0f, 0.0f);
 
-	// Store far plane frustum corner indices in Normal.x slot.
+	// 법선 벡터의 x 좌표에 먼 평면에 해당하는 인덱스를 박아둔다.
 	v[0].Normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	v[1].Normal = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	v[2].Normal = XMFLOAT3(2.0f, 0.0f, 0.0f);

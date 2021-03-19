@@ -1,12 +1,11 @@
 //=============================================================================
 // SsaoBlur.fx by Frank Luna (C) 2011 All Rights Reserved.
 //
-// Performs a bilateral edge preserving blur of the ambient map.  We use 
-// a pixel shader instead of compute shader to avoid the switch from 
-// compute mode to rendering mode.  The texture cache makes up for some of the
-// loss of not having shared memory.  The ambient map uses 16-bit texture
-// format, which is small, so we should be able to fit a lot of texels
-// in the cache.
+// SSAO 맵에 대해 양방향 가장자리 보존 흐리기를 수행함.
+// 계산 모드를 렌더링 모드로 전환하지 않기 위해 계산 셰이더 대신 픽셀 셰이더를 사용한다.
+// 계산 셰이더 구현과는 달리 공유 메모리를 사용할 수 없으므로, 텍스쳐를 일종의 캐시로 사용한다.
+// SSAO 맵은 16비트 텍스쳐 형식을 사용하므로 크기가 작다.
+// 따라서 캐시에 많은 수의 텍셀을 담을 수 있다.
 //=============================================================================
 
 cbuffer cbPerFrame
@@ -65,10 +64,10 @@ VertexOut VS(VertexIn vin)
 {
 	VertexOut vout;
 	
-	// Already in NDC space.
+	// NDC 좌표계에 이미 있음, FullScreenQuad
 	vout.PosH = float4(vin.PosL, 1.0f);
 
-	// Pass onto pixel shader.
+	// 텍스쳐 그냥 넘김
 	vout.Tex = vin.Tex;
 	
     return vout;
@@ -87,7 +86,7 @@ float4 PS(VertexOut pin, uniform bool gHorizontalBlur) : SV_Target
 		texOffset = float2(0.0f, gTexelHeight);
 	}
 
-	// The center value always contributes to the sum.
+	// 필터 핵 중앙의 표본은 항상 총합에 기여한다.
 	float4 color      = gWeights[5]*gInputImage.SampleLevel(samInputImage, pin.Tex, 0.0);
 	float totalWeight = gWeights[5];
 	 

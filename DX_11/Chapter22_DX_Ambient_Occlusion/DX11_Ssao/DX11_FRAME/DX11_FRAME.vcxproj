@@ -214,24 +214,14 @@
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="FX\Basic.cod" />
     <None Include="FX\Basic.fxo" />
-    <None Include="FX\Blur.cod" />
-    <None Include="FX\BuildShadowMap.cod" />
     <None Include="FX\BuildShadowMap.fxo" />
-    <None Include="FX\DebugTexture.cod" />
     <None Include="FX\DebugTexture.fxo" />
-    <None Include="FX\DisplacementMap.cod" />
     <None Include="FX\DisplacementMap.fxo" />
-    <None Include="FX\NormalMap.cod" />
     <None Include="FX\NormalMap.fxo" />
-    <None Include="FX\Sky.cod" />
     <None Include="FX\Sky.fxo" />
-    <None Include="FX\Ssao.cod" />
     <None Include="FX\Ssao.fxo" />
-    <None Include="FX\SsaoBlur.cod" />
     <None Include="FX\SsaoBlur.fxo" />
-    <None Include="FX\SsaoNormalDepth.cod" />
     <None Include="FX\SsaoNormalDepth.fxo" />
   </ItemGroup>
   <ItemGroup>

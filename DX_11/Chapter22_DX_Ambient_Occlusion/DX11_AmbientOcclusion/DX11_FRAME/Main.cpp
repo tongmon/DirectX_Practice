@@ -271,7 +271,6 @@ void AmbientOcclusionApp::BuildVertexAmbientOcclusion(
 		// 디버그용 로딩 출력...
 		// 로딩이 굉장히 오래 걸린다.
 		float Percentage = ((float)i / (float)tcount) * 100.f;
-		Percentage = round(Percentage * 1e3) / 1e3;
 		std::wstring DebugStr;
 		DebugStr += L"Loading: " + std::to_wstring(Percentage) + L"%\n";
 		OutputDebugString(DebugStr.c_str());

@@ -136,58 +136,28 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="FX\Basic.cod">
-      <Filter>FX</Filter>
-    </None>
     <None Include="FX\Basic.fxo">
-      <Filter>FX</Filter>
-    </None>
-    <None Include="FX\Blur.cod">
-      <Filter>FX</Filter>
-    </None>
-    <None Include="FX\BuildShadowMap.cod">
       <Filter>FX</Filter>
     </None>
     <None Include="FX\BuildShadowMap.fxo">
       <Filter>FX</Filter>
     </None>
-    <None Include="FX\DebugTexture.cod">
-      <Filter>FX</Filter>
-    </None>
     <None Include="FX\DebugTexture.fxo">
-      <Filter>FX</Filter>
-    </None>
-    <None Include="FX\DisplacementMap.cod">
       <Filter>FX</Filter>
     </None>
     <None Include="FX\DisplacementMap.fxo">
       <Filter>FX</Filter>
     </None>
-    <None Include="FX\NormalMap.cod">
-      <Filter>FX</Filter>
-    </None>
     <None Include="FX\NormalMap.fxo">
-      <Filter>FX</Filter>
-    </None>
-    <None Include="FX\Sky.cod">
       <Filter>FX</Filter>
     </None>
     <None Include="FX\Sky.fxo">
       <Filter>FX</Filter>
     </None>
-    <None Include="FX\Ssao.cod">
-      <Filter>FX</Filter>
-    </None>
     <None Include="FX\Ssao.fxo">
       <Filter>FX</Filter>
     </None>
-    <None Include="FX\SsaoBlur.cod">
-      <Filter>FX</Filter>
-    </None>
     <None Include="FX\SsaoBlur.fxo">
-      <Filter>FX</Filter>
-    </None>
-    <None Include="FX\SsaoNormalDepth.cod">
       <Filter>FX</Filter>
     </None>
     <None Include="FX\SsaoNormalDepth.fxo">
