@@ -25,11 +25,11 @@ SamplerState samNormalDepth
 {
 	Filter = MIN_MAG_LINEAR_MIP_POINT;
 
-	// 법선 깊이 맵 바깐의 표본을 추출하는 경우 잘못된
+	// 법선 깊이 맵 바깥의 표본을 추출하는 경우 잘못된
 	// 차폐도가 나오지 않도록 아주 먼 깊이 값을 설정한다.
 	AddressU = BORDER;
 	AddressV = BORDER;
-	BorderColor = float4(0.0f, 0.0f, 0.0f, 1e5f); // 맨 마지막이 차폐도
+	BorderColor = float4(0.0f, 0.0f, 0.0f, 1e5f); // 맨 마지막 알파값이 차폐도
 };
 
 SamplerState samRandomVec

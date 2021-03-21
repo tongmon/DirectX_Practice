@@ -28,8 +28,8 @@ cbuffer cbFixed
 };
  
 // Nonnumeric values cannot be added to a cbuffer.
-Texture2D gNormalDepthMap;
-Texture2D gInputImage;
+Texture2D gNormalDepthMap; // 시야에서의 법선, 깊이 맵
+Texture2D gInputImage; // AO 처리 완성된 텍스쳐
  
 SamplerState samNormalDepth
 {
@@ -76,6 +76,7 @@ VertexOut VS(VertexIn vin)
 
 float4 PS(VertexOut pin, uniform bool gHorizontalBlur) : SV_Target
 {
+	// 수직, 수평 흐리기 유무
 	float2 texOffset;
 	if(gHorizontalBlur)
 	{
@@ -87,14 +88,14 @@ float4 PS(VertexOut pin, uniform bool gHorizontalBlur) : SV_Target
 	}
 
 	// 필터 핵 중앙의 표본은 항상 총합에 기여한다.
-	float4 color      = gWeights[5]*gInputImage.SampleLevel(samInputImage, pin.Tex, 0.0);
+    float4 color = gWeights[5] * gInputImage.SampleLevel(samInputImage, pin.Tex, 0.0);
 	float totalWeight = gWeights[5];
 	 
 	float4 centerNormalDepth = gNormalDepthMap.SampleLevel(samNormalDepth, pin.Tex, 0.0f);
 
 	for(float i = -gBlurRadius; i <=gBlurRadius; ++i)
 	{
-		// We already added in the center weight.
+		// 중앙 가중치는 이미 합산함
 		if( i == 0 )
 			continue;
 
@@ -104,9 +105,9 @@ float4 PS(VertexOut pin, uniform bool gHorizontalBlur) : SV_Target
 			samNormalDepth, tex, 0.0f);
 
 		//
-		// If the center value and neighbor values differ too much (either in 
-		// normal or depth), then we assume we are sampling across a discontinuity.
-		// We discard such samples from the blur.
+		// 중앙값과 그 이웃 값의 차이가 너무 크면(법선이든, 깊이이든)
+		// 필터 핵이 불연속성에(즉 가장자리에) 걸쳐 있는 것으로 간주해서,
+		// 해당 표본들을 흐리기에서 제외시킨다.
 		//
 	
 		if( dot(neighborNormalDepth.xyz, centerNormalDepth.xyz) >= 0.8f &&
@@ -114,7 +115,7 @@ float4 PS(VertexOut pin, uniform bool gHorizontalBlur) : SV_Target
 		{
 			float weight = gWeights[i+gBlurRadius];
 
-			// Add neighbor pixel to blur.
+			// 흐릴 이웃 픽셀들을 추가한다.
 			color += weight*gInputImage.SampleLevel(
 				samInputImage, tex, 0.0);
 		
@@ -122,7 +123,8 @@ float4 PS(VertexOut pin, uniform bool gHorizontalBlur) : SV_Target
 		}
 	}
 
-	// Compensate for discarded samples by making total weights sum to 1.
+	// 계산에서 제외된 표본이 있을 수 있으므로, 실제로 적용된 가중치들의
+	// 합으로 나누어 준다.
 	return color / totalWeight;
 }
 

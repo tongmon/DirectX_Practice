@@ -389,7 +389,7 @@ void SsaoApp::UpdateScene(float dt)
 void SsaoApp::DrawScene()
 {
 	//
-	// Render the scene to the shadow map.
+	// 그림자 맵 생성
 	//
 
 	mSmap->BindDsvAndSetNullRenderTarget(md3dImmediateContext);
@@ -399,11 +399,10 @@ void SsaoApp::DrawScene()
 	md3dImmediateContext->RSSetState(0);
 
 	//
-	// Render the view space normals and depths.  This render target has the
-	// same dimensions as the back buffer, so we can use the screen viewport.
-	// This render pass is needed to compute the ambient occlusion.
-	// Notice that we use the main depth/stencil buffer in this pass.  
-	//
+	// 시야 공간 법선들과 깊이들을 렌더링한다. 이 렌더 대상의 크기는
+	// 후면 버퍼와 동일하다. 따라서 화면용 뷰포트를 뷰포트로 사용하면 된다.
+	// 이 렌더링 패스는 주변광 차폐 계산에 필요한 것이다. 이 패스에서
+	// 주된(보통의 장면 렌더링에 쓰이는) 깊이 스텐실 버퍼를 사용함을 주목할 것.
 
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	md3dImmediateContext->RSSetViewports(1, &mScreenViewport);
@@ -412,14 +411,14 @@ void SsaoApp::DrawScene()
 	DrawSceneToSsaoNormalDepthMap();
 
 	//
-	// Now compute the ambient occlusion.
+	// 이제 주변광 차폐를 계산한다.
 	//
 
 	mSsao->ComputeSsao(mCam);
 	mSsao->BlurAmbientMap(4);
 
 	//
-	// Restore the back and depth buffer and viewport to the OM stage.
+	// 원래의 후면 버퍼와 깊이 버퍼, 뷰포트를 다시 출력 병합기 단계에 묶는다.
 	//
 	ID3D11RenderTargetView* renderTargets[1] = { mRenderTargetView };
 	md3dImmediateContext->OMSetRenderTargets(1, renderTargets, mDepthStencilView);
@@ -427,10 +426,9 @@ void SsaoApp::DrawScene()
 
 	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Silver));
 
-	// We already laid down scene depth to the depth buffer in the Normal/Depth map pass,
-	// so we can set the depth comparison test to 밇QUALS.? This prevents any overdraw
-	// in this rendering pass, as only the nearest visible pixels will pass this depth
-	// comparison test.
+	// 장면의 깊이는 이미 SSAO 맵을 그리기 위한 법선 깊이 맵 패스에서 깊이 버퍼에 기록해두었기에
+	// 깊이 비교 판정을 EQUAL로 설정해도 된다. 이렇게 하면 이번 렌더링 패스에서는
+	// 오직 가장 가까운 가시 픽셀들만 깊이 판정을 통과하므로 겹쳐 그리기가 전형 발생하지 않는다.
 	md3dImmediateContext->OMSetDepthStencilState(RenderStates::EqualsDSS, 0);
 
 	XMMATRIX view = mCam.View();

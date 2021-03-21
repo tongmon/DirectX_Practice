@@ -30,7 +30,7 @@ cbuffer cbPerObject
 // Nonnumeric values cannot be added to a cbuffer.
 Texture2D gDiffuseMap;
 Texture2D gShadowMap;
-Texture2D gSsaoMap;
+Texture2D gSsaoMap; // AO 처리와 Blur 처리까지 완성된 최종 AO 맵
 TextureCube gCubeMap;
 
 SamplerState samLinear
@@ -85,7 +85,7 @@ VertexOut VS(VertexIn vin)
 	// Generate projective tex-coords to project shadow map onto scene.
 	vout.ShadowPosH = mul(float4(vin.PosL, 1.0f), gShadowTransform);
 
-	// Generate projective tex-coords to project SSAO map onto scene.
+	// SSAO 맵 추출할 좌표 생성
 	vout.SsaoPosH = mul(float4(vin.PosL, 1.0f), gWorldViewProjTex);
 
 	return vout;
@@ -142,7 +142,7 @@ float4 PS(VertexOut pin,
 		float3 shadow = float3(1.0f, 1.0f, 1.0f);
 		shadow[0] = CalcShadowFactor(samShadow, gShadowMap, pin.ShadowPosH);
 
-		// Finish texture projection and sample SSAO map.
+		// 픽셀 셰이더에서는 텍스쳐 투영을 통해서 SSAO 맵의 표본을 추출한다.
 		pin.SsaoPosH /= pin.SsaoPosH.w;
 		float ambientAccess = gSsaoMap.SampleLevel(samLinear, pin.SsaoPosH.xy, 0.0f).r;
 
@@ -154,6 +154,7 @@ float4 PS(VertexOut pin,
 			ComputeDirectionalLight(gMaterial, gDirLights[i], pin.NormalW, toEye, 
 				A, D, S);
 
+            // 추출한 도달도로 주변광 항을 변조한다.
 			ambient += ambientAccess*A;    
 			diffuse += shadow[i]*D;
 			spec    += shadow[i]*S;
