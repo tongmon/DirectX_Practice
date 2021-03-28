@@ -1,0 +1,17 @@
+﻿FXC : warning X4717: Effects deprecated for D3DCompiler_47
+  
+  compilation object save succeeded; see C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME_Win10\x64\Debug\color.cso
+  pch.cpp
+  DeviceResources.cpp
+  dxerr.cpp
+  Game.cpp
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME_Win10\DX11_FRAMEWORK\Game.cpp(175,1): warning C4456: 'hr' 선언은 이전 로컬 선언을 숨깁니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME_Win10\DX11_FRAMEWORK\Game.cpp(158,13): message : 'hr' 선언을 참조하십시오.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME_Win10\DX11_FRAMEWORK\Game.cpp(369,31): warning C4100: 'btnState': 참조되지 않은 정식 매개 변수입니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME_Win10\DX11_FRAMEWORK\Game.cpp(377,50): warning C4100: 'y': 참조되지 않은 정식 매개 변수입니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME_Win10\DX11_FRAMEWORK\Game.cpp(377,43): warning C4100: 'x': 참조되지 않은 정식 매개 변수입니다.
+C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME_Win10\DX11_FRAMEWORK\Game.cpp(377,29): warning C4100: 'btnState': 참조되지 않은 정식 매개 변수입니다.
+  Main.cpp
+  코드를 생성하고 있습니다...
+     C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME_Win10\x64\Debug\DX11_FRAMEWORK.lib 라이브러리 및 C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME_Win10\x64\Debug\DX11_FRAMEWORK.exp 개체를 생성하고 있습니다.
+  DX11_FRAMEWORK.vcxproj -> C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\DX11_FRAMEWORK\DX11_FRAME_Win10\x64\Debug\DX11_FRAMEWORK.exe

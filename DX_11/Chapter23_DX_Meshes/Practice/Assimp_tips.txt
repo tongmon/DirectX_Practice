@@ -1,0 +1,40 @@
+Assimp를 DX11에서 사용하는 예제다.
+Assimp는 fbx, blend 이런 3d 모델을 쉽게 읽어와 사용가능하게 해주는 라이브러리로
+거의 필수적으로 사용된다.
+빌드하고 사용하는 방법은 밑의 절차를 따라야 한다. (Win 10 기준)
+
+1. 깃헙 Assimp 파일 다운
+https://github.com/assimp/assimp 여기서 최신 버전을 zip 파일로 받던지
+깃으로 받던지 받아라.
+
+2. cmd 켜고 받은 폴더로 cd 명령으로 이동 후에
+cmake CMakeLists.txt 명령을 cmd에 치면 Assimp.sln이 나온다.
+
+3. Assimp.sln 열고 프로젝트가 옆에 좀 있을 텐데 그냥 ALL_BUILD를 빌드한다.
+
+4. 빌드 끝나면 걍 찾을 수 있는 아무 곳에다가 폴더명 아무거나 짓고
+assimp 폴더에 include 생겼을 텐데 복사해서 지금 만든 폴더에 붙여넣기한다.
+
+5. 다시 assimp 폴더로 가면 lib 폴더도 있을 텐데 거기에 있는 exp, lib 파일 복사해서
+아무거나 이름 지은 폴더로 가서 lib 폴더 생성한 다음에 거기 폴더 안에 exp, lib 붙여놓기한다.
+
+6. assimp 폴더로 다시 가서 bin/Debug 안에 assimp-vc버전-mtd.dll, ilk, pdb 있을 텐데
+그거 복사해서 아무거나 이름 지은 폴더 안에 lib 폴더 안에 붙여놓는다.
+
+7. 그 lib 폴더에 dll이 있을 텐데 그거 복사해서 C:\Windows\System32 여기랑
+C:\Windows\SysWOW64 여기에 붙여놓기 한다.
+
+8. 아무거나 이름 지은 폴더를 Assimp라고 하면 거기에 lib, include 폴더가 있을 것이다.
+그러면 프로젝트 생성하고 그 Assimp 폴더를 프로젝트 마음에 드는 위치에 놓고
+빌드 설정을 포함 디렉터리는 Assimp/include를 추가하면 될 것이고
+라이브러리 디렉터리는 Assimp/lib를 추가하면 될 것이다.
+물론 라이브러리는 pragama로 assimp-vc142-mtd.lib 이런 녀석을 명시적으로 참조해야 할 것이다.
+
+9. 이렇게 하고 필요한 헤더 있으면 include "assimp/어쩌구저쩌구.h" 이러면 작동 잘 될 것이다.
+
+
+
+
+
+
+cmake CMakeLists.txt

@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>ee969c27-e901-4ade-80e1-1dc5978f1661</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets">
+      <UniqueIdentifier>54297137-2885-4f6e-9443-6cd88a2b26c0</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dds;dlg;fbx;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tga;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="FX">
+      <UniqueIdentifier>{b690f169-fa8f-46f3-9a19-e66ea5602a60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DXTK">
+      <UniqueIdentifier>{7e90b6f8-9c56-4e2b-ab77-6ae1c57f4bea}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="DXTK\Audio.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\BufferHelpers.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\CommonStates.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\DDSTextureLoader.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\DirectXHelpers.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\Effects.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\GamePad.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\GeometricPrimitive.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\GraphicsMemory.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\Keyboard.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\Model.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\Mouse.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\PostProcess.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\PrimitiveBatch.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\ScreenGrab.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\SimpleMath.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\SpriteBatch.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\SpriteFont.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\VertexTypes.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\WICTextureLoader.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTK\XboxDDSTextureLoader.h">
+      <Filter>DXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\d3dx11effect.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\d3dxGlobal.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\dxerr.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\DeviceResources.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\StepTimer.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Common\dxerr.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\DeviceResources.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="directx.ico">
+      <Filter>Assets</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="settings.manifest">
+      <Filter>Assets</Filter>
+    </Manifest>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="FX\color.fx">
+      <Filter>FX</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DXTK\SimpleMath.inl">
+      <Filter>DXTK</Filter>
+    </None>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,11 @@
+﻿  Game.cpp
+C:\Users\tongm\source\repos\Engine_FrameWork\DX11_FRAMEWORK\DX11_FRAMEWORK\Game.cpp(174,1): warning C4456: 'hr' 선언은 이전 로컬 선언을 숨깁니다.
+C:\Users\tongm\source\repos\Engine_FrameWork\DX11_FRAMEWORK\DX11_FRAMEWORK\Game.cpp(157,13): message : 'hr' 선언을 참조하십시오.
+C:\Users\tongm\source\repos\Engine_FrameWork\DX11_FRAMEWORK\DX11_FRAMEWORK\Game.cpp(368,31): warning C4100: 'btnState': 참조되지 않은 정식 매개 변수입니다.
+C:\Users\tongm\source\repos\Engine_FrameWork\DX11_FRAMEWORK\DX11_FRAMEWORK\Game.cpp(376,50): warning C4100: 'y': 참조되지 않은 정식 매개 변수입니다.
+C:\Users\tongm\source\repos\Engine_FrameWork\DX11_FRAMEWORK\DX11_FRAMEWORK\Game.cpp(376,43): warning C4100: 'x': 참조되지 않은 정식 매개 변수입니다.
+C:\Users\tongm\source\repos\Engine_FrameWork\DX11_FRAMEWORK\DX11_FRAMEWORK\Game.cpp(376,29): warning C4100: 'btnState': 참조되지 않은 정식 매개 변수입니다.
+  Main.cpp
+  코드를 생성하고 있습니다...
+     C:\Users\tongm\source\repos\Engine_FrameWork\DX11_FRAMEWORK\Debug\DX11_FRAMEWORK.lib 라이브러리 및 C:\Users\tongm\source\repos\Engine_FrameWork\DX11_FRAMEWORK\Debug\DX11_FRAMEWORK.exp 개체를 생성하고 있습니다.
+  DX11_FRAMEWORK.vcxproj -> C:\Users\tongm\source\repos\Engine_FrameWork\DX11_FRAMEWORK\Debug\DX11_FRAMEWORK.exe
