@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter25_DX_Character_Animation\DX11_SkinnedMesh\Debug\DX11_FRAME.exe</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter25_DX_Character_Animation\DX11_SkinnedMesh\Debug\Basic.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter25_DX_Character_Animation\DX11_SkinnedMesh\Debug\BuildShadowMap.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter25_DX_Character_Animation\DX11_SkinnedMesh\Debug\DebugTexture.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter25_DX_Character_Animation\DX11_SkinnedMesh\Debug\LightHelper.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter25_DX_Character_Animation\DX11_SkinnedMesh\Debug\NormalMap.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter25_DX_Character_Animation\DX11_SkinnedMesh\Debug\Sky.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter25_DX_Character_Animation\DX11_SkinnedMesh\Debug\Ssao.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter25_DX_Character_Animation\DX11_SkinnedMesh\Debug\SsaoBlur.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\tongm\OneDrive\Documents\GitHub\DirectX_Practice\DX_11\Chapter25_DX_Character_Animation\DX11_SkinnedMesh\Debug\SsaoNormalDepth.cso</FullPath>
+    </ContentFile>
+  </ContentFiles>
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>
