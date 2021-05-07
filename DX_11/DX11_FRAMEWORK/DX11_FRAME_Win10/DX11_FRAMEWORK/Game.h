@@ -28,8 +28,10 @@
 // 사전에 라이브러리 준비하는 방법은 텍스쳐 파일 설명 참조
 #if defined( DEBUG ) || defined( _DEBUG )
 #pragma comment (lib,"Effects11d.lib")
+#pragma comment (lib,"DirectXTKd.lib")
 #else
 #pragma comment (lib,"Effects11.lib")
+#pragma comment (lib,"DirectXTK.lib")
 #endif
 
 // D3D11 device 생성 및 게임 루프 제공

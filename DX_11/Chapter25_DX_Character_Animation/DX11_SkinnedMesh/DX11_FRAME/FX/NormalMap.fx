@@ -144,7 +144,6 @@ VertexOut SkinnedVS(SkinnedVertexIn vin)
 	// 동차 절단 공간으로 변환한다.
 	vout.PosH = mul(float4(posL, 1.0f), gWorldViewProj);
 	
-	// 정점 특성들을 출력한다. 이들은 삼각형 표면을 따라 보간된다.
 	vout.Tex = mul(float4(vin.Tex, 0.0f, 1.0f), gTexTransform).xy;
 
 	// 그림자 맵을 장면에 투영하기 위한 투영 텍스쳐 좌표를 생성한다.

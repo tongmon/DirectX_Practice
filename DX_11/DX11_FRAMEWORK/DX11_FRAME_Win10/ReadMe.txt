@@ -32,6 +32,16 @@ arm64, arm은 자신의 cpu를 말하는 것 같으니 자신의 cpu가 amd라�
 이렇게 Effect11.lib, Effects11d.lib 파일을 알맞게 넣었다면 #pragma comment (lib,"Effects11d.lib") 얘네가 잘 작동하면서
 빌드가 정상적으로 잘 될 것이다.
 
+또한 DXTK를 사용하기 위한 라이브러리도 필요한데 https://github.com/microsoft/DirectXTK 여기에 가서
+Effects11.lib 만들던 것과 똑같이 원하는 버전 sln 켜서 각 경우마다 빌드한 lib를 디버그면 d붙이고
+아니면 그냥 .lib를 Effects11.lib의 경로와 똑같이 넣어주면 된다.
+
+um 폴더에 넣는게 싫으면 이런 라이브러리 빌드한 후에 그냥 lib 폴더 따로 만들어서 다 쳐박아둬도 좋다.
+
+또한 DXTK에서 Audio.h 즉 XAudio를 사용하고 싶다면 nuget도 설치해줘야 한다.
+VS에서 위 프로젝트 탭을 누르면 Nuget 패키지 관리 항목이 있는데 그걸 누른다.
+그리고 XAudio2를 검색하면 나오는 XAudio2.Redist 얘가 나오는데 이걸 설치하면 된다.
+
 이 프레임 워크는 추가적으로 https://github.com/walbourn/directx-vs-templates
 깃 허브에서 배포하는 VS2019 템플릿을 조금 수정하고 몇 가지 추가해서 만든 것이다.
 배포하는 템플릿을 매우 유용하니 필요하면 받아서 VSIX 폴더로 가서 .vsix 로 설치하면

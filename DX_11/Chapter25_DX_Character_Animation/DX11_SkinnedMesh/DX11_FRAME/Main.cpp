@@ -18,7 +18,7 @@
 // 그래서 뼈마다 국소 좌표계가 모두 다르다.
 // 이를 어떻게 다 옮기냐면 일단 뿌리가 되는 뼈대를 정하고 그리로 모두 좌표계를 통일해 버린다.
 // 그니까 머리가 뿌리 뼈라고 하면 머리의 좌표계로 팔, 다리, 손 등 모든 뼈들을 옮긴다.
-// 그 다음에 머리 좌표계를 세계 좌표 변환을 적용하여 변환하면 이동이 그만큼 될 것이고
+// 그 다음에 머리 좌표계를 fx에서 세계 좌표 변환을 적용하여 변환하면 이동이 그만큼 될 것이고
 // 다시 각 뼈마다의 머리에서 얼마나 떨어져 있는지 계산이 된 행렬을 가지고 다 뼈마다 곱해서
 // 실제 완성된 뼈대의 위치가 정해진다.
 // 위에 입히는 스킨은 뼈대가 옮겨졌으면 상대적으로 간단한데 이 옮겨진 뼈대는 옮겨지기 위한 최종 행렬들을
@@ -315,12 +315,13 @@ bool SkinnedMeshApp::Init()
 	BuildSkullGeometryBuffers();
 	BuildScreenQuadGeometryBuffers();
 
+	// 애니메이션되는 모델 선언
 	mCharacterModel = new SkinnedModel(md3dDevice, mTexMgr, "Models\\soldier.m3d", L"Textures\\");
 	mCharacterInstance1.Model = mCharacterModel;
 	mCharacterInstance2.Model = mCharacterModel;
 	mCharacterInstance1.TimePos = 0.0f;
 	mCharacterInstance2.TimePos = 0.0f;
-	mCharacterInstance1.ClipName = "Take1";
+	mCharacterInstance1.ClipName = "Take1"; // 애니메이션 이름, std::map을 통해 저장
 	mCharacterInstance2.ClipName = "Take1";
 	mCharacterInstance1.FinalTransforms.resize(mCharacterModel->SkinnedData.BoneCount());
 	mCharacterInstance2.FinalTransforms.resize(mCharacterModel->SkinnedData.BoneCount());
@@ -422,11 +423,6 @@ void SkinnedMeshApp::DrawScene()
 	md3dImmediateContext->RSSetViewports(1, &mScreenViewport);
 
 	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Silver));
-
-	// We already laid down scene depth to the depth buffer in the Normal/Depth map pass,
-	// so we can set the depth comparison test to 밇QUALS.? This prevents any overdraw
-	// in this rendering pass, as only the nearest visible pixels will pass this depth
-	// comparison test.
 
 	md3dImmediateContext->OMSetDepthStencilState(RenderStates::EqualsDSS, 0);
 
@@ -604,7 +600,7 @@ void SkinnedMeshApp::DrawScene()
 	}
 
 	//
-	// Draw the animated characters.
+	// 애니메이션 되는 캐릭터 그리기
 	//
 
 	md3dImmediateContext->IASetInputLayout(InputLayouts::PosNormalTexTanSkinned);

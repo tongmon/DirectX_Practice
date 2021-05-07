@@ -107,7 +107,7 @@ void M3DLoader::ReadMaterials(std::ifstream& fin, UINT numMaterials, std::vector
 			mats[i].NormalMapName.resize(normalMapName.size(), ' ');
 			std::copy(diffuseMapName.begin(), diffuseMapName.end(), mats[i].DiffuseMapName.begin());
 			std::copy(normalMapName.begin(), normalMapName.end(), mats[i].NormalMapName.begin());
-		}
+	 }
 }
 
 void M3DLoader::ReadSubsetTable(std::ifstream& fin, UINT numSubsets, std::vector<MeshGeometry::Subset>& subsets)
