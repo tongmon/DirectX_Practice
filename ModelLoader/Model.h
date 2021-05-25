@@ -6,6 +6,7 @@
 #include <ModelMesh.h>
 #include <TextureMgr.h>
 #include <ModelAnimation.h>
+#include <Camera.h>
 
 class Model
 {
@@ -54,6 +55,32 @@ struct ModelInstance
 	float mSpeed = 7.f;
 
 	float mWalkTime, mTurnTime, mRunTime, mJumpTime, mIdleTime = 0.f;
+
+	void Update(float dt);
+};
+
+struct ModelState
+{
+	XMFLOAT3 mDir = { 1,0,0 };
+	std::string mClipName = "";
+};
+
+struct ModelInst
+{
+	Model* mModel = nullptr;
+	float mTimePos = 0.0f;
+	std::string mClipName = "";
+	XMFLOAT4X4 mWorld;
+	std::vector<XMFLOAT4X4> mFinalTransforms = {};
+
+	float mSpeed = 7.0f;
+	float mScale;
+	XMFLOAT3 mDir;
+	XMFLOAT3 mPos;
+
+	Camera* mCam;
+	float mBackTimePos = 0.0f;
+	std::queue<ModelState> mState;
 
 	void Update(float dt);
 };

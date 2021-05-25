@@ -229,9 +229,11 @@ void Game::Initialize(HWND window, int width, int height)
     mTest->AddAnimation("Models\\LoadedModels\\Vampi\\walking_1.anim", "walk");
     mTest->AddAnimation("Models\\LoadedModels\\Vampi\\running_1.anim", "run");
     mTest->AddAnimation("Models\\LoadedModels\\Vampi\\idle_1.anim", "idle");
-    mTest->AddAnimation("Models\\LoadedModels\\Vampi\\left turn_1.anim", "l_turn");
-    mTest->AddAnimation("Models\\LoadedModels\\Vampi\\right turn_1.anim", "r_turn");
+    // mTest->AddAnimation("Models\\LoadedModels\\Vampi\\left turn_1.anim", "l_turn");
+    // mTest->AddAnimation("Models\\LoadedModels\\Vampi\\right turn_1.anim", "r_turn");
 
+    mTestModels[0] = mTestModels[1] = mTestModels[2] = mTestModels[3] = nullptr;
+    /*
     mTestModels[0] = new Model(device, mTexMgr, "Models\\LoadedModels\\Biking\\Ch19_nonPBR.model");
     mTestModels[0]->AddAnimation("Models\\LoadedModels\\Biking\\walking_1.anim", "walk");
     mTestModels[0]->AddAnimation("Models\\LoadedModels\\Biking\\running_1.anim", "run");
@@ -251,27 +253,24 @@ void Game::Initialize(HWND window, int width, int height)
     mTestModels[3]->AddAnimation("Models\\LoadedModels\\Ninja\\walking_1.anim", "walk");
     mTestModels[3]->AddAnimation("Models\\LoadedModels\\Ninja\\running_1.anim", "run");
     mTestModels[3]->AddAnimation("Models\\LoadedModels\\Ninja\\idle_1.anim", "idle");
+    */
     
     mTestInst_1.mScale = 0.03f;
-    mTestInst_1.mAngle = 0;
-    mTestInst_1.mX = -2.f;
-    mTestInst_1.mY = 0.f;
-    mTestInst_1.mZ = -7.f;
+    mTestInst_1.mPos = { -2.f, 0.f, -7.f };
+    mTestInst_1.mDir = { 0,0,-1 };
+    mTestInst_1.mCam = &mCam;
     
     XMFLOAT3 S = { mTestInst_1.mScale,mTestInst_1.mScale,mTestInst_1.mScale };
-    XMFLOAT3 T = { mTestInst_1.mX, mTestInst_1.mY, mTestInst_1.mZ };
     XMMATRIX Result = XMMatrixAffineTransformation(XMLoadFloat3(&S), XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
-            XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), mTestInst_1.mAngle), XMLoadFloat3(&T));
+            XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), 0), XMLoadFloat3(&mTestInst_1.mPos));
     XMStoreFloat4x4(&mTestInst_1.mWorld, Result);
 
-    mTestInst_1.mState = 5;
-    mTestInst_1.mAngle = 0.f;
     mTestInst_1.mModel = mTest;
     mTestInst_1.mClipName = "idle";
     mTestInst_1.mFinalTransforms.resize(mTest->mBoneOffset.size());
 
     mCamDist = 13;
-    mCamCenter = { mTestInst_1.mX, mTestInst_1.mY + 5, mTestInst_1.mZ };
+    mCamCenter = { mTestInst_1.mPos.x, mTestInst_1.mPos.y + 5, mTestInst_1.mPos.z };
     XMFLOAT3 L = mCam.GetLook();
     mCam.SetPosition(mCamCenter.x - L.x * mCamDist, mCamCenter.y - L.y * mCamDist, mCamCenter.z - L.z * mCamDist);
 
@@ -839,137 +838,76 @@ void Game::Update(DX::StepTimer const& timer)
     bool check = false; 
     if (GetAsyncKeyState('S') & 0x8000)
     {
-        mKeyInput[0] = 1;
+        mKeyInput[0] = 1; check = true;
     }
     if (GetAsyncKeyState('W') & 0x8000)
     {
-        mKeyInput[1] = 1;
+        mKeyInput[1] = 1; check = true;
     }
     if (GetAsyncKeyState('D') & 0x8000)
     {
-        mKeyInput[2] = 1;
+        mKeyInput[2] = 1; check = true;
     }
     if (GetAsyncKeyState('A') & 0x8000)
     {
-        mKeyInput[3] = 1;
+        mKeyInput[3] = 1; check = true;
     }
     if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
     {
-        mKeyInput[4] = 1;       
+        mKeyInput[4] = 1;
     }
 
-    XMVECTOR zAxis = XMVectorSet(0, 0, 1, 0);
-    XMVECTOR yAxis = XMVectorSet(0, 1, 0, 0);
-    XMFLOAT3 cL = mCam.GetLook(); cL.y = 0;
-    XMVECTOR cLook = XMLoadFloat3(&cL);
-    XMVECTOR R = XMVector3AngleBetweenVectors(zAxis, cLook);
-    XMVECTOR Cross = XMVector3Cross(zAxis, cLook);
-    XMVECTOR Dot = XMVector3Dot(yAxis, Cross);
-    float Rad = XMVectorGetX(R);
-    if (XMVectorGetX(Dot) < 0)
-        Rad *= -1;
-    
-    cLook = XMVector3Normalize(cLook);
-    XMStoreFloat3(&cL, cLook);
+    XMFLOAT3 lookVec = mCam.GetLook(), FinDir; lookVec.y = 0;
+    XMVECTOR look = XMLoadFloat3(&lookVec);
 
-    XMMATRIX a = XMMatrixAffineTransformation(XMVectorSet(1, 1, 1, 0), XMVectorSet(0, 0, 0, 1), XMVectorSet(0, 0, 0, 1), XMVectorSet(0, 0, 0, 1));
-
-    XMFLOAT3 Right = mCam.GetRight();
-
+    std::string state = "walk";
+    mTestInst_1.mSpeed = 7.f;
+    if (mKeyInput[4]) {
+        state = "run";
+        mTestInst_1.mSpeed = 14.f;
+    }
     if (mKeyInput[0]) {
-        mTestInst_1.mClipName = "walk";
-        mTestInst_1.mSpeed = 7.f;
-        mTestInst_1.mState = 1;
-        mTestInst_1.mAngle = Rad;
-        check = 1;
         if (mKeyInput[2]) {
-            mTestInst_1.mAngle -= XM_PIDIV4;
-            cLook = XMVector3Rotate(cLook, XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), -XM_PIDIV4));
-            XMStoreFloat3(&cL, cLook);
+            look = XMVector3Rotate(look, XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), XM_PIDIV4 * 3));          
         }
         else if (mKeyInput[3]) {
-            mTestInst_1.mAngle += XM_PIDIV4;
-            cLook = XMVector3Rotate(cLook, XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), XM_PIDIV4));
-            XMStoreFloat3(&cL, cLook);
+            look = XMVector3Rotate(look, XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), -XM_PIDIV4 * 3));
         }
-        if (mKeyInput[4]) {
-            mTestInst_1.mClipName = "run";
-            mTestInst_1.mSpeed = 14.f;
-            mTestInst_1.mState = 2;
+        else {
+            look = XMVector3Rotate(look, XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), XM_PI));
         }
-        mTestInst_1.mZ -= elapsedTime * mTestInst_1.mSpeed * cL.z;
-        mTestInst_1.mX -= elapsedTime * mTestInst_1.mSpeed * cL.x;
     }
     else if (mKeyInput[1]) {
-        mTestInst_1.mClipName = "walk";
-        mTestInst_1.mSpeed = 7.f;
-        mTestInst_1.mState = 1;
-        mTestInst_1.mAngle = Rad + XM_PI;
-        check = 1;
         if (mKeyInput[2]) {
-            mTestInst_1.mAngle += XM_PIDIV4;
-            cLook = XMVector3Rotate(cLook, XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), XM_PIDIV4));
-            XMStoreFloat3(&cL, cLook);
+            look = XMVector3Rotate(look, XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), XM_PIDIV4));
         }
         else if (mKeyInput[3]) {
-            mTestInst_1.mAngle -= XM_PIDIV4;
-            cLook = XMVector3Rotate(cLook, XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), -XM_PIDIV4));
-            XMStoreFloat3(&cL, cLook);
+            look = XMVector3Rotate(look, XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), -XM_PIDIV4));
         }
-        if (mKeyInput[4]) {
-            mTestInst_1.mClipName = "run";
-            mTestInst_1.mSpeed = 14.f;
-            mTestInst_1.mState = 2;
-        }
-        mTestInst_1.mX += elapsedTime * mTestInst_1.mSpeed * cL.x;
-        mTestInst_1.mZ += elapsedTime * mTestInst_1.mSpeed * cL.z;
     }
-    else if (mKeyInput[2]) {
-        mTestInst_1.mClipName = "walk";
-        mTestInst_1.mSpeed = 7.f;
-        mTestInst_1.mState = 1;
-        mTestInst_1.mAngle = Rad + XM_PIDIV2 * 3;
-        check = 1;
-        if (mKeyInput[4]) {
-            mTestInst_1.mClipName = "run";
-            mTestInst_1.mSpeed = 14.f;
-            mTestInst_1.mState = 2;
-        }
-        mTestInst_1.mX += elapsedTime * mTestInst_1.mSpeed * Right.x;
-        mTestInst_1.mZ += elapsedTime * mTestInst_1.mSpeed * Right.z;
+    else if (mKeyInput[2]) {     
+        look = XMVector3Rotate(look, XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), XM_PIDIV2));
     }
-    else if (mKeyInput[3]) {
-        mTestInst_1.mClipName = "walk";
-        mTestInst_1.mSpeed = 7.f;
-        mTestInst_1.mState = 1;
-        mTestInst_1.mAngle = Rad + XM_PIDIV2;
-        check = 1;
-        if (mKeyInput[4]) {
-            mTestInst_1.mClipName = "run";
-            mTestInst_1.mSpeed = 14.f;
-            mTestInst_1.mState = 2;
-        }
-        mTestInst_1.mX -= elapsedTime * mTestInst_1.mSpeed * Right.x;
-        mTestInst_1.mZ -= elapsedTime * mTestInst_1.mSpeed * Right.z;
+    else if (mKeyInput[3]) {     
+        look = XMVector3Rotate(look, XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), -XM_PIDIV2));
     }
 
     if (!check) {
-        mTestInst_1.mState = 5;
-        mTestInst_1.mClipName = "idle";
+        state = "idle";
+        mTestInst_1.mSpeed = 0.f;
+        look = XMLoadFloat3(&mTestInst_1.mDir);
     }
-    
-    XMFLOAT3 S = { mTestInst_1.mScale,mTestInst_1.mScale,mTestInst_1.mScale };
-    XMFLOAT3 T = { mTestInst_1.mX, mTestInst_1.mY, mTestInst_1.mZ };
-    XMMATRIX Result = XMMatrixAffineTransformation(XMLoadFloat3(&S), XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
-        XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), mTestInst_1.mAngle), XMLoadFloat3(&T));
-    XMStoreFloat4x4(&mTestInst_1.mWorld, Result);
 
+    XMStoreFloat3(&FinDir, XMVector3Normalize(look));
+
+    mTestInst_1.mState.push({ FinDir, state });
+    
     mTestInst_1.Update(elapsedTime);
 
     BuildShadowTransform();
 
     XMFLOAT3 L = mCam.GetLook();
-    mCamCenter = { mTestInst_1.mX, mTestInst_1.mY + 5, mTestInst_1.mZ };
+    mCamCenter = { mTestInst_1.mPos.x, mTestInst_1.mPos.y + 5, mTestInst_1.mPos.z };
     mCam.SetPosition(mCamCenter.x - L.x * mCamDist, mCamCenter.y - L.y * mCamDist, mCamCenter.z - L.z * mCamDist);
 
     mCam.UpdateViewMatrix();

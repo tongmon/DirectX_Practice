@@ -113,7 +113,7 @@ private:
     Model* mTestModels[4];
     // 테스트 모델
     Model* mTest;
-    ModelInstance mTestInst_1;
+    ModelInst mTestInst_1;
 
     // 키 입력
     bool mKeyInput[50];

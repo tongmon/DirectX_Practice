@@ -106,3 +106,117 @@ void ModelInstance::Update(float dt)
 
 	mModel->mVertices;
 }
+
+const float RadSpeed = 0.2;
+
+void ModelInst::Update(float dt)
+{
+	ModelState& Front = mState.front();
+
+	float ft = mTimePos * 1000;
+	mModel->mAnimData[mClipName]->GetFinalTransfrom(ft, mModel->mBoneOffset, mFinalTransforms);
+
+	XMVECTOR model_dir = XMLoadFloat3(&mDir);
+	XMFLOAT3 cL = Front.mDir; cL.y = 0;
+	XMVECTOR look = XMLoadFloat3(&cL);
+	XMVECTOR Angle = XMVector3AngleBetweenVectors(model_dir, look);
+	XMVECTOR Cross = XMVector3Cross(look, model_dir);
+	XMVECTOR Dot = XMVector3Dot(XMVectorSet(0, 1, 0, 0), Cross);
+	if (XMVectorGetX(Dot) > 0)
+		Angle *= -1;
+
+	float Radian = XMVectorGetX(Angle);
+	if (Radian < 0 && Radian + RadSpeed < 0) {
+		Radian = -RadSpeed;
+	}
+	else if (Radian > 0 && Radian - RadSpeed >= 0) {
+		Radian = RadSpeed;
+	}
+	
+	XMVECTOR DirVec = XMLoadFloat3(&mDir);
+	DirVec = XMVector3Rotate(DirVec, XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), Radian));
+	DirVec = XMVector3Normalize(DirVec);
+	XMStoreFloat3(&mDir, DirVec);
+
+	mPos.x += mDir.x * mSpeed * dt;
+	mPos.y += mDir.y * mSpeed * dt;
+	mPos.z += mDir.z * mSpeed * dt;
+
+	XMFLOAT3 S = { mScale,mScale,mScale };
+
+	Angle = XMVector3AngleBetweenVectors(XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f), DirVec);
+	Cross = XMVector3Cross(DirVec, XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f));
+	Dot = XMVector3Dot(XMVectorSet(0, 1, 0, 0), Cross);
+	if (XMVectorGetX(Dot) > 0)
+		Angle *= -1;
+
+	XMMATRIX Result = XMMatrixAffineTransformation(XMLoadFloat3(&S), XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
+		XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), XMVectorGetX(Angle)), XMLoadFloat3(&mPos));
+	XMStoreFloat4x4(&mWorld, Result);
+
+	mBackTimePos = mTimePos;
+
+	if (mClipName == Front.mClipName && mTimePos <= mModel->mAnimData[mClipName]->GetDuration() / 1000.f) {
+		mTimePos += dt;
+	}
+	else {
+		mClipName = Front.mClipName;
+		mTimePos = 0.f;
+	}
+
+	mState.pop();
+}
+
+/*
+void ModelInst::Update(float dt)
+{
+	ModelState& Front = mState.front();
+
+	float ft = mTimePos * 1000;
+	mModel->mAnimData[mClipName]->GetFinalTransfrom(ft, mModel->mBoneOffset, mFinalTransforms);
+
+	XMVECTOR model_dir = XMLoadFloat3(&mDir);
+	XMFLOAT3 cL = Front.mDir; cL.y = 0;
+	XMVECTOR look = XMLoadFloat3(&cL);
+	XMVECTOR Angle = XMVector3AngleBetweenVectors(model_dir, look);
+	XMVECTOR Cross = XMVector3Cross(look, model_dir);
+	XMVECTOR Dot = XMVector3Dot(XMVectorSet(0, 1, 0, 0), Cross);
+	if (XMVectorGetX(Dot) > 0)
+		Angle *= -1;
+
+	float Radian = XMVectorGetX(Angle);
+
+	XMVECTOR DirVec = XMLoadFloat3(&mDir);
+	DirVec = XMVector3Rotate(DirVec, XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), Radian));
+	DirVec = XMVector3Normalize(DirVec);
+	XMStoreFloat3(&mDir, DirVec);
+
+	mPos.x += mDir.x * mSpeed * dt;
+	mPos.y += mDir.y * mSpeed * dt;
+	mPos.z += mDir.z * mSpeed * dt;
+
+	XMFLOAT3 S = { mScale,mScale,mScale };
+
+	Angle = XMVector3AngleBetweenVectors(XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f), DirVec);
+	Cross = XMVector3Cross(DirVec, XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f));
+	Dot = XMVector3Dot(XMVectorSet(0, 1, 0, 0), Cross);
+	if (XMVectorGetX(Dot) > 0)
+		Angle *= -1;
+
+	XMMATRIX Result = XMMatrixAffineTransformation(XMLoadFloat3(&S), XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
+		XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), XMVectorGetX(Angle)), XMLoadFloat3(&mPos));
+	XMStoreFloat4x4(&mWorld, Result);
+
+	mBackTimePos = mTimePos;
+
+	if (mClipName == Front.mClipName && mTimePos <= mModel->mAnimData[mClipName]->GetDuration() / 1000.f) {
+		mTimePos += dt;
+	}
+	else {
+		mClipName = Front.mClipName;
+		mTimePos = 0.f;
+	}
+
+	mState.pop();
+}
+*/

@@ -28,8 +28,13 @@ public:
 	ModelAnimation(ModelLoader::LoadedAnimation &Anim);
 	~ModelAnimation();
 
+	std::vector<ModelLoader::LoadedKeyFrame>& GetKeyFrame() { return mKeyFrameData; }
 	float GetDuration() { return mDuration; }
+	XMFLOAT4X4 &GetGInvTrans() { return mGlobalInvTrans; }
+	std::vector<XMFLOAT4X4>& GetNodeMat() { return mNodeMat; }
+	std::vector<int>& GetKeyFrameIndex() { return mKeyFrameIndex; }
 	std::pair<int, float> GetTimeFrac(std::vector<float> times, float& ft);
 	void GetFinalTransfrom(float& ft, std::vector<XMFLOAT4X4>& boneOffset, std::vector<XMFLOAT4X4>& fin);
+	void InterMotion(float ft, float preTime, float dur, std::vector<XMFLOAT4X4>& boneOffset, ModelAnimation* preAnim, std::vector<XMFLOAT4X4>& fin);
 };
 
